@@ -1,5 +1,10 @@
 package no.nav
 
+import io.javalin.Javalin
+
 fun main() {
-    println("Hello World!")
+    Javalin.create()
+        .get("/internal/ready") { ctx -> ctx.result("ready") }
+        .get("/internal/alive") { ctx -> ctx.result("alive") }
+        .start(8080)
 }
