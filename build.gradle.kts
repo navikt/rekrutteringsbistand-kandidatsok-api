@@ -1,9 +1,14 @@
 plugins {
+    application
     kotlin("jvm") version "1.9.21"
 }
 
 group = "no.nav"
 version = "1.0-SNAPSHOT"
+
+application {
+    mainClass.set("no.nav.MainKt")
+}
 
 repositories {
     mavenCentral()
@@ -21,6 +26,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
 kotlin {
     jvmToolchain(21)
 }
