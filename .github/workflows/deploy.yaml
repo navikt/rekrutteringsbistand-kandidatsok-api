@@ -18,9 +18,17 @@ jobs:
       - run: ./gradlew assemble
 
       - uses: nais/docker-build-push@v0
+        id: docker
         with:
           team: toi
           tag: ${{ github.sha }}
           dockerfile: Dockerfile
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: nais/dev-gcp.yaml
+          VAR: image=${{ steps.docker.outputs.image }}

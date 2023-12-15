@@ -1,0 +1,13 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: rekrutteringsbistand-kandidatsok-api
+  namespace: toi
+  labels:
+    team: toi
+spec:
+  image: {{{image}}}
+  liveness:
+    path: /internal/alive
+  readiness:
+    path: /internal/ready
