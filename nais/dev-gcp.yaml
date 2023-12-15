@@ -11,3 +11,7 @@ spec:
     path: /internal/alive
   readiness:
     path: /internal/ready
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true # Remove, and replace with group claims
