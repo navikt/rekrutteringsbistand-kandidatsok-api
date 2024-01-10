@@ -19,6 +19,9 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.4.4")
     implementation("net.logstash.logback:logstash-logback-encoder:7.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.0")
+    implementation("com.auth0:java-jwt:4.4.0")
+    implementation("com.auth0:jwks-rsa:0.22.1")
+
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
