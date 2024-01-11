@@ -28,7 +28,6 @@ fun main() {
 
 fun configureOpenApi(config: JavalinConfig) {
     val openApiConfiguration = OpenApiPluginConfiguration().apply {
-        withDocumentationPath("/openapi")
         withDefinitionConfiguration { _, definition ->
             definition.apply {
                 withOpenApiInfo {
