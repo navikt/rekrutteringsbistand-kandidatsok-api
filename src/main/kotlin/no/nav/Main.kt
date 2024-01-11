@@ -1,16 +1,76 @@
 package no.nav.no.nav
 
 import io.javalin.Javalin
-import no.nav.authenticatedUser
-import no.nav.azureAdAuthentication
+import io.javalin.config.JavalinConfig
+import io.javalin.openapi.HttpMethod
+import io.javalin.openapi.OpenApi
+import io.javalin.openapi.OpenApiContent
+import io.javalin.openapi.OpenApiResponse
+import io.javalin.openapi.plugin.OpenApiPlugin
+import io.javalin.openapi.plugin.OpenApiPluginConfiguration
+import io.javalin.openapi.plugin.redoc.ReDocConfiguration
+import io.javalin.openapi.plugin.redoc.ReDocPlugin
+import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
+import io.javalin.openapi.plugin.swagger.SwaggerPlugin
+
+//import no.nav.authenticatedUser
+//import no.nav.azureAdAuthentication
 
 fun main() {
-    Javalin.create()
-        .get("/internal/ready") { ctx -> ctx.result("ready") }
-        .get("/internal/alive") { ctx -> ctx.result("alive") }
-        .azureAdAuthentication("/api/*")
-        .get("/api/me") { ctx ->
-            ctx.json(mapOf<String, Any?>("navIdent" to ctx.authenticatedUser().navIdent))
+    val app = Javalin.create { config ->
+        configureOpenApi(config)
+    }
+
+    defineRoutes(app)
+
+    app.start(8080)
+}
+
+fun configureOpenApi(config: JavalinConfig) {
+    val openApiConfiguration = OpenApiPluginConfiguration().apply {
+        withDocumentationPath("/openapi")
+        withDefinitionConfiguration { _, definition ->
+            definition.apply {
+                withOpenApiInfo {
+                    it.title = "Kandidatsøk API"
+                }
+            }
         }
-        .start(8080)
+    }
+    config.plugins.register(OpenApiPlugin(openApiConfiguration))
+    config.plugins.register(SwaggerPlugin(SwaggerConfiguration()))
+    config.plugins.register(ReDocPlugin(ReDocConfiguration()))
+}
+
+fun defineRoutes(app: Javalin) {
+    app.get("/internal/isAlive", ::isAliveHandler)
+    app.get("/internal/isReady", ::isReadyHandler)
+    //.azureAdAuthentication("/api/*")
+    /*.get("/api/me") { ctx ->
+        ctx.json(mapOf<String, Any?>("navIdent" to ctx.authenticatedUser().navIdent))
+    }*/
+}
+
+@OpenApi(
+    summary = "Sjekk om endepunkt er klart",
+    operationId = "isReady",
+    tags = [],
+    responses = [OpenApiResponse("200", [OpenApiContent(Array<String>::class)])],
+    path = "internal/isReady",
+    methods = [HttpMethod.GET]
+)
+fun isReadyHandler(ctx: io.javalin.http.Context) {
+    ctx.result("isReady")
+}
+
+@OpenApi(
+    summary = "Sjekk om endepunkt lever",
+    operationId = "isAlive",
+    tags = [],
+    responses = [OpenApiResponse("200", [OpenApiContent(Array<String>::class)])],
+    path = "internal/isAlive",
+    methods = [HttpMethod.GET]
+)
+fun isAliveHandler(ctx: io.javalin.http.Context) {
+    ctx.result("isAlive")
 }

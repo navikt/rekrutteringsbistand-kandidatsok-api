@@ -1,6 +1,7 @@
 plugins {
     application
     kotlin("jvm") version "1.9.21"
+    kotlin("kapt") version "1.9.22"
 }
 
 group = "no.nav"
@@ -21,7 +22,10 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.0")
     implementation("com.auth0:java-jwt:4.4.0")
     implementation("com.auth0:jwks-rsa:0.22.1")
-
+    implementation("io.javalin.community.openapi:javalin-openapi-plugin:5.6.3")
+    implementation("io.javalin.community.openapi:javalin-swagger-plugin:5.6.3")
+    implementation("io.javalin.community.openapi:javalin-redoc-plugin:5.6.3")
+    kapt("io.javalin.community.openapi:openapi-annotation-processor:5.6.3")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
@@ -31,5 +35,5 @@ tasks.test {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
 }
