@@ -14,6 +14,7 @@ import io.javalin.http.InternalServerErrorResponse
 import io.javalin.http.UnauthorizedResponse
 import org.eclipse.jetty.http.HttpHeader
 import org.slf4j.LoggerFactory
+import java.net.URI
 import java.security.interfaces.RSAPublicKey
 import java.util.concurrent.TimeUnit
 
@@ -22,7 +23,7 @@ val azureOpenidConfigIssuer = System.getenv("AZURE_OPENID_CONFIG_ISSUER")!!
 val azureOpenidConfigJwksUri = System.getenv("AZURE_OPENID_CONFIG_JWKS_URI")!!
 val azureAppWellKnownUrl = System.getenv("AZURE_APP_WELL_KNOWN_URL")!!
 
-val jwkProvider = JwkProviderBuilder(azureAppWellKnownUrl)
+val jwkProvider = JwkProviderBuilder(URI(azureOpenidConfigJwksUri).toURL())
     .cached(10, 1, TimeUnit.HOURS)
     .build()
 
