@@ -1,4 +1,4 @@
-/*package no.nav
+package no.nav
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.auth0.jwt.JWT
@@ -81,4 +81,3 @@ fun Javalin.azureAdAuthentication(path: String) =
             }
             ctx.status(HttpStatus.UNAUTHORIZED).result("")
         }
-*/

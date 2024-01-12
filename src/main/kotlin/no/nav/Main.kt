@@ -13,9 +13,6 @@ import io.javalin.openapi.plugin.redoc.ReDocPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 
-//import no.nav.authenticatedUser
-//import no.nav.azureAdAuthentication
-
 fun main() {
     val app = Javalin.create { config ->
         configureOpenApi(config)
@@ -42,20 +39,20 @@ fun configureOpenApi(config: JavalinConfig) {
 }
 
 fun defineRoutes(app: Javalin) {
-    app.get("/internal/isAlive", ::isAliveHandler)
-    app.get("/internal/isReady", ::isReadyHandler)
-    //.azureAdAuthentication("/api/*")
-    /*.get("/api/me") { ctx ->
+    app.get("/internal/alive", ::isAliveHandler)
+    app.get("/internal/ready", ::isReadyHandler)
+    .azureAdAuthentication("/api/*")
+    .get("/api/me") { ctx ->
         ctx.json(mapOf<String, Any?>("navIdent" to ctx.authenticatedUser().navIdent))
-    }*/
+    }
 }
 
 @OpenApi(
     summary = "Sjekk om endepunkt er klart",
     operationId = "isReady",
     tags = [],
-    responses = [OpenApiResponse("200", [OpenApiContent(Array<String>::class)])],
-    path = "internal/isReady",
+    responses = [OpenApiResponse("200", [OpenApiContent(String::class)])],
+    path = "internal/ready",
     methods = [HttpMethod.GET]
 )
 fun isReadyHandler(ctx: io.javalin.http.Context) {
@@ -66,8 +63,8 @@ fun isReadyHandler(ctx: io.javalin.http.Context) {
     summary = "Sjekk om endepunkt lever",
     operationId = "isAlive",
     tags = [],
-    responses = [OpenApiResponse("200", [OpenApiContent(Array<String>::class)])],
-    path = "internal/isAlive",
+    responses = [OpenApiResponse("200", [OpenApiContent(String::class)])],
+    path = "internal/alive",
     methods = [HttpMethod.GET]
 )
 fun isAliveHandler(ctx: io.javalin.http.Context) {
