@@ -13,8 +13,8 @@ azure:
       extra:
         - NAVident
       groups:
-        - id: 67a06857-0028-4a90-bf4c-9c9a92c7d733
-        - id: 554a66fb-fbec-4b92-90c1-0d9c085c362c
+        - id: c6524400-7cd1-4296-9009-410133690545
+        - id: 964aaae2-cf18-486b-bead-f507ff3a50b2
 spec:
   image: {{{image}}}
   liveness:
