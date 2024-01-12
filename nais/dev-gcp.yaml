@@ -15,3 +15,8 @@ spec:
     application:
       enabled: true
       allowAllUsers: true # Remove, and replace with group claims
+  accessPolicy:
+    inbound:
+      rules:
+        - application: rekrutteringsbistand
+          namespace: dev-gcp
