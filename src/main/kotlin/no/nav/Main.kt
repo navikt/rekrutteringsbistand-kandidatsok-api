@@ -13,12 +13,16 @@ import io.javalin.openapi.plugin.redoc.ReDocPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 
+const val endepunktReady = "internal/ready"
+const val endepunktAlive = "internal/alive"
+const val endepunktMe = "api/me"
+
 fun main() {
     val app = Javalin.create { config ->
         configureOpenApi(config)
     }
 
-    defineRoutes(app)
+    app.defineRoutes()
 
     app.start(8080)
 }
@@ -37,14 +41,11 @@ fun configureOpenApi(config: JavalinConfig) {
     config.plugins.register(SwaggerPlugin(SwaggerConfiguration()))
     config.plugins.register(ReDocPlugin(ReDocConfiguration()))
 }
-
-fun defineRoutes(app: Javalin) {
-    app.get("/internal/alive", ::isAliveHandler)
-    app.get("/internal/ready", ::isReadyHandler)
-    .azureAdAuthentication("/api/*")
-    .get("/api/me") { ctx ->
-        ctx.json(mapOf<String, Any?>("navIdent" to ctx.authenticatedUser().navIdent))
-    }
+fun Javalin.defineRoutes() {
+    get("/$endepunktAlive", ::isAliveHandler)
+    get("/$endepunktReady", ::isReadyHandler)
+    azureAdAuthentication("/api/*")
+    get("/$endepunktMe", ::meHandler)
 }
 
 @OpenApi(
@@ -52,7 +53,7 @@ fun defineRoutes(app: Javalin) {
     operationId = "isReady",
     tags = [],
     responses = [OpenApiResponse("200", [OpenApiContent(String::class)])],
-    path = "internal/ready",
+    path = endepunktReady,
     methods = [HttpMethod.GET]
 )
 fun isReadyHandler(ctx: io.javalin.http.Context) {
@@ -64,9 +65,21 @@ fun isReadyHandler(ctx: io.javalin.http.Context) {
     operationId = "isAlive",
     tags = [],
     responses = [OpenApiResponse("200", [OpenApiContent(String::class)])],
-    path = "internal/alive",
+    path = endepunktAlive,
     methods = [HttpMethod.GET]
 )
 fun isAliveHandler(ctx: io.javalin.http.Context) {
     ctx.result("isAlive")
+}
+
+@OpenApi(
+    summary = "Me-endepunkt",
+    operationId = "me",
+    tags = [],
+    responses = [OpenApiResponse("200", [OpenApiContent(String::class)])],
+    path = endepunktMe,
+    methods = [HttpMethod.GET]
+)
+fun meHandler(ctx: io.javalin.http.Context) {
+    ctx.json(mapOf<String, Any?>("navIdent" to ctx.authenticatedUser().navIdent))
 }
