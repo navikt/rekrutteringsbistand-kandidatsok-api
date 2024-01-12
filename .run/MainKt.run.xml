@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="MainKt" type="JetRunConfigurationType" nameIsGenerated="true">
+    <envs>
+      <env name="AZURE_APP_CLIENT_ID" value="1" />
+      <env name="AZURE_APP_WELL_KNOWN_URL" value="https://fakedings.intern.dev.nav.no/fake/" />
+      <env name="AZURE_OPENID_CONFIG_ISSUER" value="https://fakedings.intern.dev.nav.no/fake" />
+      <env name="AZURE_OPENID_CONFIG_JWKS_URI" value="https://fakedings.intern.dev.nav.no/fake/jwks" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="no.nav.MainKt" />
+    <module name="rekrutteringsbistand-kandidatsok-api.main" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
