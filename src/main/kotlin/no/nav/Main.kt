@@ -1,4 +1,4 @@
-package no.nav.no.nav
+package no.nav
 
 import io.javalin.Javalin
 import io.javalin.config.JavalinConfig
