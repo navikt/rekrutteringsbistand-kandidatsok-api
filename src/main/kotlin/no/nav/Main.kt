@@ -15,6 +15,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.Closeable
+import java.util.*
 
 private const val endepunktReady = "internal/ready"
 private const val endepunktAlive = "internal/alive"
@@ -25,8 +26,7 @@ class App(
     private val azureAppClientId: String,
     private val azureOpenidConfigIssuer: String,
     private val azureOpenidConfigJwksUri: String,
-    private val modiaGenerell: String,
-    private val modiaOppfølging: String
+    private val rolleUuidSpesifikasjon: RolleUuidSpesifikasjon,
 ): Closeable {
 
     var javalin: Javalin? = null
@@ -83,7 +83,10 @@ class App(
         )
         fun meHandler(ctx: io.javalin.http.Context) {
             log.info("Me-endepunkt kalles")
-            ctx.json(mapOf<String, Any?>("navIdent" to ctx.authenticatedUser().navIdent))
+            ctx.json(mapOf<String, Any?>(
+                "navIdent" to ctx.authenticatedUser().navIdent,
+                "roller" to ctx.authenticatedUser().roller.map { it.name }
+            ))
         }
     }
 
@@ -95,7 +98,8 @@ class App(
         javalin!!.defineRoutes(
             azureAppClientId = azureAppClientId,
             azureOpenidConfigIssuer = azureOpenidConfigIssuer,
-            azureOpenidConfigJwksUri = azureOpenidConfigJwksUri
+            azureOpenidConfigJwksUri = azureOpenidConfigJwksUri,
+            rolleUuidSpesifikasjon = rolleUuidSpesifikasjon,
         )
 
         javalin!!.start(port)
@@ -109,7 +113,8 @@ class App(
 fun Javalin.defineRoutes(
     azureAppClientId: String,
     azureOpenidConfigIssuer: String,
-    azureOpenidConfigJwksUri: String
+    azureOpenidConfigJwksUri: String,
+    rolleUuidSpesifikasjon: RolleUuidSpesifikasjon
 ) {
     get("/$endepunktAlive", App::isAliveHandler)
     get("/$endepunktReady", App::isReadyHandler)
@@ -118,7 +123,8 @@ fun Javalin.defineRoutes(
         path = "/api/*",
         azureAppClientId = azureAppClientId,
         azureOpenidConfigIssuer = azureOpenidConfigIssuer,
-        azureOpenidConfigJwksUri = azureOpenidConfigJwksUri
+        azureOpenidConfigJwksUri = azureOpenidConfigJwksUri,
+        rolleUuidSpesifikasjon = rolleUuidSpesifikasjon,
     )
 
 }
@@ -129,8 +135,10 @@ fun main() {
         azureAppClientId = System.getenv("AZURE_APP_CLIENT_ID")!!,
         azureOpenidConfigIssuer = System.getenv("AZURE_OPENID_CONFIG_ISSUER")!!,
         azureOpenidConfigJwksUri = System.getenv("AZURE_OPENID_CONFIG_JWKS_URI")!!,
-        modiaGenerell = System.getenv("MODIA_GENERELL_GRUPPE")!!,
-        modiaOppfølging = System.getenv("MODIA_OPPFOLGING_GRUPPE")!!
+        rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
+            modiaGenerell = UUID.fromString(System.getenv("MODIA_GENERELL_GRUPPE")!!),
+            modiaOppfølging = UUID.fromString(System.getenv("MODIA_OPPFOLGING_GRUPPE")!!),
+        ),
     ).start()
 }
 

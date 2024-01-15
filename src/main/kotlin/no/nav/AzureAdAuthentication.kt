@@ -3,7 +3,6 @@ package no.nav
 import com.auth0.jwk.JwkProviderBuilder
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.exceptions.TokenExpiredException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.RSAKeyProvider
@@ -15,17 +14,23 @@ import io.javalin.http.UnauthorizedResponse
 import org.eclipse.jetty.http.HttpHeader
 import java.net.URI
 import java.security.interfaces.RSAPublicKey
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 private const val navIdentClaim = "NAVident"
 
 class AuthenticatedUser(
     val navIdent: String,
+    val roller: Set<Rolle>,
 ) {
     companion object {
-        fun fromJwt(jwt: DecodedJWT) = AuthenticatedUser(
-            navIdent = jwt.getClaim(navIdentClaim).asString()
-        )
+        fun fromJwt(jwt: DecodedJWT, rolleUuidSpesifikasjon: RolleUuidSpesifikasjon) =
+            AuthenticatedUser(
+                navIdent = jwt.getClaim(navIdentClaim).asString(),
+                roller = jwt.getClaim("groups")
+                    .asList(UUID::class.java)
+                    .let { rolleUuidSpesifikasjon.rollerForUuider(it) },
+            )
     }
 }
 
@@ -40,7 +45,8 @@ fun Javalin.azureAdAuthentication(
     path: String,
     azureAppClientId: String,
     azureOpenidConfigIssuer: String,
-    azureOpenidConfigJwksUri: String
+    azureOpenidConfigJwksUri: String,
+    rolleUuidSpesifikasjon: RolleUuidSpesifikasjon,
 ): Javalin? {
     val jwkProvider = JwkProviderBuilder(URI(azureOpenidConfigJwksUri).toURL())
         .cached(10, 1, TimeUnit.HOURS)
@@ -67,7 +73,7 @@ fun Javalin.azureAdAuthentication(
         }
         val token = authorizationHeader.removePrefix("Bearer ")
         val jwt = verifier.verify(token)
-        it.attribute("authenticatedUser", AuthenticatedUser.fromJwt(jwt))
+        it.attribute("authenticatedUser", AuthenticatedUser.fromJwt(jwt, rolleUuidSpesifikasjon))
     }
         .exception(Exception::class.java) { e, ctx ->
             when (e) {

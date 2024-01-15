@@ -2,12 +2,14 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.jackson.responseObject
 import no.nav.App
+import no.nav.RolleUuidSpesifikasjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.util.*
 
 private const val modiaGenerell = "67a06857-0028-4a90-bf4c-9c9a92c7d733"
 private const val modiaOppfølging = "554a66fb-fbec-4b92-90c1-0d9c085c362c"
@@ -95,6 +97,7 @@ class Autentiseringstest {
 
         assertThat(response.statusCode).isEqualTo(200)
         assertThat(result.get()["navIdent"].asText()).isEqualTo(navIdent)
+        assertThat(result.get()["roller"].get(0).asText()).isEqualTo("MODIA_GENERELL")
     }
 
     private fun lagToken(
@@ -114,7 +117,9 @@ class Autentiseringstest {
         azureAppClientId = "1",
         azureOpenidConfigIssuer = "http://localhost:$authPort/default",
         azureOpenidConfigJwksUri = "http://localhost:$authPort/default/jwks",
-        modiaGenerell = modiaGenerell,
-        modiaOppfølging = modiaOppfølging
+        rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
+            modiaGenerell = UUID.fromString(modiaGenerell),
+            modiaOppfølging = UUID.fromString(modiaOppfølging),
+        ),
     )
 }
