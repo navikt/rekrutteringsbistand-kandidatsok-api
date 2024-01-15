@@ -24,7 +24,9 @@ class App(
     private val port: Int = 8080,
     private val azureAppClientId: String,
     private val azureOpenidConfigIssuer: String,
-    private val azureOpenidConfigJwksUri: String
+    private val azureOpenidConfigJwksUri: String,
+    private val modiaGenerell: String,
+    private val modiaOppfølging: String
 ): Closeable {
 
     var javalin: Javalin? = null
@@ -126,7 +128,9 @@ fun main() {
     App(
         azureAppClientId = System.getenv("AZURE_APP_CLIENT_ID")!!,
         azureOpenidConfigIssuer = System.getenv("AZURE_OPENID_CONFIG_ISSUER")!!,
-        azureOpenidConfigJwksUri = System.getenv("AZURE_OPENID_CONFIG_JWKS_URI")!!
+        azureOpenidConfigJwksUri = System.getenv("AZURE_OPENID_CONFIG_JWKS_URI")!!,
+        modiaGenerell = System.getenv("MODIA_GENERELL_GRUPPE")!!,
+        modiaOppfølging = System.getenv("MODIA_OPPFOLGING_GRUPPE")!!
     ).start()
 }
 

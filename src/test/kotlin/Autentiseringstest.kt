@@ -7,12 +7,16 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
+private const val modiaGenerell = "67a06857-0028-4a90-bf4c-9c9a92c7d733"
+private const val modiaOppfølging = "554a66fb-fbec-4b92-90c1-0d9c085c362c"
+
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class Autentiseringstest {
+    private val authPort = 18305
 
     private val app: App = lagLokalApp()
     private val authServer = MockOAuth2Server()
-    private val authPort = 18305
 
     @BeforeAll
     fun setUp() {
@@ -34,18 +38,47 @@ class Autentiseringstest {
         assertThat(response.statusCode).isEqualTo(200)
 
     }
+
     @Test
     fun `autentisering feiler om man ikke har token`() {
-        val (_, response) = Fuel.post("http://localhost:8080/api/me")
+        val (_, response) = Fuel.get("http://localhost:8080/api/me")
             .response()
 
         assertThat(response.statusCode).isEqualTo(401)
     }
 
+    @Test
+    fun `autentisering feiler om man ikke har navident i token`() {
+        TODO()
+    }
+
+    @Test
+    fun `autentisering feiler om man ikke har gyldig token`() {
+        TODO()
+    }
+
+    @Test
+    fun `autentisering fungerer om man har navident i token`() {
+        val token = authServer.issueToken(
+            "http://localhost:$authPort/default",
+            "subject",
+            "1",
+            claims = mapOf("NAVident" to "A000001", "groups" to listOf(modiaGenerell))
+        )
+        println(token.serialize())
+        val (_, response) = Fuel.get("http://localhost:8080/api/me")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .response()
+
+        assertThat(response.statusCode).isEqualTo(200)
+    }
+
     private fun lagLokalApp() = App(
-        8080,
-        "1",
-        "http://localhost:$authPort/default",
-        "http://localhost:$authPort/default/jwks"
+        port = 8080,
+        azureAppClientId = "1",
+        azureOpenidConfigIssuer = "http://localhost:$authPort/default",
+        azureOpenidConfigJwksUri = "http://localhost:$authPort/default/jwks",
+        modiaGenerell = modiaGenerell,
+        modiaOppfølging = modiaOppfølging
     )
 }
