@@ -7,6 +7,8 @@ plugins {
 group = "no.nav"
 version = "1.0-SNAPSHOT"
 
+val mockOAuth2ServerVersion = "2.1.0"
+
 application {
     mainClass.set("no.nav.MainKt")
 }
@@ -30,6 +32,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("com.github.kittinunf.fuel:fuel:2.3.1")
     testImplementation("org.assertj:assertj-core:3.23.1")
+    testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
 
 }
 

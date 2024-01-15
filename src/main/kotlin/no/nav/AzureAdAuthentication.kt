@@ -13,33 +13,9 @@ import io.javalin.http.HttpStatus
 import io.javalin.http.InternalServerErrorResponse
 import io.javalin.http.UnauthorizedResponse
 import org.eclipse.jetty.http.HttpHeader
-import org.slf4j.LoggerFactory
 import java.net.URI
 import java.security.interfaces.RSAPublicKey
 import java.util.concurrent.TimeUnit
-
-val azureAppClientId = System.getenv("AZURE_APP_CLIENT_ID")!!
-val azureOpenidConfigIssuer = System.getenv("AZURE_OPENID_CONFIG_ISSUER")!!
-val azureOpenidConfigJwksUri = System.getenv("AZURE_OPENID_CONFIG_JWKS_URI")!!
-val azureAppWellKnownUrl = System.getenv("AZURE_APP_WELL_KNOWN_URL")!!
-
-val jwkProvider = JwkProviderBuilder(URI(azureOpenidConfigJwksUri).toURL())
-    .cached(10, 1, TimeUnit.HOURS)
-    .build()
-
-val rsaKeyProvider = object: RSAKeyProvider {
-    override fun getPublicKeyById(keyId: String) = jwkProvider.get(keyId).publicKey as RSAPublicKey
-    override fun getPrivateKey() = throw IllegalStateException()
-    override fun getPrivateKeyId() = throw IllegalStateException()
-}
-
-val algorithm = Algorithm.RSA256(rsaKeyProvider)
-
-val verifier = JWT.require(algorithm)
-    .withIssuer(azureOpenidConfigIssuer)
-    .withAudience(azureAppClientId)
-    .withClaimPresence("NAVident")
-    .build()
 
 class AuthenticatedUser(
     val navIdent: String,
@@ -58,22 +34,39 @@ fun Context.authenticatedUser() = this.attribute<AuthenticatedUser>("authenticat
         throw InternalServerErrorResponse()
     }
 
-fun Javalin.azureAdAuthentication(path: String) =
-    this
-        .before(path) {
-            val authorizationHeader = it.header(HttpHeader.AUTHORIZATION.name)
-                ?: run {
-                    log.error("Authorization header missing!")
-                    throw UnauthorizedResponse()
-                }
-            if (!authorizationHeader.startsWith("Bearer")) {
-                log.error("Authorization header not with 'Bearer ' prefix!")
+fun Javalin.azureAdAuthentication(
+    path: String,
+    azureAppClientId: String,
+    azureOpenidConfigIssuer: String,
+    azureOpenidConfigJwksUri: String
+): Javalin? {
+    val jwkProvider = JwkProviderBuilder(URI(azureOpenidConfigJwksUri).toURL())
+        .cached(10, 1, TimeUnit.HOURS)
+        .build()
+    val algorithm = Algorithm.RSA256(object : RSAKeyProvider {
+        override fun getPublicKeyById(keyId: String) = jwkProvider.get(keyId).publicKey as RSAPublicKey
+        override fun getPrivateKey() = throw IllegalStateException()
+        override fun getPrivateKeyId() = throw IllegalStateException()
+    })
+    val verifier = JWT.require(algorithm)
+        .withIssuer(azureOpenidConfigIssuer)
+        .withAudience(azureAppClientId)
+        .withClaimPresence("NAVident")
+        .build()
+    return before(path) {
+        val authorizationHeader = it.header(HttpHeader.AUTHORIZATION.name)
+            ?: run {
+                log.error("Authorization header missing!")
                 throw UnauthorizedResponse()
             }
-            val token = authorizationHeader.removePrefix("Bearer ")
-            val jwt = verifier.verify(token)
-            it.attribute("authenticatedUser", AuthenticatedUser.fromJwt(jwt))
+        if (!authorizationHeader.startsWith("Bearer")) {
+            log.error("Authorization header not with 'Bearer ' prefix!")
+            throw UnauthorizedResponse()
         }
+        val token = authorizationHeader.removePrefix("Bearer ")
+        val jwt = verifier.verify(token)
+        it.attribute("authenticatedUser", AuthenticatedUser.fromJwt(jwt))
+    }
         .exception(JWTVerificationException::class.java) { e, ctx ->
             when (e) {
                 is TokenExpiredException -> log.info("AzureAD-token expired on {}", e.expiredOn)
@@ -81,3 +74,4 @@ fun Javalin.azureAdAuthentication(path: String) =
             }
             ctx.status(HttpStatus.UNAUTHORIZED).result("")
         }
+}

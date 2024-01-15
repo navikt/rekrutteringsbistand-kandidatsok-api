@@ -14,12 +14,20 @@ import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.Closeable
 
-const val endepunktReady = "internal/ready"
-const val endepunktAlive = "internal/alive"
-const val endepunktMe = "api/me"
+private const val endepunktReady = "internal/ready"
+private const val endepunktAlive = "internal/alive"
+private const val endepunktMe = "api/me"
 
-class App {
+class App(
+    private val port: Int = 8080,
+    private val azureAppClientId: String,
+    private val azureOpenidConfigIssuer: String,
+    private val azureOpenidConfigJwksUri: String
+): Closeable {
+
+    var javalin: Javalin? = null
 
     fun configureOpenApi(config: JavalinConfig) {
         val openApiConfiguration = OpenApiPluginConfiguration().apply {
@@ -77,25 +85,49 @@ class App {
         }
     }
 
+    fun start() {
+        javalin = Javalin.create { config ->
+            configureOpenApi(config)
+        }
+
+        javalin!!.defineRoutes(
+            azureAppClientId = azureAppClientId,
+            azureOpenidConfigIssuer = azureOpenidConfigIssuer,
+            azureOpenidConfigJwksUri = azureOpenidConfigJwksUri
+        )
+
+        javalin!!.start(port)
+    }
+
+    override fun close() {
+        javalin?.close()
+    }
 }
 
-fun Javalin.defineRoutes() {
+fun Javalin.defineRoutes(
+    azureAppClientId: String,
+    azureOpenidConfigIssuer: String,
+    azureOpenidConfigJwksUri: String
+) {
     get("/$endepunktAlive", App::isAliveHandler)
     get("/$endepunktReady", App::isReadyHandler)
     get("/$endepunktMe", App::meHandler)
-    azureAdAuthentication("/api/*")
+    azureAdAuthentication(
+        path = "/api/*",
+        azureAppClientId = azureAppClientId,
+        azureOpenidConfigIssuer = azureOpenidConfigIssuer,
+        azureOpenidConfigJwksUri = azureOpenidConfigJwksUri
+    )
 
 }
 
 
 fun main() {
-    val app = Javalin.create { config ->
-        App().configureOpenApi(config)
-    }
-
-    app.defineRoutes()
-
-    app.start(8080)
+    App(
+        azureAppClientId = System.getenv("AZURE_APP_CLIENT_ID")!!,
+        azureOpenidConfigIssuer = System.getenv("AZURE_OPENID_CONFIG_ISSUER")!!,
+        azureOpenidConfigJwksUri = System.getenv("AZURE_OPENID_CONFIG_JWKS_URI")!!
+    ).start()
 }
 
 
