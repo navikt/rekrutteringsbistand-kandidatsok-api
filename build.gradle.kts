@@ -28,6 +28,9 @@ dependencies {
     kapt("io.javalin.community.openapi:openapi-annotation-processor:5.6.3")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("com.github.kittinunf.fuel:fuel:2.3.1")
+    testImplementation("org.assertj:assertj-core:3.23.1")
+
 }
 
 tasks.test {
