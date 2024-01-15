@@ -1,4 +1,6 @@
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.jackson.responseObject
 import no.nav.App
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
@@ -84,19 +86,22 @@ class Autentiseringstest {
 
     @Test
     fun `autentisering fungerer om man har navident i token`() {
-        val token = lagToken()
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
         println(token.serialize())
-        val (_, response) = Fuel.get("http://localhost:8080/api/me")
+        val (_, response, result) = Fuel.get("http://localhost:8080/api/me")
             .header("Authorization", "Bearer ${token.serialize()}")
-            .response()
+            .responseObject<JsonNode>()
 
         assertThat(response.statusCode).isEqualTo(200)
+        assertThat(result.get()["navIdent"].asText()).isEqualTo(navIdent)
     }
 
     private fun lagToken(
         issuerId: String = "http://localhost:$authPort/default",
         aud: String = "1",
-        claims: Map<String, Any> = mapOf("NAVident" to "A000001", "groups" to listOf(modiaGenerell))
+        navIdent: String = "A000001",
+        claims: Map<String, Any> = mapOf("NAVident" to navIdent, "groups" to listOf(modiaGenerell))
     ) = authServer.issueToken(
         issuerId = issuerId,
         subject = "subject",
