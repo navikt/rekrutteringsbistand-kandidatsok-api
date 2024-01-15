@@ -49,10 +49,7 @@ class Autentiseringstest {
 
     @Test
     fun `autentisering feiler om man ikke har navident i token`() {
-        val token = authServer.issueToken(
-            "http://localhost:$authPort/default",
-            "subject",
-            "1",
+        val token = lagToken(
             claims = mapOf("groups" to listOf(modiaGenerell))
         )
         println(token.serialize())
@@ -65,11 +62,8 @@ class Autentiseringstest {
 
     @Test
     fun `autentisering feiler om man ikke har gyldig token`() {
-        val token = authServer.issueToken(
-            "fakeissuer",
-            "subject",
-            "1",
-            claims = mapOf("NAVident" to "A000001", "groups" to listOf(modiaGenerell))
+        val token = lagToken(
+            issuerId = "fakeissuer",
         )
         println(token.serialize())
         val (_, response) = Fuel.get("http://localhost:8080/api/me")
@@ -80,13 +74,13 @@ class Autentiseringstest {
     }
 
     @Test
+    fun `autentisering feiler om man token ikke er utstedt for vår applikasjon`() {
+        TODO()
+    }
+
+    @Test
     fun `autentisering fungerer om man har navident i token`() {
-        val token = authServer.issueToken(
-            "http://localhost:$authPort/default",
-            "subject",
-            "1",
-            claims = mapOf("NAVident" to "A000001", "groups" to listOf(modiaGenerell))
-        )
+        val token = lagToken()
         println(token.serialize())
         val (_, response) = Fuel.get("http://localhost:8080/api/me")
             .header("Authorization", "Bearer ${token.serialize()}")
@@ -94,6 +88,16 @@ class Autentiseringstest {
 
         assertThat(response.statusCode).isEqualTo(200)
     }
+
+    private fun lagToken(
+        issuerId: String = "http://localhost:$authPort/default",
+        claims: Map<String, Any> = mapOf("NAVident" to "A000001", "groups" to listOf(modiaGenerell))
+    ) = authServer.issueToken(
+        issuerId = issuerId,
+        subject = "subject",
+        audience = "1",
+        claims = claims
+    )
 
     private fun lagLokalApp() = App(
         port = 8080,
