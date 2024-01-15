@@ -17,7 +17,7 @@ pid=12345678910&
 NAVident=1234
 ```
 og så legge på svaret som
-```
+``` 
 Authorization: Bearer <token>
 ```
 
