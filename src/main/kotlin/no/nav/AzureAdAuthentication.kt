@@ -17,12 +17,14 @@ import java.net.URI
 import java.security.interfaces.RSAPublicKey
 import java.util.concurrent.TimeUnit
 
+private const val navIdentClaim = "NAVident"
+
 class AuthenticatedUser(
     val navIdent: String,
 ) {
     companion object {
         fun fromJwt(jwt: DecodedJWT) = AuthenticatedUser(
-            navIdent = jwt.getClaim("NAVident").asString()
+            navIdent = jwt.getClaim(navIdentClaim).asString()
         )
     }
 }
@@ -51,7 +53,7 @@ fun Javalin.azureAdAuthentication(
     val verifier = JWT.require(algorithm)
         .withIssuer(azureOpenidConfigIssuer)
         .withAudience(azureAppClientId)
-        .withClaimPresence("NAVident")
+        .withClaimPresence(navIdentClaim)
         .build()
     return before(path) {
         val authorizationHeader = it.header(HttpHeader.AUTHORIZATION.name)

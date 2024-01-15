@@ -49,7 +49,18 @@ class Autentiseringstest {
 
     @Test
     fun `autentisering feiler om man ikke har navident i token`() {
-        TODO()
+        val token = authServer.issueToken(
+            "http://localhost:$authPort/default",
+            "subject",
+            "1",
+            claims = mapOf("groups" to listOf(modiaGenerell))
+        )
+        println(token.serialize())
+        val (_, response) = Fuel.get("http://localhost:8080/api/me")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .response()
+
+        assertThat(response.statusCode).isEqualTo(401)
     }
 
     @Test
