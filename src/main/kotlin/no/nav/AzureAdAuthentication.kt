@@ -51,7 +51,6 @@ class AuthenticatedUser(
     }
 }
 
-private val log = LoggerFactory.getLogger("no.nav.azureAdAuthentication")
 
 fun Context.authenticatedUser() = this.attribute<AuthenticatedUser>("authenticatedUser")
     ?: run {
