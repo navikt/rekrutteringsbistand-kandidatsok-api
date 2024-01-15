@@ -69,7 +69,7 @@ fun Javalin.azureAdAuthentication(
         val jwt = verifier.verify(token)
         it.attribute("authenticatedUser", AuthenticatedUser.fromJwt(jwt))
     }
-        .exception(JWTVerificationException::class.java) { e, ctx ->
+        .exception(Exception::class.java) { e, ctx ->
             when (e) {
                 is TokenExpiredException -> log.info("AzureAD-token expired on {}", e.expiredOn)
                 else -> log.error("Unexpected exception {} while authenticating AzureAD-token", e::class.simpleName, e)

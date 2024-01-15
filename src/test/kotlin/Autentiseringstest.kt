@@ -65,7 +65,18 @@ class Autentiseringstest {
 
     @Test
     fun `autentisering feiler om man ikke har gyldig token`() {
-        TODO()
+        val token = authServer.issueToken(
+            "fakeissuer",
+            "subject",
+            "1",
+            claims = mapOf("NAVident" to "A000001", "groups" to listOf(modiaGenerell))
+        )
+        println(token.serialize())
+        val (_, response) = Fuel.get("http://localhost:8080/api/me")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .response()
+
+        assertThat(response.statusCode).isEqualTo(401)
     }
 
     @Test
