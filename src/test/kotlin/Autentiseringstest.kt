@@ -65,7 +65,6 @@ class Autentiseringstest {
         val token = lagToken(
             issuerId = "fakeissuer",
         )
-        println(token.serialize())
         val (_, response) = Fuel.get("http://localhost:8080/api/me")
             .header("Authorization", "Bearer ${token.serialize()}")
             .response()
@@ -75,7 +74,12 @@ class Autentiseringstest {
 
     @Test
     fun `autentisering feiler om man token ikke er utstedt for vår applikasjon`() {
-        TODO()
+        val token = lagToken(aud = "feilaudience")
+        val (_, response) = Fuel.get("http://localhost:8080/api/me")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .response()
+
+        assertThat(response.statusCode).isEqualTo(401)
     }
 
     @Test
@@ -91,11 +95,12 @@ class Autentiseringstest {
 
     private fun lagToken(
         issuerId: String = "http://localhost:$authPort/default",
+        aud: String = "1",
         claims: Map<String, Any> = mapOf("NAVident" to "A000001", "groups" to listOf(modiaGenerell))
     ) = authServer.issueToken(
         issuerId = issuerId,
         subject = "subject",
-        audience = "1",
+        audience = aud,
         claims = claims
     )
 
