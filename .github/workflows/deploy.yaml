@@ -6,6 +6,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    outputs:
+      image: ${{ steps.docker.outputs.image }}
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +40,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: nais/nais.yaml
-          VAR: image=${{ needs.build-test-deploy.steps.docker.outputs.image }}
+          VAR: image=${{ needs.build-test-deploy.outputs.image }}
           VARS: nais/dev-gcp.json
 
   deploy-to-prod:
@@ -53,5 +55,5 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: nais/nais.yaml
-          VAR: image=${{ needs.build-test-deploy.steps.docker.outputs.image }}
+          VAR: image=${{ needs.build-test-deploy.outputs.image }}
           VARS: nais/prod-gcp.json
