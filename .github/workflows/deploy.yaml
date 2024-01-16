@@ -30,5 +30,19 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: nais/dev-gcp.yaml
+          RESOURCE: nais/nais.yaml
           VAR: image=${{ steps.docker.outputs.image }}
+          VARS: deploy/dev-gcp.json
+
+  deploy-to-prod:
+    name: Deploy to prod
+    if: github.ref == 'refs/heads/master'
+    needs: build-test-deploy
+    steps:
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: nais/nais.yaml
+          VAR: image=${{ needs.build-test-deploy.steps.docker.outputs.image }}
+          VARS: deploy/prod-gcp.json
