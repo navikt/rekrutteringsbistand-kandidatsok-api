@@ -43,7 +43,7 @@ jobs:
   deploy-to-prod:
     name: Deploy to prod
     if: github.ref == 'refs/heads/master'
-    needs: build-test-deploy, deploy-to-dev
+    needs: [build-test-deploy, deploy-to-dev]
     runs-on: ubuntu-latest
     steps:
       - uses: nais/deploy/actions/deploy@v1
