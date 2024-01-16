@@ -15,16 +15,15 @@ data class RolleUuidSpesifikasjon(
     private val modiaGenerell: UUID,
     private val modiaOppfølging: UUID,
 ) {
-    fun rolleForUuid(uuid: UUID): Rolle {
+    private fun rolleForUuid(uuid: UUID): Rolle? {
         return when (uuid) {
             modiaGenerell -> Rolle.MODIA_GENERELL
             modiaOppfølging -> Rolle.MODIA_OPPFØLGING
-            else -> throw IllegalArgumentException("Ukjent rolle-UUID: $uuid")
+            else -> { log.warn("Ukjent rolle-UUID: $uuid"); null }
         }
     }
 
     fun rollerForUuider(uuider: Collection<UUID>): Set<Rolle> =
-        EnumSet.copyOf(uuider.map { rolleForUuid(it) })
+        EnumSet.copyOf(uuider.mapNotNull { rolleForUuid(it) })
 }
-
 
