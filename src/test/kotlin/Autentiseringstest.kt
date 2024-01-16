@@ -97,7 +97,32 @@ class Autentiseringstest {
 
         assertThat(response.statusCode).isEqualTo(200)
         assertThat(result.get()["navIdent"].asText()).isEqualTo(navIdent)
+    }
+
+    @Test
+    fun `autentisering fungerer om man har MODIA_GENERELL rolle i token`() {
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        println(token.serialize())
+        val (_, response, result) = Fuel.get("http://localhost:8080/api/me")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        assertThat(response.statusCode).isEqualTo(200)
         assertThat(result.get()["roller"].get(0).asText()).isEqualTo("MODIA_GENERELL")
+    }
+
+    @Test
+    fun `autentisering fungerer om man har MODIA_OPPFØLGING rolle i token`() {
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent, claims = mapOf("NAVident" to navIdent, "groups" to listOf(modiaOppfølging)))
+        println(token.serialize())
+        val (_, response, result) = Fuel.get("http://localhost:8080/api/me")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(result.get()["roller"].get(0).asText()).isEqualTo("MODIA_OPPFØLGING")
     }
 
     private fun lagToken(
