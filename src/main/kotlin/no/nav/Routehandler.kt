@@ -50,10 +50,13 @@ class Routehandler(
     }
 
     @OpenApi(
-        summary = "Me-endepunkt",
-        operationId = "me",
+        summary = "NAVIdent og roller for innlogget bruker",
+        operationId = endepunktMe,
         tags = [],
-        responses = [OpenApiResponse("200", [OpenApiContent(String::class)])],
+        responses = [OpenApiResponse("200", [OpenApiContent(Any::class, properties = [
+            OpenApiContentProperty(name = "navIdent", type = "string"),
+            OpenApiContentProperty(name = "roller", isArray = true, type = "string")
+        ])])],
         path = endepunktMe,
         methods = [HttpMethod.GET]
     )
