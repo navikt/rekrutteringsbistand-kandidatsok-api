@@ -38,7 +38,7 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: nais/nais.yaml
           VAR: image=${{ needs.build-test-deploy.steps.docker.outputs.image }}
-          VARS: deploy/dev-gcp.json
+          VARS: nais/dev-gcp.json
 
   deploy-to-prod:
     name: Deploy to prod
@@ -52,4 +52,4 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: nais/nais.yaml
           VAR: image=${{ needs.build-test-deploy.steps.docker.outputs.image }}
-          VARS: deploy/prod-gcp.json
+          VARS: nais/prod-gcp.json
