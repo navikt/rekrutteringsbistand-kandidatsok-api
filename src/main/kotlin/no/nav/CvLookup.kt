@@ -17,8 +17,8 @@ fun OpenSearchClient.lookupCv(fodselsnummer: String) =
 
 
 fun main() {
-    val createOpenSearchClient = createOpenSearchClient()
-    val searchResponse = createOpenSearchClient.lookupCv("10428826731") // fnr from dev
+    val openSearchClient = createOpenSearchClient()
+    val searchResponse = openSearchClient.lookupCv("10428826731") // fnr from dev
     for (i in searchResponse.hits().hits().indices) {
         System.out.println(searchResponse.hits().hits()[i].source())
     }
