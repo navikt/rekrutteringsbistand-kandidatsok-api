@@ -2,6 +2,7 @@ package no.nav
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.auth0.jwt.JWT
+import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.TokenExpiredException
 import com.auth0.jwt.interfaces.DecodedJWT
@@ -19,6 +20,9 @@ import java.util.concurrent.TimeUnit
 
 private const val navIdentClaim = "NAVident"
 
+/**
+ * Representerer en autensiert bruker
+ */
 class AuthenticatedUser(
     val navIdent: String,
     val roller: Set<Rolle>,
@@ -34,13 +38,18 @@ class AuthenticatedUser(
     }
 }
 
-
-fun Context.authenticatedUser() = this.attribute<AuthenticatedUser>("authenticatedUser")
+/**
+ * Henter ut en autensiert bruker fra en kontekst. Kaster InternalServerErrorResponse om det ikke finnes en autensiert bruker
+ */
+fun Context.authenticatedUser() = attribute<AuthenticatedUser>("authenticatedUser")
     ?: run {
         log.error("No authenticated user found!")
         throw InternalServerErrorResponse()
     }
 
+/**
+ * Setter opp token-verifisering på en path på Javalin-serveren
+ */
 fun Javalin.azureAdAuthentication(
     path: String,
     azureAppClientId: String,
@@ -48,31 +57,9 @@ fun Javalin.azureAdAuthentication(
     azureOpenidConfigJwksUri: String,
     rolleUuidSpesifikasjon: RolleUuidSpesifikasjon,
 ): Javalin? {
-    val jwkProvider = JwkProviderBuilder(URI(azureOpenidConfigJwksUri).toURL())
-        .cached(10, 1, TimeUnit.HOURS)
-        .build()
-    val algorithm = Algorithm.RSA256(object : RSAKeyProvider {
-        override fun getPublicKeyById(keyId: String) = jwkProvider.get(keyId).publicKey as RSAPublicKey
-        override fun getPrivateKey() = throw IllegalStateException()
-        override fun getPrivateKeyId() = throw IllegalStateException()
-    })
-    val verifier = JWT.require(algorithm)
-        .withIssuer(azureOpenidConfigIssuer)
-        .withAudience(azureAppClientId)
-        .withClaimPresence(navIdentClaim)
-        .build()
+    val verifier = jwtVerifier(azureOpenidConfigJwksUri, azureOpenidConfigIssuer, azureAppClientId)
     return before(path) {
-        val authorizationHeader = it.header(HttpHeader.AUTHORIZATION.name)
-            ?: run {
-                log.error("Authorization header missing!")
-                throw UnauthorizedResponse()
-            }
-        if (!authorizationHeader.startsWith("Bearer")) {
-            log.error("Authorization header not with 'Bearer ' prefix!")
-            throw UnauthorizedResponse()
-        }
-        val token = authorizationHeader.removePrefix("Bearer ")
-        val jwt = verifier.verify(token)
+        val jwt = verifier.verify(it.hentToken())
         it.attribute("authenticatedUser", AuthenticatedUser.fromJwt(jwt, rolleUuidSpesifikasjon))
     }
         .exception(Exception::class.java) { e, ctx ->
@@ -83,3 +70,52 @@ fun Javalin.azureAdAuthentication(
             ctx.status(HttpStatus.UNAUTHORIZED).result("")
         }
 }
+
+/**
+ * Henter token ut fra header fra en Context
+ */
+private fun Context.hentToken(): String {
+    val authorizationHeader = header(HttpHeader.AUTHORIZATION.name)
+        ?: run {
+            log.error("Authorization header missing!")
+            throw UnauthorizedResponse()
+        }
+    if (!authorizationHeader.startsWith("Bearer")) {
+        log.error("Authorization header not with 'Bearer ' prefix!")
+        throw UnauthorizedResponse()
+    }
+    return authorizationHeader.removePrefix("Bearer ")
+}
+
+/**
+ * Setter opp en jwtVerifier som verifiserer token
+ */
+private fun jwtVerifier(
+    azureOpenidConfigJwksUri: String,
+    azureOpenidConfigIssuer: String,
+    azureAppClientId: String
+): JWTVerifier = JWT.require(algorithm(azureOpenidConfigJwksUri))
+    .withIssuer(azureOpenidConfigIssuer)
+    .withAudience(azureAppClientId)
+    .withClaimPresence(navIdentClaim)
+    .build()
+
+/**
+ * Setter opp algoritmen som tokenet skal være signert under
+ */
+private fun algorithm(azureOpenidConfigJwksUri: String): Algorithm {
+    val jwkProvider = jwkProvider(azureOpenidConfigJwksUri)
+    return Algorithm.RSA256(object : RSAKeyProvider {
+        override fun getPublicKeyById(keyId: String) = jwkProvider.get(keyId).publicKey as RSAPublicKey
+        override fun getPrivateKey() = throw IllegalStateException()
+        override fun getPrivateKeyId() = throw IllegalStateException()
+    })
+}
+
+/**
+ * Setter opp Jwk-nøkkel for token-verifikasjon
+ */
+private fun jwkProvider(azureOpenidConfigJwksUri: String) =
+    JwkProviderBuilder(URI(azureOpenidConfigJwksUri).toURL())
+        .cached(10, 1, TimeUnit.HOURS)
+        .build()
