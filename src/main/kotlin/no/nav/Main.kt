@@ -24,9 +24,18 @@ class App(
     private val azureOpenidConfigIssuer: String,
     private val azureOpenidConfigJwksUri: String,
     private val rolleUuidSpesifikasjon: RolleUuidSpesifikasjon,
+    openSearchUsername: String,
+    openSearchPassword: String,
+    openSearchUri: String,
 ): Closeable {
 
     lateinit var javalin: Javalin
+
+    private val openSearchClient = createOpenSearchClient(
+        openSearchUsername = openSearchUsername,
+        openSearchPassword = openSearchPassword,
+        openSearchUri = openSearchUri,
+    )
 
     fun configureOpenApi(config: JavalinConfig) {
         val openApiConfiguration = OpenApiPluginConfiguration().apply {
@@ -49,7 +58,7 @@ class App(
             configureOpenApi(config)
         }
 
-        Routehandler.defineRoutes(javalin)
+        Routehandler(openSearchClient).defineRoutes(javalin)
         javalin.azureAdAuthentication(
             path = "/api/*",
             azureAppClientId = azureAppClientId,
@@ -64,8 +73,6 @@ class App(
     override fun close() {
         javalin.close()
     }
-
-
 }
 
 fun main() {
@@ -77,6 +84,9 @@ fun main() {
             modiaGenerell = UUID.fromString(System.getenv("MODIA_GENERELL_GRUPPE")!!),
             modiaOppfølging = UUID.fromString(System.getenv("MODIA_OPPFOLGING_GRUPPE")!!),
         ),
+        openSearchUsername = System.getenv("OPEN_SEARCH_USERNAME")!!,
+        openSearchPassword = System.getenv("OPEN_SEARCH_PASSWORD")!!,
+        openSearchUri = System.getenv("OPEN_SEARCH_URI")!!,
     ).start()
 }
 

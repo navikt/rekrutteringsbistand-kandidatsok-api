@@ -21,6 +21,9 @@ spec:
         groups:
           - id: {{adGruppeModiaGenerellTilgang}}
           - id: {{adGruppeModiaOppfolging}}
+  openSearch:
+    access: read
+    instance: kandidat
   accessPolicy:
     inbound:
       rules:

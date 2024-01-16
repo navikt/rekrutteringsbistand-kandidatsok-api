@@ -98,6 +98,7 @@ private fun jwtVerifier(
     .withIssuer(azureOpenidConfigIssuer)
     .withAudience(azureAppClientId)
     .withClaimPresence(navIdentClaim)
+    .withClaimPresence("groups")
     .build()
 
 /**

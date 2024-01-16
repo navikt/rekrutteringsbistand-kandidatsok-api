@@ -1,25 +1,39 @@
 package no.nav
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.FieldValue
+import org.opensearch.client.opensearch.core.SearchResponse
 
-fun OpenSearchClient.lookupCv(fodselsnummer: String) =
+data class LookupCvParameters(
+    val fodselsnummer: String,
+)
+
+fun OpenSearchClient.lookupCv(params: LookupCvParameters): SearchResponse<JsonNode> =
     search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {
             term_ {
-                field("fodselsnummer").value(FieldValue.of(fodselsnummer))
+                field("fodselsnummer").value(FieldValue.of(params.fodselsnummer))
             }
         }
         size(1)
     }
 
-
 fun main() {
     val openSearchClient = createOpenSearchClient()
-    val searchResponse = openSearchClient.lookupCv("10428826731") // fnr from dev
-    for (i in searchResponse.hits().hits().indices) {
-        System.out.println(searchResponse.hits().hits()[i].source())
-    }
+    val searchResponse = openSearchClient.lookupCv(LookupCvParameters("10428826731")) // fnr from dev
+
+    println(
+        jacksonObjectMapper().writeValueAsString(
+            mapOf(
+                "hits" to mapOf(
+                    "hits" to searchResponse.hits().hits().map { it.source() }
+                )
+        )))
+
+//    for (i in searchResponse.hits().hits().indices) {
+//        System.out.println(searchResponse.hits().hits()[i].source())
+//    }
 }

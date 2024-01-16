@@ -7,6 +7,7 @@ client_id=someclientid
 &acr=Level4
 &pid=12345678910
 &NAVident=1234
+&groups=%5B%2267a06857-0028-4a90-bf4c-9c9a92c7d733%22%5D
 
 > {%
     client.global.set("auth_token", response.body);
@@ -16,11 +17,10 @@ client_id=someclientid
 GET http://localhost:8080/api/me
 Authorization: Bearer {{auth_token}}
 
+###
+POST http://localhost:8080/api/lookupCv
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
 
-
-
-
-
-
-
+{"fodselsnummer": "10428826731"}
 

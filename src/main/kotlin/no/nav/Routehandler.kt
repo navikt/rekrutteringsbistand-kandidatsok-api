@@ -1,21 +1,26 @@
 package no.nav
 
 import io.javalin.Javalin
-import io.javalin.openapi.HttpMethod
-import io.javalin.openapi.OpenApi
-import io.javalin.openapi.OpenApiContent
-import io.javalin.openapi.OpenApiResponse
+import io.javalin.http.bodyAsClass
+import io.javalin.openapi.*
+import org.opensearch.client.opensearch.OpenSearchClient
 
-object Routehandler {
+class Routehandler(
+    private val openSearchClient: OpenSearchClient,
+) {
+    companion object {
+        private const val endepunktReady = "/internal/ready"
+        private const val endepunktAlive = "/internal/alive"
+        private const val endepunktMe = "/api/me"
+        private const val endepunktLookupCv = "/api/lookup-cv"
+    }
 
-    private const val endepunktReady = "internal/ready"
-    private const val endepunktAlive = "internal/alive"
-    private const val endepunktMe = "api/me"
 
     fun defineRoutes(javalin: Javalin) {
-        javalin.get("/${Routehandler.endepunktAlive}", Routehandler::isAliveHandler)
-        javalin.get("/${Routehandler.endepunktReady}", Routehandler::isReadyHandler)
-        javalin.get("/${Routehandler.endepunktMe}", Routehandler::meHandler)
+        javalin.get(endepunktAlive, ::isAliveHandler)
+        javalin.get(endepunktReady, ::isReadyHandler)
+        javalin.get(endepunktMe, ::meHandler)
+        javalin.post(endepunktLookupCv, ::lookupCvHandler)
     }
 
     @OpenApi(
@@ -58,5 +63,20 @@ object Routehandler {
             "navIdent" to ctx.authenticatedUser().navIdent,
             "roller" to ctx.authenticatedUser().roller.map { it.name }
         ))
+    }
+
+    @OpenApi(
+        summary = "Oppslag av hele CVen til en enkelt person basert på fødselsnummer",
+        operationId = endepunktLookupCv,
+        tags = [],
+        requestBody = OpenApiRequestBody([OpenApiContent(LookupCvParameters::class)]),
+        responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+        path = endepunktLookupCv,
+        methods = [HttpMethod.POST]
+    )
+    fun lookupCvHandler(ctx: io.javalin.http.Context) {
+        val lookupCvParameters = ctx.bodyAsClass<LookupCvParameters>()
+        val result = openSearchClient.lookupCv(lookupCvParameters)
+        ctx.json(result.toJson())
     }
 }

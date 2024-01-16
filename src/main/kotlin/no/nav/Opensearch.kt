@@ -1,5 +1,6 @@
 package no.nav
 
+import com.fasterxml.jackson.databind.JsonNode
 import org.apache.http.HttpHost
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
@@ -55,3 +56,18 @@ fun Query.Builder.term_(
 ): ObjectBuilder<Query> =
     term { it.body() }
 
+
+data class OpensearchResponse(
+    val hits: Hits,
+)
+
+data class Hits(
+    val hits: List<JsonNode>,
+)
+
+fun SearchResponse<JsonNode>.toJson(): OpensearchResponse =
+    OpensearchResponse(
+        hits = Hits(
+            hits = hits().hits().mapNotNull { it.source() }
+        )
+    )
