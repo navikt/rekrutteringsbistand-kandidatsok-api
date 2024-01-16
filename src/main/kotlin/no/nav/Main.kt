@@ -26,7 +26,7 @@ class App(
     private val rolleUuidSpesifikasjon: RolleUuidSpesifikasjon,
 ): Closeable {
 
-    var javalin: Javalin? = null
+    lateinit var javalin: Javalin
 
     fun configureOpenApi(config: JavalinConfig) {
         val openApiConfiguration = OpenApiPluginConfiguration().apply {
@@ -49,40 +49,24 @@ class App(
             configureOpenApi(config)
         }
 
-        javalin!!.defineRoutes(
+        Routehandler.defineRoutes(javalin)
+        javalin.azureAdAuthentication(
+            path = "/api/*",
             azureAppClientId = azureAppClientId,
             azureOpenidConfigIssuer = azureOpenidConfigIssuer,
             azureOpenidConfigJwksUri = azureOpenidConfigJwksUri,
             rolleUuidSpesifikasjon = rolleUuidSpesifikasjon,
         )
 
-        javalin!!.start(port)
+        javalin.start(port)
     }
 
     override fun close() {
-        javalin?.close()
+        javalin.close()
     }
 
 
 }
-
-fun Javalin.defineRoutes(
-    azureAppClientId: String,
-    azureOpenidConfigIssuer: String,
-    azureOpenidConfigJwksUri: String,
-    rolleUuidSpesifikasjon: RolleUuidSpesifikasjon
-) {
-    Routehandler.defineRoutes(this)
-    azureAdAuthentication(
-        path = "/api/*",
-        azureAppClientId = azureAppClientId,
-        azureOpenidConfigIssuer = azureOpenidConfigIssuer,
-        azureOpenidConfigJwksUri = azureOpenidConfigJwksUri,
-        rolleUuidSpesifikasjon = rolleUuidSpesifikasjon,
-    )
-
-}
-
 
 fun main() {
     App(
@@ -99,5 +83,3 @@ fun main() {
 
 val Any.log: Logger
     get() = LoggerFactory.getLogger(this::class.java)
-
-fun log(name: String): Logger = LoggerFactory.getLogger(name)
