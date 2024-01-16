@@ -32,6 +32,7 @@ jobs:
     needs: build-test-deploy
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
@@ -46,6 +47,7 @@ jobs:
     needs: [build-test-deploy, deploy-to-dev]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
