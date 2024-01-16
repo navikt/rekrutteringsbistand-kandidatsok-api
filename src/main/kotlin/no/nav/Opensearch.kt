@@ -22,18 +22,19 @@ fun createOpenSearchClient(
     openSearchPassword: String = System.getenv("OPEN_SEARCH_PASSWORD")!!,
     openSearchUri: String = System.getenv("OPEN_SEARCH_URI")!!,
 ): OpenSearchClient {
-    val parsedUri = URI(openSearchUri)
-    val host = HttpHost(parsedUri.host, parsedUri.port, parsedUri.scheme)
-
-    val credentialsProvider = BasicCredentialsProvider().apply {
-        setCredentials(AuthScope(host), UsernamePasswordCredentials(openSearchUsername, openSearchPassword))
+    val httpHost = URI(openSearchUri).run {
+        HttpHost(host, port, scheme)
     }
 
-    val restClient = RestClient.builder(host).setHttpClientConfigCallback { httpClientBuilder ->
-        httpClientBuilder.setDefaultCredentialsProvider(
-            credentialsProvider
-        )
-    }.build()
+    val credentialsProvider = BasicCredentialsProvider().apply {
+        setCredentials(AuthScope(httpHost), UsernamePasswordCredentials(openSearchUsername, openSearchPassword))
+    }
+
+    val restClient = RestClient.builder(httpHost)
+        .setHttpClientConfigCallback { httpClientBuilder ->
+            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+        }
+        .build()
 
     val transport = RestClientTransport(restClient, JacksonJsonpMapper())
     return OpenSearchClient(transport)
