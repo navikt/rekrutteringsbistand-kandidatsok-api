@@ -7,6 +7,10 @@ enum class Rolle {
     MODIA_OPPFØLGING,
 }
 
+/*
+    Holder på UUID-ene som brukes for å identifisere roller i Azure AD.
+    Det er ulik spesifikasjon for dev og prod.
+ */
 data class RolleUuidSpesifikasjon(
     private val modiaGenerell: UUID,
     private val modiaOppfølging: UUID,

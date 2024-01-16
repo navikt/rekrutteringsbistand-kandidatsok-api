@@ -21,6 +21,9 @@ private const val endepunktReady = "internal/ready"
 private const val endepunktAlive = "internal/alive"
 private const val endepunktMe = "api/me"
 
+/*
+    Oppsett av applikasjon, som kan kjøres av både tester og main-metode.
+ */
 class App(
     private val port: Int = 8080,
     private val azureAppClientId: String,
