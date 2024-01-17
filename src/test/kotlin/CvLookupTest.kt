@@ -46,18 +46,18 @@ class CvLookupTest {
             post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"12345678910" }}},"size":1}"""))
                 .willReturn(
-                    ok(CvTestRespons.response)
+                    ok(CvTestRespons.responseOpenSearch)
                 )
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/lookup-cv")
-            .body("""{"fodselsnummer": "12345678910"}""")
+                .body("""{"fodselsnummer": "12345678910"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.response))
+        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseCvLookup))
     }
 
     private fun lagLokalApp() = App(

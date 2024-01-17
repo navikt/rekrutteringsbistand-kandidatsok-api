@@ -80,6 +80,6 @@ class Routehandler(
     fun lookupCvHandler(ctx: io.javalin.http.Context) {
         val lookupCvParameters = ctx.bodyAsClass<LookupCvParameters>()
         val result = openSearchClient.lookupCv(lookupCvParameters)
-        ctx.json(result.toJson())
+        ctx.json(result.toResponseJson())
     }
 }

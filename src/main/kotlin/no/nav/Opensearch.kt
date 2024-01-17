@@ -62,12 +62,18 @@ data class OpensearchResponse(
 )
 
 data class Hits(
-    val hits: List<JsonNode>,
+    val hits: List<Hit>,
 )
 
-fun SearchResponse<JsonNode>.toJson(): OpensearchResponse =
+data class Hit(
+    val _source: JsonNode,
+)
+
+fun SearchResponse<JsonNode>.toResponseJson(): OpensearchResponse =
     OpensearchResponse(
         hits = Hits(
-            hits = hits().hits().mapNotNull { it.source() }
+            hits = hits().hits().mapNotNull {
+                it.source()?.let { Hit(it) }
+            }
         )
     )
