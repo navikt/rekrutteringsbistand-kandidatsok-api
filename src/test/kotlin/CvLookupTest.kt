@@ -1,4 +1,5 @@
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.tomakehurst.wiremock.client.WireMock.*
@@ -56,7 +57,7 @@ class CvLookupTest {
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get().asText()).isEqualTo("feil")
+        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.response))
     }
 
     private fun lagLokalApp() = App(
