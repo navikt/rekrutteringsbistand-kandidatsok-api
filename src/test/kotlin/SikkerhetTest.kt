@@ -1,6 +1,9 @@
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.jackson.responseObject
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
+import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.App
 import no.nav.RolleUuidSpesifikasjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -16,7 +19,8 @@ private const val modiaOppfølging = "554a66fb-fbec-4b92-90c1-0d9c085c362c"
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class Autentiseringstest {
+@WireMockTest(httpPort = 10000)
+class SikkerhetTest {
     private val authPort = 18305
 
     private val app: App = lagLokalApp()
@@ -125,6 +129,25 @@ class Autentiseringstest {
         assertThat(result.get()["roller"].get(0).asText()).isEqualTo("MODIA_OPPFØLGING")
     }
 
+    @Test
+    fun `opensearch-biblioteket takler forsøk på json-injection`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"\",!xz" }}},"size":1}"""))
+                .willReturn(
+                    WireMock.ok(CvTestRespons.responseOpenSearch)
+                )
+        )
+        val token = lagToken()
+        val (_, response) = Fuel.post("http://localhost:8080/api/lookup-cv")
+            .body("""{"fodselsnummer": "\",!xz"}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        assertThat(response.statusCode).isEqualTo(200)
+    }
+
     private fun lagToken(
         issuerId: String = "http://localhost:$authPort/default",
         aud: String = "1",
@@ -148,6 +171,6 @@ class Autentiseringstest {
         ),
         openSearchUsername = "user",
         openSearchPassword = "pass",
-        openSearchUri = "http://localhost:0000"
+        openSearchUri = "http://localhost:10000/opensearch",
     )
 }
