@@ -33,6 +33,7 @@ dependencies {
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:$javalinVersion")
     implementation("io.javalin.community.openapi:javalin-redoc-plugin:$javalinVersion")
     implementation("no.nav.common:audit-log:3.2023.12.12_13.53-510909d4aa1a")
+    implementation("org.codehaus.janino:janino:3.1.11")
     kapt("io.javalin.community.openapi:openapi-annotation-processor:$javalinVersion")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")

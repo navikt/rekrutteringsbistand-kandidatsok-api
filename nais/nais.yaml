@@ -11,6 +11,8 @@ spec:
     path: /internal/alive
   readiness:
     path: /internal/ready
+  secureLogs:
+    enabled: true
   azure:
     application:
       enabled: true
