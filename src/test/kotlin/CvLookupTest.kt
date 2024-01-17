@@ -39,12 +39,15 @@ class CvLookupTest {
     }
 
     @Test
-    fun `Kan hente cv`( wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Kan hente cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true").withRequestBody(equalTo("feil")).willReturn(
-                okJson("""""")
-        ))
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"12345678910" }}},"size":1}"""))
+                .willReturn(
+                    ok(CvTestRespons.response)
+                )
+        )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/lookup-cv")
@@ -53,7 +56,7 @@ class CvLookupTest {
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()["roller"].get(0).asText()).isEqualTo("MODIA_GENERELL")
+        Assertions.assertThat(result.get().asText()).isEqualTo("feil")
     }
 
     private fun lagLokalApp() = App(
