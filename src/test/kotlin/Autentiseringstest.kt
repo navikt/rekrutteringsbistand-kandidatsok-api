@@ -146,8 +146,8 @@ class Autentiseringstest {
             modiaGenerell = UUID.fromString(modiaGenerell),
             modiaOppfølging = UUID.fromString(modiaOppfølging),
         ),
-        openSearchUsername = "",
-        openSearchPassword = "",
-        openSearchUri = "",
+        openSearchUsername = "user",
+        openSearchPassword = "pass",
+        openSearchUri = "http://localhost:0000"
     )
 }
