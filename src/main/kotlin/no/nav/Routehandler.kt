@@ -4,6 +4,7 @@ import io.javalin.Javalin
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import org.opensearch.client.opensearch.OpenSearchClient
+import org.opensearch.client.opensearch._types.FieldValue
 
 class Routehandler(
     private val openSearchClient: OpenSearchClient,
@@ -79,6 +80,8 @@ class Routehandler(
     )
     fun lookupCvHandler(ctx: io.javalin.http.Context) {
         val lookupCvParameters = ctx.bodyAsClass<LookupCvParameters>()
+        val fodselsnummer = FieldValue.of(lookupCvParameters.fodselsnummer).stringValue()
+        AuditLogg.loggOppslagCv(fodselsnummer, ctx.authenticatedUser().navIdent)
         val result = openSearchClient.lookupCv(lookupCvParameters)
         ctx.json(result.toResponseJson())
     }
