@@ -1,13 +1,12 @@
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.jackson.responseObject
-import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.App
 import no.nav.RolleUuidSpesifikasjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import no.nav.security.mock.oauth2.http.get
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -20,7 +19,7 @@ private const val modiaGenerell = "67a06857-0028-4a90-bf4c-9c9a92c7d733"
 private const val modiaOppfølging = "554a66fb-fbec-4b92-90c1-0d9c085c362c"
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@WireMockTest
+@WireMockTest(httpPort = 10000)
 class CvLookupTest {
     private val authPort = 18306
 
@@ -42,7 +41,10 @@ class CvLookupTest {
     @Test
     fun `Kan hente cv`( wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(get("/cv-lookup").willReturn(WireMock.okJson("""{"name": "instance-dsl"}""")))
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true").withRequestBody(equalTo("feil")).willReturn(
+                okJson("""""")
+        ))
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/lookup-cv")
@@ -65,7 +67,7 @@ class CvLookupTest {
         ),
         openSearchUsername = "user",
         openSearchPassword = "pass",
-        openSearchUri = "http://localhost:10000",
+        openSearchUri = "http://localhost:10000/opensearch",
     )
 
     private fun lagToken(
