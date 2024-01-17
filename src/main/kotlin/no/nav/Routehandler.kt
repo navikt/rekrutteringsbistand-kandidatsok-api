@@ -33,7 +33,6 @@ class Routehandler(
         methods = [HttpMethod.GET]
     )
     fun isReadyHandler(ctx: io.javalin.http.Context) {
-        log.info("isReadyHandler kalles")
         ctx.result("isReady")
     }
 
@@ -46,7 +45,6 @@ class Routehandler(
         methods = [HttpMethod.GET]
     )
     fun isAliveHandler(ctx: io.javalin.http.Context) {
-        log.info("isAliveHandler kalles")
         ctx.result("isAlive")
     }
 
@@ -62,7 +60,6 @@ class Routehandler(
         methods = [HttpMethod.GET]
     )
     fun meHandler(ctx: io.javalin.http.Context) {
-        log.info("Me-endepunkt kalles")
         ctx.json(mapOf<String, Any?>(
             "navIdent" to ctx.authenticatedUser().navIdent,
             "roller" to ctx.authenticatedUser().roller.map { it.name }
