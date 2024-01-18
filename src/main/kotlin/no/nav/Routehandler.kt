@@ -14,6 +14,7 @@ class Routehandler(
         private const val endepunktAlive = "/internal/alive"
         private const val endepunktMe = "/api/me"
         private const val endepunktLookupCv = "/api/lookup-cv"
+        private const val endepunktHentKandidatnavn = "api/hent-kandidatnavn"
     }
 
 
@@ -22,6 +23,7 @@ class Routehandler(
         javalin.get(endepunktReady, ::isReadyHandler)
         javalin.get(endepunktMe, ::meHandler)
         javalin.post(endepunktLookupCv, ::lookupCvHandler)
+        javalin.post(endepunktHentKandidatnavn, ::hentKandidatnavnHandler)
     }
 
     @OpenApi(
@@ -81,5 +83,13 @@ class Routehandler(
         AuditLogg.loggOppslagCv(fodselsnummer, ctx.authenticatedUser().navIdent)
         val result = openSearchClient.lookupCv(lookupCvParameters)
         ctx.json(result.toResponseJson())
+    }
+
+    fun hentKandidatnavnHandler(ctx: io.javalin.http.Context) {
+        val lookupCvParameters = ctx.bodyAsClass<LookupCvParameters>() // Egen DTO for bare fnr?
+        val fnr = FieldValue.of(lookupCvParameters.fodselsnummer).stringValue()
+        AuditLogg.loggOppslagCv(fnr, ctx.authenticatedUser().navIdent)
+        data class KandidatnavnResponsDto(val fornavn: String, val mellomnavn: String, val etternavn: String, val synligIRekbis: Boolean, val kandidatnr: String?)
+        ctx.json(KandidatnavnResponsDto("anyFornavn", "anyMellomnavn", "anyEtternavn", true, "anyKandidatnr-$fnr"))
     }
 }
