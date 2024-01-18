@@ -21,7 +21,7 @@ object AuditLogg {
     fun loggOppslagCv(aktørId: String, navIdent: String) {
         val cefMessage = CefMessage.builder()
             .applicationName("Rekrutteringsbistand")
-            .loggerName("rekrutteringsbistand-kandidat-api")
+            .loggerName("rekrutteringsbistand-kandidatsok-api")
             .event(CefMessageEvent.ACCESS)
             .name("Sporingslogg")
             .authorizationDecision(AuthorizationDecision.PERMIT)
