@@ -7,7 +7,7 @@ import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch.core.SearchResponse
 
 data class LookupCvParameters(
-    val fodselsnummer: String,
+    val kandidatnr: String,
 )
 
 fun OpenSearchClient.lookupCv(params: LookupCvParameters): SearchResponse<JsonNode> =
@@ -15,7 +15,7 @@ fun OpenSearchClient.lookupCv(params: LookupCvParameters): SearchResponse<JsonNo
         index(DEFAULT_INDEX)
         query_ {
             term_ {
-                field("fodselsnummer").value(FieldValue.of(params.fodselsnummer))
+                field("kandidatnr").value(FieldValue.of(params.kandidatnr))
             }
         }
         size(1)

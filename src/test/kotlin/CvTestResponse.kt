@@ -14,7 +14,7 @@ object CvTestRespons {
           "harKontaktinformasjon": false,
           "telefon": null,
           "statsborgerskap": null,
-          "kandidatnr": null,
+          "kandidatnr": "PAM0xtfrwli5",
           "arenaKandidatnr": null,
           "beskrivelse": "",
           "samtykkeStatus": "G",
@@ -562,6 +562,35 @@ object CvTestRespons {
                 "_source": $source
               }
             ]
+          }
+        }
+    """.trimIndent()
+
+    val responseCvLookupIngenTreff: String = """
+        {
+          "hits": {
+            "hits": []
+          }
+        }
+    """.trimIndent()
+
+    val responseOpensearchIngenTreff = """
+        {
+          "took": 0,
+          "timed_out": false,
+          "_shards": {
+            "total": 3,
+            "successful": 3,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 0,
+              "relation": "eq"
+            },
+            "max_score": null,
+            "hits": []
           }
         }
     """.trimIndent()

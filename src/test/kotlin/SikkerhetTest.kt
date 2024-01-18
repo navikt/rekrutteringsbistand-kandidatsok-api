@@ -134,14 +134,14 @@ class SikkerhetTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"\",!xz" }}},"size":1}"""))
+                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"kandidatnr":{"value":"\",!xz" }}},"size":1}"""))
                 .willReturn(
                     WireMock.ok(CvTestRespons.responseOpenSearch)
                 )
         )
         val token = lagToken()
         val (_, response) = Fuel.post("http://localhost:8080/api/lookup-cv")
-            .body("""{"fodselsnummer": "\",!xz"}""")
+            .body("""{"kandidatnr": "\",!xz"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 

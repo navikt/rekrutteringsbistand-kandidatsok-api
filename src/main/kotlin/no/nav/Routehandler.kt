@@ -77,9 +77,12 @@ class Routehandler(
     )
     fun lookupCvHandler(ctx: io.javalin.http.Context) {
         val lookupCvParameters = ctx.bodyAsClass<LookupCvParameters>()
-        val fodselsnummer = FieldValue.of(lookupCvParameters.fodselsnummer).stringValue()
-        AuditLogg.loggOppslagCv(fodselsnummer, ctx.authenticatedUser().navIdent)
+        val kandidatnr = FieldValue.of(lookupCvParameters.kandidatnr).stringValue()
         val result = openSearchClient.lookupCv(lookupCvParameters)
+        val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
+        if(fodselsnummer != null) {
+            AuditLogg.loggOppslagCv(fodselsnummer, ctx.authenticatedUser().navIdent)
+        }
         ctx.json(result.toResponseJson())
     }
 }
