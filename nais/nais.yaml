@@ -7,6 +7,10 @@ metadata:
     team: toi
 spec:
   image: {{{image}}}
+  ingresses:
+  {{ #each ingress as |url|}}
+  - {{ url }}
+  {{/each } }
   liveness:
     path: /internal/alive
   readiness:
