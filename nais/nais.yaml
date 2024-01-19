@@ -8,7 +8,7 @@ metadata:
 spec:
   image: {{{image}}}
   ingresses:
-  {{ #each ingress as |url|}}
+  {{#each ingress as |url|}}
   - {{ url }}
   {{/each }}
   liveness:
