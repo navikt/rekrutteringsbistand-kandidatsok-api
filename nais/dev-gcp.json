@@ -3,7 +3,7 @@
     "adGruppeModiaOppfolging": "554a66fb-fbec-4b92-90c1-0d9c085c362c",
     "ingress": [
         "https://rekrutteringsbistand-kandidatsok-api.intern.dev.nav.no/swagger",
-        "https://rekrutteringsbistand-kandidatsok-api.intern.dev.nav.no/webjars"
-
+        "https://rekrutteringsbistand-kandidatsok-api.intern.dev.nav.no/webjars",
+        "https://rekrutteringsbistand-kandidatsok-api.intern.dev.nav.no/openapi"
     ]
 }
