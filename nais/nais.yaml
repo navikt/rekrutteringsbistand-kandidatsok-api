@@ -9,8 +9,8 @@ spec:
   image: {{{image}}}
   ingresses:
   {{#each ingress as |url|}}
-  - {{ url }}
-  {{/each }}
+     - {{ url }}
+  {{/each}}
   liveness:
     path: /internal/alive
   readiness:
