@@ -10,7 +10,7 @@ spec:
   ingresses:
   {{ #each ingress as |url|}}
   - {{ url }}
-  {{/each } }
+  {{/each }}
   liveness:
     path: /internal/alive
   readiness:
