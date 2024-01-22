@@ -1,9 +1,11 @@
 package no.nav
 
 import com.auth0.jwk.JwkProviderBuilder
+import com.auth0.jwk.SigningKeyNotFoundException
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
+import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.exceptions.TokenExpiredException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.RSAKeyProvider
@@ -62,11 +64,14 @@ fun Javalin.azureAdAuthentication(
         val jwt = verifier.verify(it.hentToken())
         it.attribute("authenticatedUser", AuthenticatedUser.fromJwt(jwt, rolleUuidSpesifikasjon))
     }
-        .exception(Exception::class.java) { e, ctx ->
+        .exception(JWTVerificationException::class.java) { e, ctx ->
             when (e) {
                 is TokenExpiredException -> log.info("AzureAD-token expired on {}", e.expiredOn)
                 else -> log.error("Unexpected exception {} while authenticating AzureAD-token", e::class.simpleName, e)
             }
+            ctx.status(HttpStatus.UNAUTHORIZED).result("")
+        }.exception(SigningKeyNotFoundException::class.java) { _, ctx ->
+            log.warn("Noen prøvde å aksessere endepunkt med en token signert med en falsk issuer")
             ctx.status(HttpStatus.UNAUTHORIZED).result("")
         }
 }
