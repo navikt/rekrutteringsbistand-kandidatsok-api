@@ -81,6 +81,26 @@ class CvLookupTest {
         Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseCvLookupIngenTreff))
     }
 
+    @Test
+    fun `Om kall feiler under henting av cv fra elasticsearch, får vi HTTP 500`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .willReturn(
+                    notFound()
+                )
+        )
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/lookup-cv")
+            .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(500)
+    }
+
     private fun lagLokalApp() = App(
         port = 8080,
         azureAppClientId = "1",
