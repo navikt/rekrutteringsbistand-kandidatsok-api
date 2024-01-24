@@ -4,7 +4,6 @@ import io.javalin.Javalin
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import org.opensearch.client.opensearch.OpenSearchClient
-import org.opensearch.client.opensearch._types.FieldValue
 
 class Routehandler(
     private val openSearchClient: OpenSearchClient,
@@ -54,10 +53,14 @@ class Routehandler(
         summary = "NAVIdent og roller for innlogget bruker",
         operationId = endepunktMe,
         tags = [],
-        responses = [OpenApiResponse("200", [OpenApiContent(Any::class, properties = [
-            OpenApiContentProperty(name = "navIdent", type = "string"),
-            OpenApiContentProperty(name = "roller", isArray = true, type = "string")
-        ])])],
+        responses = [OpenApiResponse(
+            "200", [OpenApiContent(
+                Any::class, properties = [
+                    OpenApiContentProperty(name = "navIdent", type = "string"),
+                    OpenApiContentProperty(name = "roller", isArray = true, type = "string")
+                ]
+            )]
+        )],
         path = endepunktMe,
         methods = [HttpMethod.GET]
     )
@@ -81,17 +84,26 @@ class Routehandler(
         val lookupCvParameters = ctx.bodyAsClass<LookupCvParameters>()
         val result = openSearchClient.lookupCv(lookupCvParameters)
         val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
-        if(fodselsnummer != null) {
+        if (fodselsnummer != null) {
             AuditLogg.loggOppslagCv(fodselsnummer, ctx.authenticatedUser().navIdent)
         }
         ctx.json(result.toResponseJson())
     }
 
     fun hentKandidatnavnHandler(ctx: io.javalin.http.Context) {
-        val lookupCvParameters = ctx.bodyAsClass<LookupCvParameters>() // Egen DTO for bare fnr?
-        val fnr = FieldValue.of(lookupCvParameters.fodselsnummer).stringValue()
-        AuditLogg.loggOppslagCv(fnr, ctx.authenticatedUser().navIdent)
-        data class KandidatnavnResponsDto(val fornavn: String, val mellomnavn: String, val etternavn: String, val synligIRekbis: Boolean, val kandidatnr: String?)
+        data class FnrRequestDto(val fnr: String)
+
+        val fnr: String = ctx.bodyAsClass<FnrRequestDto>().fnr // Hva skjer hvis body har helt feil innhold?
+        AuditLogg.loggHentNavn(fnr, ctx.authenticatedUser().navIdent)
+        data class KandidatnavnResponsDto(
+            val fornavn: String,
+            val mellomnavn: String,
+            val etternavn: String,
+            val synligIRekbis: Boolean,
+            val kandidatnr: String?
+        )
         ctx.json(KandidatnavnResponsDto("anyFornavn", "anyMellomnavn", "anyEtternavn", true, "anyKandidatnr-$fnr"))
     }
+
+
 }

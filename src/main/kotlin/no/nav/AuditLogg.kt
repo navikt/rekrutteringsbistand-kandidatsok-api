@@ -32,4 +32,20 @@ object AuditLogg {
             .build()
         log(cefMessage)
     }
+
+    fun loggHentNavn(kandidatFnr: String, navIdent: String) {
+        val cefMessage = CefMessage.builder()
+            .applicationName("Rekrutteringsbistand")
+            .loggerName("rekrutteringsbistand-kandidatsok-api")
+            .event(CefMessageEvent.ACCESS)
+            .name("Sporingslogg")
+            .authorizationDecision(AuthorizationDecision.PERMIT)
+            .sourceUserId(navIdent)
+            .destinationUserId(kandidatFnr)
+            .timeEnded(System.currentTimeMillis())
+            .extension("msg", "NAV-ansatt har hentet navn til bruker")
+            .build()
+        log(cefMessage)
+    }
+
 }
