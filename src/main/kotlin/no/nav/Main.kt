@@ -4,15 +4,12 @@ import io.javalin.Javalin
 import io.javalin.config.JavalinConfig
 import io.javalin.openapi.plugin.OpenApiPlugin
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration
-import io.javalin.openapi.plugin.redoc.ReDocConfiguration
-import io.javalin.openapi.plugin.redoc.ReDocPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.Closeable
 import java.util.*
-
 
 
 /*
@@ -27,7 +24,7 @@ class App(
     openSearchUsername: String,
     openSearchPassword: String,
     openSearchUri: String,
-): Closeable {
+) : Closeable {
 
     lateinit var javalin: Javalin
 
@@ -48,8 +45,10 @@ class App(
             }
         }
         config.plugins.register(OpenApiPlugin(openApiConfiguration))
-        config.plugins.register(SwaggerPlugin(SwaggerConfiguration()))
-        config.plugins.register(ReDocPlugin(ReDocConfiguration()))
+        config.plugins.register(SwaggerPlugin(SwaggerConfiguration().apply {
+            this.validatorUrl = null
+        }
+        ))
     }
 
 
