@@ -1,6 +1,6 @@
 object CvTestRespons {
 
-    val source = """
+    val sourceCvLookup = """
         {
           "aktorId": "2177336243360",
           "fodselsnummer": "07858597719",
@@ -530,14 +530,73 @@ object CvTestRespons {
           "hits": {
             "hits": [
               {
-                "_source": $source
+                "_source": $sourceCvLookup
               }
             ]
           }
         }
     """.trimIndent()
 
-    val responseOpenSearch: String = """
+    val sourceKandidatsammendragLookup =
+        """
+            {
+                    "yrkeJobbonskerObj": [
+                        {
+                            "styrkBeskrivelse": "Avisbud",
+                            "sokeTitler": [
+                                "Avisbud",
+                                "Avisbud",
+                                "Bilagskontrollør (avisbud)",
+                                "Avis- og reklamebrosjyrebud",
+                                "Altmuligmann",
+                                "Avis- og reklamedistributør",
+                                "Utdeler (gratisavis)",
+                                "Reklamebud",
+                                "Reklame- og avisdistributør",
+                                "Bud, utlevering"
+                            ],
+                            "primaertJobbonske": false,
+                            "styrkKode": null
+                        }
+                    ],
+                    "kommuneNavn": "Sarpsborg",
+                    "adresselinje1": "Kallastenveien 47B",
+                    "veilederVisningsnavn": "Vegard Veileder",
+                    "fornavn": "Redd",
+                    "poststed": "Sarpsborg",
+                    "kommunenummerstring": "3003",
+                    "veileder": "A100000",
+                    "fodselsdato": "1987-12-04",
+                    "etternavn": "Lukt",
+                    "epostadresse": "b@b.no",
+                    "postnummer": "1708",
+                    "telefon": 12312312,
+                    "arenaKandidatnr": "PAM0152hb0wr4",
+                    "geografiJobbonsker": [
+                        {
+                            "geografiKodeTekst": "Norge",
+                            "geografiKode": "NO"
+                        }
+                    ],
+                    "veilederIdent": "A100000",
+                    "fodselsnummer": "04928797045",
+                    "veilederEpost": "a@a.no"
+                }
+        """.trimIndent()
+
+    val responseKandidatsammendragLookup: String = """
+        {
+          "hits": {
+            "hits": [
+              {
+                "_source": $sourceKandidatsammendragLookup
+              }
+            ]
+          }
+        }
+    """.trimIndent()
+
+    fun responseOpenSearch(source: String): String = """
         {
           "took": 0,
           "timed_out": false,
@@ -566,7 +625,7 @@ object CvTestRespons {
         }
     """.trimIndent()
 
-    val responseCvLookupIngenTreff: String = """
+    val responseIngenTreff: String = """
         {
           "hits": {
             "hits": []

@@ -4,16 +4,16 @@ import io.javalin.Javalin
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import org.opensearch.client.opensearch.OpenSearchClient
-import org.opensearch.client.opensearch._types.FieldValue
 
 class Routehandler(
     private val openSearchClient: OpenSearchClient,
 ) {
     companion object {
-        private const val endepunktReady = "/internal/ready"
-        private const val endepunktAlive = "/internal/alive"
-        private const val endepunktMe = "/api/me"
-        private const val endepunktLookupCv = "/api/lookup-cv"
+        const val endepunktReady = "/internal/ready"
+        const val endepunktAlive = "/internal/alive"
+        const val endepunktMe = "/api/me"
+        const val endepunktLookupCv = "/api/lookup-cv"
+        const val endepunktKandidatsammendrag = "/api/kandidatsammendrag"
     }
 
 
@@ -22,6 +22,7 @@ class Routehandler(
         javalin.get(endepunktReady, ::isReadyHandler)
         javalin.get(endepunktMe, ::meHandler)
         javalin.post(endepunktLookupCv, ::lookupCvHandler)
+        javalin.post(endepunktKandidatsammendrag, ::lookupKandidatsammendragHandler)
     }
 
     @OpenApi(
@@ -52,10 +53,14 @@ class Routehandler(
         summary = "NAVIdent og roller for innlogget bruker",
         operationId = endepunktMe,
         tags = [],
-        responses = [OpenApiResponse("200", [OpenApiContent(Any::class, properties = [
-            OpenApiContentProperty(name = "navIdent", type = "string"),
-            OpenApiContentProperty(name = "roller", isArray = true, type = "string")
-        ])])],
+        responses = [OpenApiResponse(
+            "200", [OpenApiContent(
+                Any::class, properties = [
+                    OpenApiContentProperty(name = "navIdent", type = "string"),
+                    OpenApiContentProperty(name = "roller", isArray = true, type = "string")
+                ]
+            )]
+        )],
         path = endepunktMe,
         methods = [HttpMethod.GET]
     )
@@ -67,7 +72,7 @@ class Routehandler(
     }
 
     @OpenApi(
-        summary = "Oppslag av hele CVen til en enkelt person basert på fødselsnummer",
+        summary = "Oppslag av hele CVen til en enkelt person basert på kandidatnummer",
         operationId = endepunktLookupCv,
         tags = [],
         requestBody = OpenApiRequestBody([OpenApiContent(LookupCvParameters::class)]),
@@ -79,8 +84,27 @@ class Routehandler(
         val lookupCvParameters = ctx.bodyAsClass<LookupCvParameters>()
         val result = openSearchClient.lookupCv(lookupCvParameters)
         val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
-        if(fodselsnummer != null) {
+        if (fodselsnummer != null) {
             AuditLogg.loggOppslagCv(fodselsnummer, ctx.authenticatedUser().navIdent)
+        }
+        ctx.json(result.toResponseJson())
+    }
+
+    @OpenApi(
+        summary = "Oppslag av kandidatsammendrag for en enkelt person basert på fødselsnummer",
+        operationId = endepunktLookupCv,
+        tags = [],
+        requestBody = OpenApiRequestBody([OpenApiContent(LookupCvParameters::class)]),
+        responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+        path = endepunktLookupCv,
+        methods = [HttpMethod.POST]
+    )
+    fun lookupKandidatsammendragHandler(ctx: io.javalin.http.Context) {
+        val lookupKandidatsammendragParameters = ctx.bodyAsClass<LookupCvParameters>()
+        val result = openSearchClient.lookupKandidatsammendrag(lookupKandidatsammendragParameters)
+        val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
+        if (fodselsnummer != null) {
+            AuditLogg.loggOppslagKandidatsammendrag(fodselsnummer, ctx.authenticatedUser().navIdent)
         }
         ctx.json(result.toResponseJson())
     }

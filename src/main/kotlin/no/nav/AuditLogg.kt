@@ -32,4 +32,19 @@ object AuditLogg {
             .build()
         log(cefMessage)
     }
+
+    fun loggOppslagKandidatsammendrag(aktørId: String, navIdent: String) {
+        val cefMessage = CefMessage.builder()
+            .applicationName("Rekrutteringsbistand")
+            .loggerName("rekrutteringsbistand-kandidatsok-api")
+            .event(CefMessageEvent.ACCESS)
+            .name("Sporingslogg")
+            .authorizationDecision(AuthorizationDecision.PERMIT)
+            .sourceUserId(navIdent)
+            .destinationUserId(aktørId)
+            .timeEnded(System.currentTimeMillis())
+            .extension("msg", "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidatsammendragsinformasjon")
+            .build()
+        log(cefMessage)
+    }
 }

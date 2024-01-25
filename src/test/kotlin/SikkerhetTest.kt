@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.*
 
-private const val modiaGenerell = "67a06857-0028-4a90-bf4c-9c9a92c7d733"
-private const val modiaOppfølging = "554a66fb-fbec-4b92-90c1-0d9c085c362c"
+const val modiaGenerell = "67a06857-0028-4a90-bf4c-9c9a92c7d733"
+const val modiaOppfølging = "554a66fb-fbec-4b92-90c1-0d9c085c362c"
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -136,7 +136,7 @@ class SikkerhetTest {
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"kandidatnr":{"value":"\",!xz" }}},"size":1}"""))
                 .willReturn(
-                    WireMock.ok(CvTestRespons.responseOpenSearch)
+                    WireMock.ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
                 )
         )
         val token = lagToken()
