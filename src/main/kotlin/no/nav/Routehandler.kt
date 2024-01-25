@@ -91,7 +91,7 @@ class Routehandler(
     }
 
     @OpenApi(
-        summary = "Oppslag av kandidatsammendrag for en enkelt person basert på fødselsnummer",
+        summary = "Oppslag av kandidatsammendrag for en enkelt person basert på kandidatnummer",
         operationId = endepunktLookupCv,
         tags = [],
         requestBody = OpenApiRequestBody([OpenApiContent(LookupCvParameters::class)]),
