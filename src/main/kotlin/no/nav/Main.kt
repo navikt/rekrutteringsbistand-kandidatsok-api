@@ -6,6 +6,7 @@ import io.javalin.openapi.plugin.OpenApiPlugin
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
+import io.javalin.validation.ValidationException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.Closeable
@@ -66,7 +67,10 @@ class App(
             rolleUuidSpesifikasjon = rolleUuidSpesifikasjon,
         )
 
-        javalin.start(port)
+        val app = javalin.start(port)
+        app.exception(ValidationException::class.java) { e, ctx ->
+            ctx.json(e.errors).status(400)
+        }
     }
 
     override fun close() {
