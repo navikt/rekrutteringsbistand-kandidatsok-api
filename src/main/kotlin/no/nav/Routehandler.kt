@@ -92,11 +92,11 @@ class Routehandler(
 
     @OpenApi(
         summary = "Oppslag av kandidatsammendrag for en enkelt person basert på kandidatnummer",
-        operationId = endepunktLookupCv,
+        operationId = endepunktKandidatsammendrag,
         tags = [],
         requestBody = OpenApiRequestBody([OpenApiContent(LookupCvParameters::class)]),
         responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
-        path = endepunktLookupCv,
+        path = endepunktKandidatsammendrag,
         methods = [HttpMethod.POST]
     )
     fun lookupKandidatsammendragHandler(ctx: io.javalin.http.Context) {
