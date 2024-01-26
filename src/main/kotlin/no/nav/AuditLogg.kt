@@ -19,22 +19,17 @@ object AuditLogg {
     }
 
     fun loggOppslagCv(aktørId: String, navIdent: String) {
-        val cefMessage = CefMessage.builder()
-            .applicationName("Rekrutteringsbistand")
-            .loggerName("rekrutteringsbistand-kandidatsok-api")
-            .event(CefMessageEvent.ACCESS)
-            .name("Sporingslogg")
-            .authorizationDecision(AuthorizationDecision.PERMIT)
-            .sourceUserId(navIdent)
-            .destinationUserId(aktørId)
-            .timeEnded(System.currentTimeMillis())
-            .extension("msg", "NAV-ansatt har åpnet CV'en til bruker")
-            .build()
-        log(cefMessage)
+        lagCefMessage(navIdent = navIdent, aktørId = aktørId, msg = "NAV-ansatt har åpnet CV'en til bruker")
+            .apply(::log)
     }
 
     fun loggOppslagKandidatsammendrag(aktørId: String, navIdent: String) {
-        val cefMessage = CefMessage.builder()
+        lagCefMessage(navIdent = navIdent, aktørId = aktørId, msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidatsammendragsinformasjon")
+            .apply(::log)
+    }
+
+    private fun lagCefMessage(navIdent: String, aktørId: String, msg: String): CefMessage =
+        CefMessage.builder()
             .applicationName("Rekrutteringsbistand")
             .loggerName("rekrutteringsbistand-kandidatsok-api")
             .event(CefMessageEvent.ACCESS)
@@ -43,8 +38,6 @@ object AuditLogg {
             .sourceUserId(navIdent)
             .destinationUserId(aktørId)
             .timeEnded(System.currentTimeMillis())
-            .extension("msg", "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidatsammendragsinformasjon")
+            .extension("msg", msg)
             .build()
-        log(cefMessage)
-    }
 }
