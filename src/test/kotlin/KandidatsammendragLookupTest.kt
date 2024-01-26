@@ -81,7 +81,7 @@ class KandidatsammendragLookupTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080${Routehandler.endepunktKandidatsammendrag}")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsammendrag")
                 .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -135,7 +135,7 @@ class KandidatsammendragLookupTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080${Routehandler.endepunktKandidatsammendrag}")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsammendrag")
             .body("""{"kandidatnr": "PAM000000001"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -156,7 +156,7 @@ class KandidatsammendragLookupTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080${Routehandler.endepunktKandidatsammendrag}")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsammendrag")
             .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()

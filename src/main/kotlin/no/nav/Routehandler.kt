@@ -9,11 +9,11 @@ class Routehandler(
     private val openSearchClient: OpenSearchClient,
 ) {
     companion object {
-        const val endepunktReady = "/internal/ready"
-        const val endepunktAlive = "/internal/alive"
-        const val endepunktMe = "/api/me"
-        const val endepunktLookupCv = "/api/lookup-cv"
-        const val endepunktKandidatsammendrag = "/api/kandidatsammendrag"
+        private const val endepunktReady = "/internal/ready"
+        private const val endepunktAlive = "/internal/alive"
+        private const val endepunktMe = "/api/me"
+        private const val endepunktLookupCv = "/api/lookup-cv"
+        private const val endepunktKandidatsammendrag = "/api/kandidatsammendrag"
     }
 
 
