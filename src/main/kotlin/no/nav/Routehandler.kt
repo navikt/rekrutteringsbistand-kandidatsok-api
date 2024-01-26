@@ -93,7 +93,7 @@ class Routehandler(
     }
 
     @OpenApi(
-        summary = "Finn navn på personfra Rekrutteringsbistand sin Opensearch-instans for kandidater og sekundært fra Persondataløsningen (PDL)",
+        summary = "Finn navn på person primært fra Rekrutteringsbistand sin Opensearch-instans for kandidater og sekundært fra Persondataløsningen (PDL)",
         operationId = endepunktHentKandidatnavn,
         tags = [],
         requestBody = OpenApiRequestBody([OpenApiContent(HentKandidatnavnRequestDto::class)]),
