@@ -1,6 +1,7 @@
 package no.nav
 
 import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import com.nimbusds.jwt.SignedJWT
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -35,48 +36,33 @@ class HentKandidatnavnTest {
     }
 
     @Test
-//    fun `Kan hente kandidatnavn`(wmRuntimeInfo: WireMockRuntimeInfo) {
     fun `Kan hente kandidatnavn`() {
-//        val wireMock = wmRuntimeInfo.wireMock
-//        wireMock.register(
-//            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
-//                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
-//                .willReturn(
-//                    WireMock.ok(CvTestRespons.responseOpenSearch)
-//                )
-//        )
-
-        val requestBody = """{"fnr": "anyFnr"}"""
+        val etFnr = "55555555555"
+        val requestBody = """{"fnr": "$etFnr"}"""
         val (_, response, result) = Fuel.post("http://localhost:8080/api/hent-kandidatnavn")
-            .body(requestBody)
+            .jsonBody(requestBody)
             .header("Authorization", "Bearer ${token().serialize()}")
             .responseString()
 
         assertThat(response.statusCode).isEqualTo(200)
         assertThat(result.get()).isEqualTo(
             """
-            {"fornavn":"anyFornavn","mellomnavn":"anyMellomnavn","etternavn":"anyEtternavn","synligIRekbis":true,"kandidatnr":"anyKandidatnr-anyFnr"}
+            {"fornavn":"anyFornavn","mellomnavn":"anyMellomnavn","etternavn":"anyEtternavn","synligIRekbis":true,"kandidatnr":"anyKandidatnr-$etFnr"}
             """.trimIndent()
         )
     }
 
 
     @Test
-    fun `Skal få client error gitt feil request body`() {
-        val requestBody = """{"fnr": false}"""
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/hent-kandidatnavn")
-            .body(requestBody)
+    fun `Skal få 400 Bad Request gitt feil request body`() {
+        val requestBodyMedFeil = """{"fnr": false}"""
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/hent-kandidatnavn")
+            .jsonBody(requestBodyMedFeil)
             .header("Authorization", "Bearer ${token().serialize()}")
             .responseString()
 
         assertThat(response.statusCode).isEqualTo(400)
-//        assertThat(result.get()).isEqualTo(
-//            """
-//            {"fornavn":"anyFornavn","mellomnavn":"anyMellomnavn","etternavn":"anyEtternavn","synligIRekbis":true,"kandidatnr":"anyKandidatnr-anyFnr"}
-//            """.trimIndent()
-//        )
     }
-
 
 
     private fun lagLokalApp() = App(

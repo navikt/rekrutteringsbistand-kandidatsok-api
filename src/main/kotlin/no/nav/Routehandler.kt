@@ -1,7 +1,9 @@
 package no.nav
 
 import io.javalin.Javalin
+import io.javalin.http.Context
 import io.javalin.http.bodyAsClass
+import io.javalin.http.bodyValidator
 import io.javalin.openapi.*
 import org.opensearch.client.opensearch.OpenSearchClient
 
@@ -33,7 +35,7 @@ class Routehandler(
         path = endepunktReady,
         methods = [HttpMethod.GET]
     )
-    fun isReadyHandler(ctx: io.javalin.http.Context) {
+    fun isReadyHandler(ctx: Context) {
         ctx.result("isReady")
     }
 
@@ -45,7 +47,7 @@ class Routehandler(
         path = endepunktAlive,
         methods = [HttpMethod.GET]
     )
-    fun isAliveHandler(ctx: io.javalin.http.Context) {
+    fun isAliveHandler(ctx: Context) {
         ctx.result("isAlive")
     }
 
@@ -64,7 +66,7 @@ class Routehandler(
         path = endepunktMe,
         methods = [HttpMethod.GET]
     )
-    fun meHandler(ctx: io.javalin.http.Context) {
+    fun meHandler(ctx: Context) {
         ctx.json(mapOf<String, Any?>(
             "navIdent" to ctx.authenticatedUser().navIdent,
             "roller" to ctx.authenticatedUser().roller.map { it.name }
@@ -80,7 +82,7 @@ class Routehandler(
         path = endepunktLookupCv,
         methods = [HttpMethod.POST]
     )
-    fun lookupCvHandler(ctx: io.javalin.http.Context) {
+    fun lookupCvHandler(ctx: Context) {
         val lookupCvParameters = ctx.bodyAsClass<LookupCvParameters>()
         val result = openSearchClient.lookupCv(lookupCvParameters)
         val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
@@ -90,20 +92,34 @@ class Routehandler(
         ctx.json(result.toResponseJson())
     }
 
-    fun hentKandidatnavnHandler(ctx: io.javalin.http.Context) {
-        data class FnrRequestDto(val fnr: String)
+    @OpenApi(
+        summary = "Finn navn på personfra Rekrutteringsbistand sin Opensearch-instans for kandidater og sekundært fra Persondataløsningen (PDL)",
+        operationId = endepunktHentKandidatnavn,
+        tags = [],
+        requestBody = OpenApiRequestBody([OpenApiContent(HentKandidatnavnRequestDto::class)]),
+        responses = [OpenApiResponse("200", [OpenApiContent(HentKandidatnavnResponseDto::class)])],
+        path = endepunktHentKandidatnavn,
+        methods = [HttpMethod.POST]
+    )
+    fun hentKandidatnavnHandler(ctx: Context) {
+        val validator = ctx.bodyValidator<HentKandidatnavnRequestDto>().check({ it.erElleveSiffer() }, "Fnr må være elleve siffer")
+        val fnr: String = validator.get().fnr
 
-        val fnr: String = ctx.bodyAsClass<FnrRequestDto>().fnr // Hva skjer hvis body har helt feil innhold?
         AuditLogg.loggHentNavn(fnr, ctx.authenticatedUser().navIdent)
-        data class KandidatnavnResponsDto(
-            val fornavn: String,
-            val mellomnavn: String,
-            val etternavn: String,
-            val synligIRekbis: Boolean,
-            val kandidatnr: String?
-        )
-        ctx.json(KandidatnavnResponsDto("anyFornavn", "anyMellomnavn", "anyEtternavn", true, "anyKandidatnr-$fnr"))
+        ctx.json(HentKandidatnavnResponseDto("anyFornavn", "anyMellomnavn", "anyEtternavn", true, "anyKandidatnr-$fnr"))
     }
+
+    data class HentKandidatnavnRequestDto(val fnr: String){
+        fun erElleveSiffer(): Boolean =
+            fnr.all { it.isDigit() } && fnr.length == 11
+    }
+    data class HentKandidatnavnResponseDto(
+        val fornavn: String,
+        val mellomnavn: String,
+        val etternavn: String,
+        val synligIRekbis: Boolean,
+        val kandidatnr: String?
+    )
 
 
 }
