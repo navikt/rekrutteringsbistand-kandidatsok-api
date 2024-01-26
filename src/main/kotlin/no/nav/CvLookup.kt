@@ -31,8 +31,8 @@ fun OpenSearchClient.lookupKandidatsammendrag(params: LookupCvParameters): Searc
         query_ {
             term_ { field("kandidatnr").value(FieldValue.of(params.kandidatnr)) }
         }
-        source {
-            it.includes(
+        source_ {
+            includes(
                 "fornavn", "etternavn", "arenaKandidatnr", "fodselsdato",
                 "fodselsnummer", "adresselinje1", "postnummer", "poststed",
                 "epostadresse", "telefon", "veileder", "geografiJobbonsker",
@@ -43,13 +43,6 @@ fun OpenSearchClient.lookupKandidatsammendrag(params: LookupCvParameters): Searc
         size(1)
     }
 }
-
-fun SourceConfig.Builder.includes(vararg includes: String) =
-    filter(
-        SourceFilter.of { filterBuilder ->
-            filterBuilder.includes(includes.toList())
-        }
-    )
 
 fun main() {
     val openSearchClient = createOpenSearchClient()
