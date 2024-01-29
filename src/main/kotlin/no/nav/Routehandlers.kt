@@ -2,30 +2,40 @@ package no.nav
 
 import io.javalin.Javalin
 import io.javalin.http.Context
+import io.javalin.http.HandlerType
 import io.javalin.http.bodyAsClass
-import io.javalin.http.bodyValidator
 import io.javalin.openapi.*
+import no.nav.rekrutteringsbistand.hentkandidatnavn.HentKandidatnavnRoute
+import no.nav.rekrutteringsbistand.hentkandidatnavn.PdlClient
 import org.opensearch.client.opensearch.OpenSearchClient
 
-class Routehandler(
+interface RouteHandler {
+    val path: String
+    val httpMethod: HandlerType
+    fun handler(ctx: Context): Unit
+}
+
+class Routehandlers(
     private val openSearchClient: OpenSearchClient,
+    private val pdlClient: PdlClient
 ) {
     companion object {
         private const val endepunktReady = "/internal/ready"
         private const val endepunktAlive = "/internal/alive"
         private const val endepunktMe = "/api/me"
         private const val endepunktLookupCv = "/api/lookup-cv"
-        private const val endepunktHentKandidatnavn = "api/hent-kandidatnavn"
     }
 
+    private val hentKandidatnavn: HentKandidatnavnRoute = HentKandidatnavnRoute(openSearchClient, pdlClient)
 
     fun defineRoutes(javalin: Javalin) {
         javalin.get(endepunktAlive, ::isAliveHandler)
         javalin.get(endepunktReady, ::isReadyHandler)
         javalin.get(endepunktMe, ::meHandler)
         javalin.post(endepunktLookupCv, ::lookupCvHandler)
-        javalin.post(endepunktHentKandidatnavn, ::hentKandidatnavnHandler)
+        javalin.addHandler(hentKandidatnavn.httpMethod, hentKandidatnavn.path, hentKandidatnavn::handler)
     }
+
 
     @OpenApi(
         summary = "Sjekk om endepunkt er klart",
@@ -91,35 +101,5 @@ class Routehandler(
         }
         ctx.json(result.toResponseJson())
     }
-
-    @OpenApi(
-        summary = "Finn navn på person primært fra Rekrutteringsbistand sin Opensearch-instans for kandidater og sekundært fra Persondataløsningen (PDL)",
-        operationId = endepunktHentKandidatnavn,
-        tags = [],
-        requestBody = OpenApiRequestBody([OpenApiContent(HentKandidatnavnRequestDto::class)]),
-        responses = [OpenApiResponse("200", [OpenApiContent(HentKandidatnavnResponseDto::class)])],
-        path = endepunktHentKandidatnavn,
-        methods = [HttpMethod.POST]
-    )
-    fun hentKandidatnavnHandler(ctx: Context) {
-        val validator = ctx.bodyValidator<HentKandidatnavnRequestDto>().check({ it.erElleveSiffer() }, "Fnr må være elleve siffer")
-        val fnr: String = validator.get().fnr
-
-        AuditLogg.loggHentNavn(fnr, ctx.authenticatedUser().navIdent)
-        ctx.json(HentKandidatnavnResponseDto("anyFornavn", "anyMellomnavn", "anyEtternavn", true, "anyKandidatnr-$fnr"))
-    }
-
-    data class HentKandidatnavnRequestDto(val fnr: String){
-        fun erElleveSiffer(): Boolean =
-            fnr.all { it.isDigit() } && fnr.length == 11
-    }
-    data class HentKandidatnavnResponseDto(
-        val fornavn: String,
-        val mellomnavn: String,
-        val etternavn: String,
-        val synligIRekbis: Boolean,
-        val kandidatnr: String?
-    )
-
 
 }

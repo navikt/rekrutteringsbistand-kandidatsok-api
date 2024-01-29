@@ -7,6 +7,7 @@ import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
+import no.nav.rekrutteringsbistand.hentkandidatnavn.PdlClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.Closeable
@@ -58,7 +59,7 @@ class App(
             configureOpenApi(config)
         }
 
-        Routehandler(openSearchClient).defineRoutes(javalin)
+        Routehandlers(openSearchClient, PdlClient()).defineRoutes(javalin)
         javalin.azureAdAuthentication(
             path = "/api/*",
             azureAppClientId = azureAppClientId,
