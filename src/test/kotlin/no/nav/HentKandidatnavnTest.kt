@@ -43,10 +43,7 @@ class HentKandidatnavnTest {
     fun `Kan hente kandidatnavn`() {
         val etFnr = "55555555555"
         val requestBody = """{"fnr": "$etFnr"}"""
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/hent-kandidatnavn")
-            .jsonBody(requestBody)
-            .header("Authorization", "Bearer ${token().serialize()}")
-            .responseString()
+        val (_, response, result) = sendRequest(requestBody)
 
         assertThat(response.statusCode).isEqualTo(200)
         assertThat(result.get()).isEqualTo(
@@ -59,12 +56,6 @@ class HentKandidatnavnTest {
 
     @Test
     fun `Skal få 400 Bad Request gitt feil request body`() {
-        fun sendRequest(body: String): Triple<Request, Response, Result<String, FuelError>> =
-            Fuel.post("http://localhost:8080/api/hent-kandidatnavn")
-                .jsonBody(body)
-                .header("Authorization", "Bearer ${token().serialize()}")
-                .responseString()
-
         val ikkeJson = ""
         val (_, responseIkkeJson, _) = sendRequest(ikkeJson)
         assertThat(responseIkkeJson.statusCode).isEqualTo(400)
@@ -108,4 +99,10 @@ class HentKandidatnavnTest {
         audience = aud,
         claims = claims
     )
+
+    private fun sendRequest(body: String): Triple<Request, Response, Result<String, FuelError>> =
+        Fuel.post("http://localhost:8080/api/hent-kandidatnavn")
+            .jsonBody(body)
+            .header("Authorization", "Bearer ${token().serialize()}")
+            .responseString()
 }
