@@ -1,7 +1,11 @@
 package no.nav
 
 import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.extensions.jsonBody
+import com.github.kittinunf.result.Result
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import com.nimbusds.jwt.SignedJWT
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -55,13 +59,27 @@ class HentKandidatnavnTest {
 
     @Test
     fun `Skal få 400 Bad Request gitt feil request body`() {
-        val requestBodyMedFeil = """{"fnr": false}"""
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/hent-kandidatnavn")
-            .jsonBody(requestBodyMedFeil)
-            .header("Authorization", "Bearer ${token().serialize()}")
-            .responseString()
+        fun sendRequest(body: String): Triple<Request, Response, Result<String, FuelError>> =
+            Fuel.post("http://localhost:8080/api/hent-kandidatnavn")
+                .jsonBody(body)
+                .header("Authorization", "Bearer ${token().serialize()}")
+                .responseString()
 
-        assertThat(response.statusCode).isEqualTo(400)
+        val ikkeJson = ""
+        val (_, responseIkkeJson, _) = sendRequest(ikkeJson)
+        assertThat(responseIkkeJson.statusCode).isEqualTo(400)
+
+        val tomJson = "{}"
+        val (_, responseTomJson, _) = sendRequest(tomJson)
+        assertThat(responseTomJson.statusCode).isEqualTo(400)
+
+        val feilKey = """{"fnrrrrrrrrrr": "55555555555"}"""
+        val (_, responseFeilKey, _) = sendRequest(feilKey)
+        assertThat(responseFeilKey.statusCode).isEqualTo(400)
+
+        val feilValue = """{"fnr": false}"""
+        val (_, responseFeilValue, _) = sendRequest(feilValue)
+        assertThat(responseFeilValue.statusCode).isEqualTo(400)
     }
 
 
