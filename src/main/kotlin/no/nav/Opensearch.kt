@@ -12,6 +12,8 @@ import org.opensearch.client.opensearch._types.query_dsl.Query
 import org.opensearch.client.opensearch._types.query_dsl.TermQuery
 import org.opensearch.client.opensearch.core.SearchRequest
 import org.opensearch.client.opensearch.core.SearchResponse
+import org.opensearch.client.opensearch.core.search.SourceConfig
+import org.opensearch.client.opensearch.core.search.SourceFilter
 import org.opensearch.client.transport.rest_client.RestClientTransport
 import org.opensearch.client.util.ObjectBuilder
 import java.net.URI
@@ -55,6 +57,18 @@ fun Query.Builder.term_(
     body: TermQuery.Builder.() -> ObjectBuilder<TermQuery>
 ): ObjectBuilder<Query> =
     term { it.body() }
+
+fun SearchRequest.Builder.source_(
+    body: SourceConfig.Builder.() -> ObjectBuilder<SourceConfig>
+): SearchRequest.Builder =
+    source { it.body() }
+
+fun SourceConfig.Builder.includes(vararg includes: String) =
+    filter(
+        SourceFilter.of { filterBuilder ->
+            filterBuilder.includes(includes.toList())
+        }
+    )
 
 
 data class OpensearchResponse(
