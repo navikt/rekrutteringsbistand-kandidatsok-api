@@ -7,7 +7,6 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.App
 import no.nav.RolleUuidSpesifikasjon
-import no.nav.Routehandler
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
@@ -18,7 +17,7 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WireMockTest(httpPort = 10000)
-class KandidatsammendragLookupTest {
+class KandidatStillingssokLookupTest {
     private val authPort = 18306
 
     private val app: App = lagLokalApp()
@@ -37,7 +36,7 @@ class KandidatsammendragLookupTest {
     }
 
     @Test
-    fun `Kan hente kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Kan hente kandidatStillingssøk`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
@@ -45,24 +44,11 @@ class KandidatsammendragLookupTest {
                     {
                       "_source": {
                         "includes": [
-                          "fornavn",
-                          "etternavn",
                           "arenaKandidatnr",
-                          "fodselsdato",
-                          "fodselsnummer",
-                          "adresselinje1",
-                          "postnummer",
-                          "poststed",
-                          "epostadresse",
-                          "telefon",
-                          "veileder",
                           "geografiJobbonsker",
                           "yrkeJobbonskerObj",
                           "kommunenummerstring",
-                          "kommuneNavn",
-                          "veilederIdent",
-                          "veilederVisningsnavn",
-                          "veilederEpost"
+                          "kommuneNavn"
                         ]
                       },
                       "query": {
@@ -76,22 +62,22 @@ class KandidatsammendragLookupTest {
                     }
                 """.trimIndent()))
                 .willReturn(
-                    ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceKandidatsammendragLookup))
+                    ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceKandidatStillingssøkLookup))
                 )
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsammendrag")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
                 .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseKandidatsammendragLookup))
+        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseKandidatStillingssøkLookup))
     }
 
     @Test
-    fun `Finner ikke kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Finner ikke kandidatStillingssøk`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
@@ -99,25 +85,12 @@ class KandidatsammendragLookupTest {
                     {
                       "_source": {
                         "includes": [
-                          "fornavn",
-                          "etternavn",
                           "arenaKandidatnr",
-                          "fodselsdato",
-                          "fodselsnummer",
-                          "adresselinje1",
-                          "postnummer",
-                          "poststed",
-                          "epostadresse",
-                          "telefon",
-                          "veileder",
                           "geografiJobbonsker",
                           "yrkeJobbonskerObj",
                           "kommunenummerstring",
-                          "kommuneNavn",
-                          "veilederIdent",
-                          "veilederVisningsnavn",
-                          "veilederEpost"
-                        ]
+                          "kommuneNavn"
+                          ]
                       },
                       "query": {
                         "term": {
@@ -135,7 +108,7 @@ class KandidatsammendragLookupTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsammendrag")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
             .body("""{"kandidatnr": "PAM000000001"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -145,7 +118,7 @@ class KandidatsammendragLookupTest {
     }
 
     @Test
-    fun `Om kall feiler under henting av kandidatsammendrag fra elasticsearch, får vi HTTP 500`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Om kall feiler under henting av kandidatStillingssøk fra elasticsearch, får vi HTTP 500`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
@@ -156,7 +129,7 @@ class KandidatsammendragLookupTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsammendrag")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
             .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()

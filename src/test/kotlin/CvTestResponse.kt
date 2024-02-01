@@ -584,12 +584,56 @@ object CvTestRespons {
                 }
         """.trimIndent()
 
+    val sourceKandidatStillingssøkLookup =
+        """
+            {
+                    "yrkeJobbonskerObj": [
+                        {
+                            "styrkBeskrivelse": "Avisbud",
+                            "sokeTitler": [
+                                "Avisbud",
+                                "Avisbud",
+                                "Bilagskontrollør (avisbud)",
+                                "Avis- og reklamebrosjyrebud",
+                                "Altmuligmann",
+                                "Avis- og reklamedistributør",
+                                "Utdeler (gratisavis)",
+                                "Reklamebud",
+                                "Reklame- og avisdistributør",
+                                "Bud, utlevering"
+                            ],
+                            "primaertJobbonske": false,
+                            "styrkKode": null
+                        }
+                    ],
+                    "arenaKandidatnr": "PAM0152hb0wr4",
+                    "geografiJobbonsker": [
+                        {
+                            "geografiKodeTekst": "Norge",
+                            "geografiKode": "NO"
+                        }
+                    ]
+                }
+        """.trimIndent()
+
     val responseKandidatsammendragLookup: String = """
         {
           "hits": {
             "hits": [
               {
                 "_source": $sourceKandidatsammendragLookup
+              }
+            ]
+          }
+        }
+    """.trimIndent()
+
+    val responseKandidatStillingssøkLookup: String = """
+        {
+          "hits": {
+            "hits": [
+              {
+                "_source": $sourceKandidatStillingssøkLookup
               }
             ]
           }

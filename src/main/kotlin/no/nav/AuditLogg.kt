@@ -18,17 +18,22 @@ object AuditLogg {
         secureLog.info("auditlogger: {}", cefMessage)
     }
 
-    fun loggOppslagCv(aktørId: String, navIdent: String) {
-        lagCefMessage(navIdent = navIdent, aktørId = aktørId, msg = "NAV-ansatt har åpnet CV'en til bruker")
+    fun loggOppslagCv(userid: String, navIdent: String) {
+        lagCefMessage(navIdent = navIdent, userid = userid, msg = "NAV-ansatt har åpnet CV'en til bruker")
             .apply(::log)
     }
 
-    fun loggOppslagKandidatsammendrag(aktørId: String, navIdent: String) {
-        lagCefMessage(navIdent = navIdent, aktørId = aktørId, msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidatsammendragsinformasjon")
+    fun loggOppslagKandidatsammendrag(userid: String, navIdent: String) {
+        lagCefMessage(navIdent = navIdent, userid = userid, msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidat sammendragsinformasjon")
             .apply(::log)
     }
 
-    private fun lagCefMessage(navIdent: String, aktørId: String, msg: String): CefMessage =
+    fun loggOppslagKandidatStillingssøk(userid: String, navIdent: String) {
+        lagCefMessage(navIdent = navIdent, userid = userid, msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidat stillingssøksinformasjon")
+            .apply(::log)
+    }
+
+    private fun lagCefMessage(navIdent: String, userid: String, msg: String): CefMessage =
         CefMessage.builder()
             .applicationName("Rekrutteringsbistand")
             .loggerName("rekrutteringsbistand-kandidatsok-api")
@@ -36,7 +41,7 @@ object AuditLogg {
             .name("Sporingslogg")
             .authorizationDecision(AuthorizationDecision.PERMIT)
             .sourceUserId(navIdent)
-            .destinationUserId(aktørId)
+            .destinationUserId(userid)
             .timeEnded(System.currentTimeMillis())
             .extension("msg", msg)
             .build()

@@ -14,6 +14,7 @@ class Routehandler(
         private const val endepunktMe = "/api/me"
         private const val endepunktLookupCv = "/api/lookup-cv"
         private const val endepunktKandidatsammendrag = "/api/kandidatsammendrag"
+        private const val endepunktKandidatStillingssøk = "/api/kandidat-stillingssok"
     }
 
 
@@ -23,6 +24,8 @@ class Routehandler(
         javalin.get(endepunktMe, ::meHandler)
         javalin.post(endepunktLookupCv, ::lookupCvHandler)
         javalin.post(endepunktKandidatsammendrag, ::lookupKandidatsammendragHandler)
+        javalin.post(endepunktKandidatStillingssøk, ::lookupKandidatStillingssøkHandler)
+
     }
 
     @OpenApi(
@@ -105,6 +108,25 @@ class Routehandler(
         val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
         if (fodselsnummer != null) {
             AuditLogg.loggOppslagKandidatsammendrag(fodselsnummer, ctx.authenticatedUser().navIdent)
+        }
+        ctx.json(result.toResponseJson())
+    }
+
+    @OpenApi(
+        summary = "Oppslag av kandidat stillingssøk data for en enkelt person basert på kandidatnummer",
+        operationId = endepunktKandidatStillingssøk,
+        tags = [],
+        requestBody = OpenApiRequestBody([OpenApiContent(LookupCvParameters::class)]),
+        responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+        path = endepunktKandidatStillingssøk,
+        methods = [HttpMethod.POST]
+    )
+    fun lookupKandidatStillingssøkHandler(ctx: io.javalin.http.Context) {
+        val lookupKandidatStillingssøkParameters = ctx.bodyAsClass<LookupCvParameters>()
+        val result = openSearchClient.lookupKandidatStillingssøk(lookupKandidatStillingssøkParameters)
+        val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
+        if (fodselsnummer != null) {
+            AuditLogg.loggOppslagKandidatStillingssøk(fodselsnummer, ctx.authenticatedUser().navIdent)
         }
         ctx.json(result.toResponseJson())
     }
