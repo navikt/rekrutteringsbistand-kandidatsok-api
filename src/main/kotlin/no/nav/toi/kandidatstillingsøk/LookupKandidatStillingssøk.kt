@@ -11,7 +11,7 @@ import org.opensearch.client.opensearch.core.SearchResponse
 
 private const val endepunkt = "/api/kandidat-stillingssok"
 
-private data class RequestDTO(
+private data class RequestDto(
     val kandidatnr: String,
 )
 
@@ -19,14 +19,14 @@ private data class RequestDTO(
     summary = "Oppslag av kandidat stillingssøk data for en enkelt person basert på kandidatnummer",
     operationId = endepunkt,
     tags = [],
-    requestBody = OpenApiRequestBody([OpenApiContent(RequestDTO::class)]),
+    requestBody = OpenApiRequestBody([OpenApiContent(RequestDto::class)]),
     responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.lookupKandidatStillingssøkHandler(openSearchClient: OpenSearchClient) {
+fun Javalin.handleLookupKandidatStillingssøk(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
-        val request = ctx.bodyAsClass<RequestDTO>()
+        val request = ctx.bodyAsClass<RequestDto>()
         val result = openSearchClient.lookupKandidatStillingssøk(request)
         val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
         if (fodselsnummer != null) {
@@ -36,7 +36,7 @@ fun Javalin.lookupKandidatStillingssøkHandler(openSearchClient: OpenSearchClien
     }
 }
 
-private fun OpenSearchClient.lookupKandidatStillingssøk(params: RequestDTO): SearchResponse<JsonNode> {
+private fun OpenSearchClient.lookupKandidatStillingssøk(params: RequestDto): SearchResponse<JsonNode> {
     return search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {

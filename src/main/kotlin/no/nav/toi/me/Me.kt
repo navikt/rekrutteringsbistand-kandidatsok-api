@@ -21,7 +21,7 @@ private const val endepunktMe = "/api/me"
     path = endepunktMe,
     methods = [HttpMethod.GET]
 )
-fun Javalin.meHandler() {
+fun Javalin.handleMe() {
     get(endepunktMe) { ctx ->
         ctx.json(mapOf<String, Any?>(
             "navIdent" to ctx.authenticatedUser().navIdent,

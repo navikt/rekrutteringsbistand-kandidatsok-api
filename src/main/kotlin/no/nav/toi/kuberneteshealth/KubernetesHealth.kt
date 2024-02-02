@@ -5,7 +5,7 @@ import io.javalin.Javalin
 private const val endepunktReady = "/internal/ready"
 private const val endepunktAlive = "/internal/alive"
 
-fun Javalin.healthHandlers() {
+fun Javalin.handleHealth() {
     get(endepunktReady) { ctx->
         ctx.result("isReady")
     }

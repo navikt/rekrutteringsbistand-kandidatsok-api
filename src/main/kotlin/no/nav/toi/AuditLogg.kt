@@ -9,32 +9,31 @@ import org.slf4j.LoggerFactory
 
 
 object AuditLogg {
-
     private val secureLog = LoggerFactory.getLogger("secureLog")!!
     private val auditLogger: AuditLogger = AuditLoggerImpl()
 
-    private fun log(cefMessage: CefMessage) {
-        auditLogger.log(cefMessage)
-        secureLog.info("auditlogger: {}", cefMessage)
-    }
-
     fun loggOppslagCv(userid: String, navIdent: String) {
-        lagCefMessage(navIdent = navIdent, userid = userid, msg = "NAV-ansatt har åpnet CV'en til bruker")
-            .apply(AuditLogg::log)
+        logCefMessage(navIdent = navIdent, userid = userid, msg = "NAV-ansatt har åpnet CV'en til bruker")
     }
 
     fun loggOppslagKandidatsammendrag(userid: String, navIdent: String) {
-        lagCefMessage(navIdent = navIdent, userid = userid, msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidat sammendragsinformasjon")
-            .apply(AuditLogg::log)
+        logCefMessage(
+            navIdent = navIdent,
+            userid = userid,
+            msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidat sammendragsinformasjon"
+        )
     }
 
     fun loggOppslagKandidatStillingssøk(userid: String, navIdent: String) {
-        lagCefMessage(navIdent = navIdent, userid = userid, msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidat stillingssøksinformasjon")
-            .apply(AuditLogg::log)
+        logCefMessage(
+            navIdent = navIdent,
+            userid = userid,
+            msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidat stillingssøksinformasjon"
+        )
     }
 
-    private fun lagCefMessage(navIdent: String, userid: String, msg: String): CefMessage =
-        CefMessage.builder()
+    private fun logCefMessage(navIdent: String, userid: String, msg: String) {
+        val message = CefMessage.builder()
             .applicationName("Rekrutteringsbistand")
             .loggerName("rekrutteringsbistand-kandidatsok-api")
             .event(CefMessageEvent.ACCESS)
@@ -45,4 +44,7 @@ object AuditLogg {
             .timeEnded(System.currentTimeMillis())
             .extension("msg", msg)
             .build()
+        auditLogger.log(message)
+        secureLog.info("auditlogger: {}", message)
+    }
 }
