@@ -11,8 +11,6 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import com.nimbusds.jwt.SignedJWT
-//import no.nav.App
-//import no.nav.RolleUuidSpesifikasjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.toi.App
 import no.nav.toi.RolleUuidSpesifikasjon
