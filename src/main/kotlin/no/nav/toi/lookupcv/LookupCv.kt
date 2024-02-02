@@ -9,25 +9,25 @@ import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch.core.SearchResponse
 
-private const val endepunktLookupCv = "/api/lookup-cv"
+private const val endepunkt = "/api/lookup-cv"
 
-private data class LookupCvParameters(
+private data class RequestDTO(
     val kandidatnr: String,
 )
 
 @OpenApi(
     summary = "Oppslag av hele CVen til en enkelt person basert på kandidatnummer",
-    operationId = endepunktLookupCv,
+    operationId = endepunkt,
     tags = [],
-    requestBody = OpenApiRequestBody([OpenApiContent(LookupCvParameters::class)]),
+    requestBody = OpenApiRequestBody([OpenApiContent(RequestDTO::class)]),
     responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
-    path = endepunktLookupCv,
+    path = endepunkt,
     methods = [HttpMethod.POST]
 )
 fun Javalin.lookupCvHandler(openSearchClient: OpenSearchClient) {
-    post(endepunktLookupCv) { ctx ->
-        val lookupCvParameters = ctx.bodyAsClass<LookupCvParameters>()
-        val result = openSearchClient.lookupCv(lookupCvParameters)
+    post(endepunkt) { ctx ->
+        val request = ctx.bodyAsClass<RequestDTO>()
+        val result = openSearchClient.lookupCv(request)
         val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
         if (fodselsnummer != null) {
             AuditLogg.loggOppslagCv(fodselsnummer, ctx.authenticatedUser().navIdent)
@@ -36,7 +36,7 @@ fun Javalin.lookupCvHandler(openSearchClient: OpenSearchClient) {
     }
 }
 
-private fun OpenSearchClient.lookupCv(params: LookupCvParameters): SearchResponse<JsonNode> =
+private fun OpenSearchClient.lookupCv(params: RequestDTO): SearchResponse<JsonNode> =
     search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {
