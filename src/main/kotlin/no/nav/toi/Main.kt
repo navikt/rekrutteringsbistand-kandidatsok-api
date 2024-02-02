@@ -7,6 +7,11 @@ import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
+import no.nav.toi.kandidatsammendrag.kandidatSammendragHandler
+import no.nav.toi.kandidatstillingsøk.lookupKandidatStillingssøkHandler
+import no.nav.toi.kuberneteshealth.healthHandlers
+import no.nav.toi.lookupcv.lookupCvHandler
+import no.nav.toi.me.meHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.Closeable
@@ -58,7 +63,12 @@ class App(
             configureOpenApi(config)
         }
 
-        Routes(openSearchClient).defineRoutes(javalin)
+        javalin.healthHandlers()
+        javalin.meHandler()
+        javalin.lookupCvHandler(openSearchClient)
+        javalin.kandidatSammendragHandler(openSearchClient)
+        javalin.lookupKandidatStillingssøkHandler(openSearchClient)
+
         javalin.azureAdAuthentication(
             path = "/api/*",
             azureAppClientId = azureAppClientId,
