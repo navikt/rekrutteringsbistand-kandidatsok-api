@@ -2,6 +2,8 @@ package no.nav.toi
 
 import io.javalin.Javalin
 import io.javalin.config.JavalinConfig
+import io.javalin.http.HttpStatus.BAD_REQUEST
+import io.javalin.http.HttpStatus.INTERNAL_SERVER_ERROR
 import io.javalin.openapi.plugin.OpenApiPlugin
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
@@ -83,7 +85,11 @@ class App(
         val app = javalin.start(port)
         app.exception(ValidationException::class.java) { e, ctx ->
             log.info("Returnerer 400 Bad Request på grunn av: ${e.errors}", e)
-            ctx.json(e.errors).status(400)
+            ctx.json(e.errors).status(BAD_REQUEST)
+        }
+        app.exception(Exception::class.java) { e, ctx ->
+            log.error(e.message, e)
+            ctx.status(INTERNAL_SERVER_ERROR)
         }
     }
 

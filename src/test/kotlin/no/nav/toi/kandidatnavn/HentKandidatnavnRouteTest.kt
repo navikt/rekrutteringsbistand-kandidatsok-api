@@ -43,15 +43,26 @@ class HentKandidatnavnRouteTest {
     }
 
     @Test
-    fun `Kan hente kandidatnavn`() {
-        val etFnr = "55555555555"
-        val requestBody = """{"fnr": "$etFnr"}"""
+    fun `Kan hente kandidatnavn`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val expectedToOpensearch =
+            """{"_source":{"includes": ["fornavn","etternavn","kandidatnr"]},"query":{"term":{"fodselsnummer":{"value":"55555555555"}}}}"""
+        val resultFromOpensearch = opensearchResult(_source)
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(WireMock.equalToJson(expectedToOpensearch))
+                .willReturn(
+                    WireMock.ok(resultFromOpensearch)
+                )
+        )
+
+        val requestBody = """{"fnr": "55555555555"}"""
         val (_, response, result) = sendRequest(requestBody)
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
         Assertions.assertThat(result.get()).isEqualTo(
             """
-            {"fornavn":"anyFornavn","mellomnavn":"anyMellomnavn","etternavn":"anyEtternavn","synligIRekbis":true,"kandidatnr":"anyKandidatnr-$etFnr"}
+            {"fornavn":"Oppfyllende Korrekt Boble","etternavn":"Grense","synligIRekbis":true,"kandidatnr":"PAM0104tl64rq"}
             """.trimIndent()
         )
     }
@@ -147,4 +158,43 @@ class HentKandidatnavnRouteTest {
             .jsonBody(body)
             .header("Authorization", "Bearer ${token().serialize()}")
             .responseString()
+
+
+    private val _source: String = """
+        {
+          "kandidatnr": "PAM0104tl64rq",
+          "etternavn": "Grense",
+          "fornavn": "Oppfyllende Korrekt Boble"
+        }
+    """.trimIndent()
+
+    private fun opensearchResult(_source: String): String =
+        """
+            {
+              "took": 2,
+              "timed_out": false,
+              "_shards": {
+                "total": 3,
+                "successful": 3,
+                "skipped": 0,
+                "failed": 0
+              },
+              "hits": {
+                "total": {
+                  "value": 1,
+                  "relation": "eq"
+                },
+                "max_score": 3.4231763,
+                "hits": [
+                  {
+                    "_index": "veilederkandidat_os4",
+                    "_type": "_doc",
+                    "_id": "PAM0104tl64rq",
+                    "_score": 3.4231763,
+                    "_source": $_source
+                  }
+                ]
+              }
+            }
+        """.trimIndent()
 }
