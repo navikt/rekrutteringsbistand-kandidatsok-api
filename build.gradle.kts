@@ -12,7 +12,7 @@ val fuelVersion = "2.3.1"
 val javalinVersion = "5.6.3"
 
 application {
-    mainClass.set("no.nav.MainKt")
+    mainClass.set("no.nav.toi.MainKt")
 }
 
 repositories {
