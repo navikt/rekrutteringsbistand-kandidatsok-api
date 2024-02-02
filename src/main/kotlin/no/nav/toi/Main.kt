@@ -79,6 +79,7 @@ class App(
 
         val app = javalin.start(port)
         app.exception(ValidationException::class.java) { e, ctx ->
+            log.info("Returnerer 400 Bad Request på grunn av: ${e.errors}", e)
             ctx.json(e.errors).status(400)
         }
     }
