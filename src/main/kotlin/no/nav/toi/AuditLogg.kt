@@ -1,4 +1,4 @@
-package no.nav
+package no.nav.toi
 
 import no.nav.common.audit_log.cef.AuthorizationDecision
 import no.nav.common.audit_log.cef.CefMessage
@@ -20,17 +20,17 @@ object AuditLogg {
 
     fun loggOppslagCv(userid: String, navIdent: String) {
         lagCefMessage(navIdent = navIdent, userid = userid, msg = "NAV-ansatt har åpnet CV'en til bruker")
-            .apply(::log)
+            .apply(AuditLogg::log)
     }
 
     fun loggOppslagKandidatsammendrag(userid: String, navIdent: String) {
         lagCefMessage(navIdent = navIdent, userid = userid, msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidat sammendragsinformasjon")
-            .apply(::log)
+            .apply(AuditLogg::log)
     }
 
     fun loggOppslagKandidatStillingssøk(userid: String, navIdent: String) {
         lagCefMessage(navIdent = navIdent, userid = userid, msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidat stillingssøksinformasjon")
-            .apply(::log)
+            .apply(AuditLogg::log)
     }
 
     private fun lagCefMessage(navIdent: String, userid: String, msg: String): CefMessage =

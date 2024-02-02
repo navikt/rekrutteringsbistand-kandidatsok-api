@@ -1,4 +1,4 @@
-package no.nav
+package no.nav.toi
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.auth0.jwk.SigningKeyNotFoundException

@@ -1,18 +1,18 @@
-package no.nav
+package no.nav.toi
 
 import io.javalin.Javalin
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
+import no.nav.toi.lookupcv.lookupCvHandler
 import org.opensearch.client.opensearch.OpenSearchClient
 
-class Routehandler(
+class Routes(
     private val openSearchClient: OpenSearchClient,
 ) {
     companion object {
         private const val endepunktReady = "/internal/ready"
         private const val endepunktAlive = "/internal/alive"
         private const val endepunktMe = "/api/me"
-        private const val endepunktLookupCv = "/api/lookup-cv"
         private const val endepunktKandidatsammendrag = "/api/kandidatsammendrag"
         private const val endepunktKandidatStillingssøk = "/api/kandidat-stillingssok"
     }
@@ -22,7 +22,7 @@ class Routehandler(
         javalin.get(endepunktAlive, ::isAliveHandler)
         javalin.get(endepunktReady, ::isReadyHandler)
         javalin.get(endepunktMe, ::meHandler)
-        javalin.post(endepunktLookupCv, ::lookupCvHandler)
+        javalin.lookupCvHandler(openSearchClient)
         javalin.post(endepunktKandidatsammendrag, ::lookupKandidatsammendragHandler)
         javalin.post(endepunktKandidatStillingssøk, ::lookupKandidatStillingssøkHandler)
 
@@ -74,24 +74,6 @@ class Routehandler(
         ))
     }
 
-    @OpenApi(
-        summary = "Oppslag av hele CVen til en enkelt person basert på kandidatnummer",
-        operationId = endepunktLookupCv,
-        tags = [],
-        requestBody = OpenApiRequestBody([OpenApiContent(LookupCvParameters::class)]),
-        responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
-        path = endepunktLookupCv,
-        methods = [HttpMethod.POST]
-    )
-    fun lookupCvHandler(ctx: io.javalin.http.Context) {
-        val lookupCvParameters = ctx.bodyAsClass<LookupCvParameters>()
-        val result = openSearchClient.lookupCv(lookupCvParameters)
-        val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
-        if (fodselsnummer != null) {
-            AuditLogg.loggOppslagCv(fodselsnummer, ctx.authenticatedUser().navIdent)
-        }
-        ctx.json(result.toResponseJson())
-    }
 
     @OpenApi(
         summary = "Oppslag av kandidatsammendrag for en enkelt person basert på kandidatnummer",

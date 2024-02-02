@@ -1,4 +1,4 @@
-package no.nav
+package no.nav.toi
 
 import java.util.*
 

@@ -5,9 +5,8 @@ import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
-import no.nav.App
-import no.nav.RolleUuidSpesifikasjon
-import no.nav.Routehandler
+import no.nav.toi.App
+import no.nav.toi.RolleUuidSpesifikasjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll

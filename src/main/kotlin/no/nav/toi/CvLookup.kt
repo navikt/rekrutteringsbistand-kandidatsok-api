@@ -1,31 +1,15 @@
-package no.nav
+package no.nav.toi
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.toi.lookupcv.lookupCv
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch.core.SearchResponse
-import org.opensearch.client.opensearch.core.search.SourceConfig
-import org.opensearch.client.opensearch.core.search.SourceFilter
 
-data class LookupCvParameters(
-    val kandidatnr: String,
-)
-
-fun OpenSearchClient.lookupCv(params: LookupCvParameters): SearchResponse<JsonNode> =
-    search<JsonNode> {
-        index(DEFAULT_INDEX)
-        query_ {
-            term_ {
-                field("kandidatnr").value(FieldValue.of(params.kandidatnr))
-            }
-        }
-        size(1)
-    }
 
 
 fun OpenSearchClient.lookupKandidatsammendrag(params: LookupCvParameters): SearchResponse<JsonNode> {
-
     return search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {

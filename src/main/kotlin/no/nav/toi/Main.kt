@@ -1,4 +1,4 @@
-package no.nav
+package no.nav.toi
 
 import io.javalin.Javalin
 import io.javalin.config.JavalinConfig
@@ -58,7 +58,7 @@ class App(
             configureOpenApi(config)
         }
 
-        Routehandler(openSearchClient).defineRoutes(javalin)
+        Routes(openSearchClient).defineRoutes(javalin)
         javalin.azureAdAuthentication(
             path = "/api/*",
             azureAppClientId = azureAppClientId,

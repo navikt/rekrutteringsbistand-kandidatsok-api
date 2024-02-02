@@ -1,4 +1,4 @@
-package no.nav
+package no.nav.toi
 
 import com.fasterxml.jackson.databind.JsonNode
 import org.apache.http.HttpHost
