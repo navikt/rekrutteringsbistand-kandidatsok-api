@@ -1,4 +1,4 @@
-package no.nav.toi.kandidatsammendrag
+package no.nav.toi.kandidatstillingsøk
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
@@ -9,14 +9,14 @@ import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch.core.SearchResponse
 
-private const val endepunkt = "/api/kandidatsammendrag"
+private const val endepunkt = "/api/kandidat-stillingssok"
 
 private data class RequestDTO(
     val kandidatnr: String,
 )
 
 @OpenApi(
-    summary = "Oppslag av kandidatsammendrag for en enkelt person basert på kandidatnummer",
+    summary = "Oppslag av kandidat stillingssøk data for en enkelt person basert på kandidatnummer",
     operationId = endepunkt,
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(RequestDTO::class)]),
@@ -24,19 +24,19 @@ private data class RequestDTO(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.kandidatSammendragHandler(openSearchClient: OpenSearchClient) {
+fun Javalin.lookupKandidatStillingssøkHandler(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
         val request = ctx.bodyAsClass<RequestDTO>()
-        val result = openSearchClient.lookupKandidatsammendrag(request)
+        val result = openSearchClient.lookupKandidatStillingssøk(request)
         val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
         if (fodselsnummer != null) {
-            AuditLogg.loggOppslagKandidatsammendrag(fodselsnummer, ctx.authenticatedUser().navIdent)
+            AuditLogg.loggOppslagKandidatStillingssøk(fodselsnummer, ctx.authenticatedUser().navIdent)
         }
         ctx.json(result.toResponseJson())
     }
 }
 
-private fun OpenSearchClient.lookupKandidatsammendrag(params: RequestDTO): SearchResponse<JsonNode> {
+private fun OpenSearchClient.lookupKandidatStillingssøk(params: RequestDTO): SearchResponse<JsonNode> {
     return search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {
@@ -44,11 +44,8 @@ private fun OpenSearchClient.lookupKandidatsammendrag(params: RequestDTO): Searc
         }
         source_ {
             includes(
-                "fornavn", "etternavn", "arenaKandidatnr", "fodselsdato",
-                "fodselsnummer", "adresselinje1", "postnummer", "poststed",
-                "epostadresse", "telefon", "veileder", "geografiJobbonsker",
-                "yrkeJobbonskerObj", "kommunenummerstring", "kommuneNavn",
-                "veilederIdent", "veilederVisningsnavn", "veilederEpost"
+                "arenaKandidatnr", "geografiJobbonsker",
+                "yrkeJobbonskerObj", "kommunenummerstring", "kommuneNavn"
             )
         }
         size(1)
