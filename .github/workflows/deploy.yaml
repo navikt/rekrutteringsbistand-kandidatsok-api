@@ -30,7 +30,7 @@ jobs:
 
   deploy-to-dev:
     name: Deploy to dev
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/spørring-for-kandidatheader'
     needs: build-test-deploy
     runs-on: ubuntu-latest
     steps:

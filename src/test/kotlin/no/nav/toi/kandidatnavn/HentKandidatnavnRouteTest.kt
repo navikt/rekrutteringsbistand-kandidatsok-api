@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.hentkandidatnavn
+package no.nav.toi.kandidatnavn
 
 import CvTestRespons
 import com.github.kittinunf.fuel.Fuel
@@ -11,9 +11,11 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import com.nimbusds.jwt.SignedJWT
-import no.nav.App
-import no.nav.RolleUuidSpesifikasjon
+//import no.nav.App
+//import no.nav.RolleUuidSpesifikasjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.toi.App
+import no.nav.toi.RolleUuidSpesifikasjon
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -68,7 +70,7 @@ class HentKandidatnavnRouteTest {
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
                 .willReturn(
-                    WireMock.ok(CvTestRespons.responseOpenSearch)
+                    WireMock.ok(CvTestRespons.responseOpenSearch("{}")) // TODO
                 )
         )
 

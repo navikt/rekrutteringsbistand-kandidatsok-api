@@ -17,7 +17,7 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WireMockTest(httpPort = 10000)
-class CvLookupTest {
+class KandidatStillingssokLookupTest {
     private val authPort = 18306
 
     private val app: App = lagLokalApp()
@@ -36,40 +36,80 @@ class CvLookupTest {
     }
 
     @Test
-    fun `Kan hente cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Kan hente kandidatStillingssøk`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""
+                    {
+                      "_source": {
+                        "includes": [
+                          "arenaKandidatnr",
+                          "geografiJobbonsker",
+                          "yrkeJobbonskerObj",
+                          "kommunenummerstring",
+                          "kommuneNavn"
+                        ]
+                      },
+                      "query": {
+                        "term": {
+                          "kandidatnr": {
+                            "value": "PAM0xtfrwli5"
+                          }
+                        }
+                      },
+                      "size": 1
+                    }
+                """.trimIndent()))
                 .willReturn(
-                    ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
+                    ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceKandidatStillingssøkLookup))
                 )
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/lookup-cv")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
                 .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseCvLookup))
+        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseKandidatStillingssøkLookup))
     }
 
     @Test
-    fun `Finner ikke cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Finner ikke kandidatStillingssøk`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM000000000" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""
+                    {
+                      "_source": {
+                        "includes": [
+                          "arenaKandidatnr",
+                          "geografiJobbonsker",
+                          "yrkeJobbonskerObj",
+                          "kommunenummerstring",
+                          "kommuneNavn"
+                          ]
+                      },
+                      "query": {
+                        "term": {
+                          "kandidatnr": {
+                            "value": "PAM000000001"
+                          }
+                        }
+                      },
+                      "size": 1
+                    }
+                """.trimIndent()))
                 .willReturn(
                     ok(CvTestRespons.responseOpensearchIngenTreff)
                 )
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/lookup-cv")
-            .body("""{"kandidatnr": "PAM000000000"}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
+            .body("""{"kandidatnr": "PAM000000001"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -78,7 +118,7 @@ class CvLookupTest {
     }
 
     @Test
-    fun `Om kall feiler under henting av cv fra elasticsearch, får vi HTTP 500`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Om kall feiler under henting av kandidatStillingssøk fra elasticsearch, får vi HTTP 500`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
@@ -89,7 +129,7 @@ class CvLookupTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/lookup-cv")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
             .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
