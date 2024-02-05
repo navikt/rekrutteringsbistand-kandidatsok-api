@@ -8,8 +8,13 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.opensearch.client.RestClient
 import org.opensearch.client.json.jackson.JacksonJsonpMapper
 import org.opensearch.client.opensearch.OpenSearchClient
+import org.opensearch.client.opensearch._types.FieldValue
+import org.opensearch.client.opensearch._types.SortOptions
+import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
 import org.opensearch.client.opensearch._types.query_dsl.Query
+import org.opensearch.client.opensearch._types.query_dsl.QueryBuilders.bool
 import org.opensearch.client.opensearch._types.query_dsl.TermQuery
+import org.opensearch.client.opensearch._types.query_dsl.TermsQuery
 import org.opensearch.client.opensearch.core.SearchRequest
 import org.opensearch.client.opensearch.core.SearchResponse
 import org.opensearch.client.opensearch.core.search.SourceConfig
@@ -62,6 +67,25 @@ fun SearchRequest.Builder.source_(
     body: SourceConfig.Builder.() -> ObjectBuilder<SourceConfig>
 ): SearchRequest.Builder =
     source { it.body() }
+
+fun Query.Builder.bool_(
+    body: BoolQuery.Builder.() -> ObjectBuilder<BoolQuery>
+): ObjectBuilder<Query> =
+    bool { it.body() }
+
+fun BoolQuery.Builder.must_(
+    body: Query.Builder.() -> ObjectBuilder<Query>
+): ObjectBuilder<BoolQuery> =
+    must { it.body() }
+
+fun Query.Builder.terms(
+    fieldAndValue: Pair<String, List<String>>
+): ObjectBuilder<Query> = fieldAndValue.let { (field, value) ->
+    terms { termsQuery ->
+        termsQuery.field(field)
+        termsQuery.terms { it.value(value.map(FieldValue::of)) }
+    }
+}
 
 fun SourceConfig.Builder.includes(vararg includes: String) =
     filter(
