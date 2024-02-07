@@ -71,6 +71,7 @@ class App(
         javalin.handleKandidatSammendrag(openSearchClient)
         javalin.handleLookupKandidatStillingssøk(openSearchClient)
 
+
         javalin.azureAdAuthentication(
             path = "/api/*",
             azureAppClientId = azureAppClientId,

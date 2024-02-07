@@ -44,7 +44,6 @@ class KandidatStillingssokLookupTest {
                     {
                       "_source": {
                         "includes": [
-                          "arenaKandidatnr",
                           "geografiJobbonsker",
                           "yrkeJobbonskerObj",
                           "kommunenummerstring",
@@ -85,7 +84,6 @@ class KandidatStillingssokLookupTest {
                     {
                       "_source": {
                         "includes": [
-                          "arenaKandidatnr",
                           "geografiJobbonsker",
                           "yrkeJobbonskerObj",
                           "kommunenummerstring",
