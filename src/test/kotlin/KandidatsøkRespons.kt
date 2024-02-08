@@ -1,12 +1,10 @@
 object KandidatsøkRespons {
-    fun query(vararg extraTerms: String) = extraTerms
-        .let { listOf("""{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM","IKVAL","VARIG"]}}""") + extraTerms }
+    fun query(vararg extraTerms: String) = (extraTerms.toList() + """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM","IKVAL","VARIG"]}}""")
         .let { terms ->
-            """{"_source":{"includes":["fodselsnummer","fornavn","etternavn","arenaKandidatnr","kvalifiseringsgruppekode","yrkeJobbonskerObj","geografiJobbonsker","kommuneNavn","postnummer"]},"from":0,"query":{"bool":{"must":$terms}},"size":25}"""
-            // TODO: "track_total_hits":true,"sort":{"tidsstempel":{"order":"desc"}},
+            """{"_source":{"includes":["fodselsnummer","fornavn","etternavn","arenaKandidatnr","kvalifiseringsgruppekode","yrkeJobbonskerObj","geografiJobbonsker","kommuneNavn","postnummer"]},"from":0,"query":{"bool":{"must":$terms}},"size":25,"track_total_hits":true,"sort":[{"tidsstempel":{"order":"desc"}}]}"""
         }
 
-    val stedTerm = """{"bool":{"should":[{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":"NO18.1804|NO18|NO"}}]}}}}]}}"""
+    val stedTerm = """{"bool":{"should":[{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO18.1804|NO18|NO"}}}]}}}}]}}"""
     val kandidatsøkHits = """[
                     {
                         "_index": "veilederkandidat_os4",
@@ -1687,6 +1685,16 @@ object KandidatsøkRespons {
                     }
                 ]"""
     val kandidatsøkRespons = """
+        {
+            "hits": {
+                "total": {
+                    "value": 108
+                },
+                "hits": $kandidatsøkHits
+            }
+        }
+    """.trimIndent()
+    val esKandidatsøkRespons = """
         {
             "took": 10,
             "timed_out": false,

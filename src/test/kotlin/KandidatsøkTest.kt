@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.skyscreamer.jsonassert.JSONAssert
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -42,7 +43,7 @@ class KandidatsøkTest {
             post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(equalToJson(KandidatsøkRespons.query()))
                 .willReturn(
-                    ok(KandidatsøkRespons.kandidatsøkRespons)
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
                 )
         )
         val navIdent = "A123456"
@@ -52,7 +53,7 @@ class KandidatsøkTest {
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(KandidatsøkRespons.kandidatsøkHits))
+        JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
     }
 
     @Test
@@ -91,7 +92,7 @@ class KandidatsøkTest {
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(KandidatsøkRespons.kandidatsøkRespons))
+        JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
     }
 
     private fun lagLokalApp() = App(

@@ -9,16 +9,13 @@ import org.opensearch.client.RestClient
 import org.opensearch.client.json.jackson.JacksonJsonpMapper
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.FieldValue
-import org.opensearch.client.opensearch._types.SortOptions
-import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
-import org.opensearch.client.opensearch._types.query_dsl.Query
-import org.opensearch.client.opensearch._types.query_dsl.QueryBuilders.bool
-import org.opensearch.client.opensearch._types.query_dsl.TermQuery
-import org.opensearch.client.opensearch._types.query_dsl.TermsQuery
+import org.opensearch.client.opensearch._types.SortOrder
+import org.opensearch.client.opensearch._types.query_dsl.*
 import org.opensearch.client.opensearch.core.SearchRequest
 import org.opensearch.client.opensearch.core.SearchResponse
 import org.opensearch.client.opensearch.core.search.SourceConfig
 import org.opensearch.client.opensearch.core.search.SourceFilter
+import org.opensearch.client.opensearch.core.search.TrackHits
 import org.opensearch.client.transport.rest_client.RestClientTransport
 import org.opensearch.client.util.ObjectBuilder
 import java.net.URI
@@ -58,6 +55,11 @@ fun SearchRequest.Builder.query_(
 ): SearchRequest.Builder =
     query { it.body() }
 
+fun NestedQuery.Builder.query_(
+    body: Query.Builder.() -> ObjectBuilder<Query>
+): NestedQuery.Builder =
+    query { it.body() }
+
 fun Query.Builder.term_(
     body: TermQuery.Builder.() -> ObjectBuilder<TermQuery>
 ): ObjectBuilder<Query> =
@@ -78,12 +80,39 @@ fun BoolQuery.Builder.must_(
 ): ObjectBuilder<BoolQuery> =
     must { it.body() }
 
+fun BoolQuery.Builder.should_(
+    body: Query.Builder.() -> ObjectBuilder<Query>
+): ObjectBuilder<BoolQuery> =
+    should { it.body() }
+
+fun Query.Builder.nested_(
+    body: NestedQuery.Builder.() -> ObjectBuilder<NestedQuery>
+): ObjectBuilder<Query> =
+    nested { it.body() }
+
+fun Query.Builder.regexp(
+    field: String,
+    value: String
+): ObjectBuilder<Query> =
+    regexp {
+        it.field(field)
+        it.value(value)
+    }
+
 fun Query.Builder.terms(
     fieldAndValue: Pair<String, List<String>>
 ): ObjectBuilder<Query> = fieldAndValue.let { (field, value) ->
     terms { termsQuery ->
         termsQuery.field(field)
         termsQuery.terms { it.value(value.map(FieldValue::of)) }
+    }
+}
+fun SearchRequest.Builder.trackTotalHits(value: Boolean) = trackTotalHits(TrackHits.Builder().enabled(value).build())
+
+fun SearchRequest.Builder.sort(felt: String, sortOrder: SortOrder) = sort {
+    it.field { fieldSort ->
+        fieldSort.field(felt)
+        fieldSort.order(sortOrder)
     }
 }
 
