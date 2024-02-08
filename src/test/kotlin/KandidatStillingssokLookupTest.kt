@@ -47,7 +47,8 @@ class KandidatStillingssokLookupTest {
                           "geografiJobbonsker",
                           "yrkeJobbonskerObj",
                           "kommunenummerstring",
-                          "kommuneNavn"
+                          "kommuneNavn",
+                          "fodselsnummer"
                         ]
                       },
                       "query": {
@@ -87,7 +88,8 @@ class KandidatStillingssokLookupTest {
                           "geografiJobbonsker",
                           "yrkeJobbonskerObj",
                           "kommunenummerstring",
-                          "kommuneNavn"
+                          "kommuneNavn",
+                          "fodselsnummer"
                           ]
                       },
                       "query": {
