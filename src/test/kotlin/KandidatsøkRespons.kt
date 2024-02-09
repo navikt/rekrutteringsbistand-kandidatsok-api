@@ -5,6 +5,7 @@ object KandidatsøkRespons {
         }
 
     val stedTerm = """{"bool":{"should":[{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO18.1804|NO18|NO"}}}]}}}}]}}"""
+    val arbeidsønskeTerm = """{"bool":{"should":[{"match":{"yrkeJobbonskerObj.styrkBeskrivelse":{"fuzziness":"0","operator":"and","query":"Sauegjeter"}}},{"match":{"yrkeJobbonskerObj.sokeTitler":{"fuzziness":"0","operator":"and","query":"Sauegjeter"}}}]}}"""
     val kandidatsøkHits = """[
                     {
                         "_index": "veilederkandidat_os4",

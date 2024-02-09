@@ -4,14 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
 import io.javalin.openapi.*
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.filter.Arbeidsønskefilter
 import no.nav.toi.kandidatsøk.filter.Filter
 import no.nav.toi.kandidatsøk.filter.FilterFunksjon
 import no.nav.toi.kandidatsøk.filter.StedFilter
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.SortOrder
-import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
 import org.opensearch.client.opensearch.core.SearchResponse
-import org.opensearch.client.util.ObjectBuilder
 
 private const val endepunkt = "/api/kandidatsok"
 
@@ -25,7 +24,7 @@ private const val endepunkt = "/api/kandidatsok"
 )
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
-        val filter = listOf(StedFilter())
+        val filter = listOf(StedFilter(), Arbeidsønskefilter())
             .onEach { it.berikMedParameter(ctx::queryParam) }
             .filter(Filter::erAktiv)
             .map(Filter::lagESFilterFunksjon)

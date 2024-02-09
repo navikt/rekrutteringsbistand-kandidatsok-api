@@ -90,6 +90,18 @@ fun Query.Builder.nested_(
 ): ObjectBuilder<Query> =
     nested { it.body() }
 
+fun Query.Builder.match_(
+    body: MatchQuery.Builder.() -> ObjectBuilder<MatchQuery>
+): ObjectBuilder<Query> =
+    match { it.body() }
+
+fun MatchQuery.Builder.query(
+    field: String
+): ObjectBuilder<MatchQuery> =
+    query {
+        it.stringValue(field)
+    }
+
 fun Query.Builder.regexp(
     field: String,
     value: String
