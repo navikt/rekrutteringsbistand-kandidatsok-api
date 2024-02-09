@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
 import io.javalin.openapi.*
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.filter.Filter
+import no.nav.toi.kandidatsøk.filter.FilterFunksjon
+import no.nav.toi.kandidatsøk.filter.StedFilter
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.SortOrder
 import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
@@ -22,9 +25,10 @@ private const val endepunkt = "/api/kandidatsok"
 )
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
-        val filter = listOfNotNull(
-            ctx.queryParam("sted")?.let(::stedFilter)
-        )
+        val filter = listOf(StedFilter())
+            .onEach { it.berikMedParameter(ctx::queryParam) }
+            .filter(Filter::erAktiv)
+            .map(Filter::lagESFilterFunksjon)
         val result = openSearchClient.kandidatSøk(filter)
         val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
         if (fodselsnummer != null) {
@@ -34,26 +38,7 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
     }
 }
 
-private fun stedFilter(geografiKode: String): BoolQuery.Builder.() -> ObjectBuilder<BoolQuery> = {
-    must_ {
-        bool_ {
-            should_ {
-                nested_ {
-                    path("geografiJobbonsker")
-                    query_ {
-                        bool_ {
-                            should_ {
-                                regexp("geografiJobbonsker.geografiKode", "$geografiKode|${geografiKode.split(".")[0]}|${geografiKode.substring(0,2)}")
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun OpenSearchClient.kandidatSøk(filter: List<BoolQuery.Builder.() -> ObjectBuilder<BoolQuery>>): SearchResponse<JsonNode> {
+private fun OpenSearchClient.kandidatSøk(filter: List<FilterFunksjon>): SearchResponse<JsonNode> {
     return search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {

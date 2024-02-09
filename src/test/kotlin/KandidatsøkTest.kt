@@ -82,7 +82,7 @@ class KandidatsøkTest {
             post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.stedTerm)))
                 .willReturn(
-                    ok(KandidatsøkRespons.kandidatsøkRespons)
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
                 )
         )
         val navIdent = "A123456"
