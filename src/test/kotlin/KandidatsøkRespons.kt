@@ -1,11 +1,12 @@
 object KandidatsøkRespons {
-    fun query(vararg extraTerms: String) = (extraTerms.toList() + """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM","IKVAL","VARIG"]}}""")
+    fun query(vararg extraTerms: String, innsatsgruppeTerm: String = """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM","IKVAL","VARIG"]}}""") = (extraTerms.toList() + innsatsgruppeTerm)
         .let { terms ->
             """{"_source":{"includes":["fodselsnummer","fornavn","etternavn","arenaKandidatnr","kvalifiseringsgruppekode","yrkeJobbonskerObj","geografiJobbonsker","kommuneNavn","postnummer"]},"from":0,"query":{"bool":{"must":$terms}},"size":25,"track_total_hits":true,"sort":[{"tidsstempel":{"order":"desc"}}]}"""
         }
 
     val stedTerm = """{"bool":{"should":[{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO18.1804|NO18|NO"}}}]}}}}]}}"""
     val arbeidsønskeTerm = """{"bool":{"should":[{"match":{"yrkeJobbonskerObj.styrkBeskrivelse":{"fuzziness":"0","operator":"and","query":"Sauegjeter"}}},{"match":{"yrkeJobbonskerObj.sokeTitler":{"fuzziness":"0","operator":"and","query":"Sauegjeter"}}}]}}"""
+    val innsatsgruppeTermMedBATTogBFORM: String = """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM"]}}"""
     val kandidatsøkHits = """[
                     {
                         "_index": "veilederkandidat_os4",
