@@ -57,6 +57,44 @@ class KandidatsøkTest {
     }
 
     @Test
+    fun `Må ha token`() {
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `Må ha gyldig token`() {
+        val token = lagToken(issuerId = "falskissuer")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `Må ha navIdent`() {
+        val token = lagToken(claims = mapOf("groups" to listOf(modiaGenerell)))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `Må ha gruppe-tilhørighet`() {
+        val token = lagToken(claims = mapOf("NAVident" to "A123456"))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
     fun `Om kall feiler under henting av cv fra elasticsearch, får vi HTTP 500`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
