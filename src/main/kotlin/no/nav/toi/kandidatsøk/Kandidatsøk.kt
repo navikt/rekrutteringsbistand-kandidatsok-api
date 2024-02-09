@@ -23,7 +23,7 @@ private const val endepunkt = "/api/kandidatsok"
     methods = [HttpMethod.POST]
 )
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
-    post(endepunkt) { ctx ->
+    get(endepunkt) { ctx ->
         val filter = listOf(StedFilter(), Arbeidsønskefilter())
             .onEach { it.berikMedParameter(ctx::queryParam) }
             .filter(Filter::erAktiv)
