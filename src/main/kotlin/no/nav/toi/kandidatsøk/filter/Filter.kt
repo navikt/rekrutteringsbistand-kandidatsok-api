@@ -10,3 +10,5 @@ interface Filter {
     fun erAktiv(): Boolean
     fun lagESFilterFunksjon(): FilterFunksjon
 }
+
+fun søkeFilter() = listOf(Arbeidsønskefilter(), InnsatsgruppeFilter(),SpråkFilter(),StedFilter())
