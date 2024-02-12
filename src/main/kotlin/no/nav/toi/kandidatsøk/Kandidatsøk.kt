@@ -21,7 +21,7 @@ private const val endepunkt = "/api/kandidatsok"
 )
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
     get(endepunkt) { ctx ->
-        val filter = listOf(StedFilter(), Arbeidsønskefilter(), InnsatsgruppeFilter())
+        val filter = listOf(StedFilter(), Arbeidsønskefilter(), InnsatsgruppeFilter(), SpråkFilter())
             .onEach { it.berikMedParameter(ctx::queryParam) }
             .filter(Filter::erAktiv)
             .map(Filter::lagESFilterFunksjon)
