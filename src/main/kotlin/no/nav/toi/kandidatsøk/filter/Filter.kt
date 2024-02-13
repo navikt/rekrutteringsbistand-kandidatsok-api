@@ -11,4 +11,5 @@ interface Filter {
     fun lagESFilterFunksjon(): FilterFunksjon
 }
 
-fun søkeFilter() = listOf(Arbeidsønskefilter(), InnsatsgruppeFilter(),SpråkFilter(),StedFilter())
+fun søkeFilter() =
+    listOf(Arbeidsønskefilter(), InnsatsgruppeFilter(), SpråkFilter(), StedFilter(), ArbeidserfaringFilter())

@@ -193,6 +193,26 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
     }
 
+    @Test
+    fun `Kan søke kandidater med arbeidserfaring`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.arbeidsErfaringTerm), true, false))
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
+                )
+        )
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.get("http://localhost:8080/api/kandidatsok?arbeidserfaring=Barnehageassistent")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
+    }
+
     private fun lagLokalApp() = App(
         port = 8080,
         azureAppClientId = "1",

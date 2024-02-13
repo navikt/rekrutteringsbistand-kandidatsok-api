@@ -19,7 +19,7 @@ class Arbeidsønskefilter: Filter {
                         field("yrkeJobbonskerObj.styrkBeskrivelse")
                         fuzziness("0")  // TODO: Avklare om string er like greit som number
                         operator(Operator.And)
-                        query("Sauegjeter")
+                        query(arbeidsønske!!)
                     }
                 }
                 should_ {
@@ -27,7 +27,7 @@ class Arbeidsønskefilter: Filter {
                         field("yrkeJobbonskerObj.sokeTitler")
                         fuzziness("0")
                         operator(Operator.And)
-                        query("Sauegjeter")
+                        query(arbeidsønske!!)
                     }
                 }
             }

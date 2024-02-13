@@ -1,31 +1,29 @@
 package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.*
-import org.opensearch.client.opensearch._types.query_dsl.ChildScoreMode
 import org.opensearch.client.opensearch._types.query_dsl.Operator
 
-class SpråkFilter: Filter {
-    private var språk: String? = null
+class ArbeidserfaringFilter: Filter {
+    private var arbeidsErfaring: String? = null
     override fun berikMedParameter(hentParameter: (String) -> String?) {
-        språk = hentParameter("sprak")
+        arbeidsErfaring=hentParameter("arbeidserfaring")
     }
 
-    override fun erAktiv() = språk != null
+    override fun erAktiv() = arbeidsErfaring != null
 
     override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
             bool_ {
                 should_ {
                     nested_ {
-                        path("sprak")
+                        path("yrkeserfaring")
                         query_ {
                             match_ {
-                                field("sprak.sprakKodeTekst")
+                                field("yrkeserfaring.sokeTitler")
                                 operator(Operator.And)
-                                query(språk!!)
+                                query(arbeidsErfaring!!)
                             }
                         }
-                        scoreMode(ChildScoreMode.Sum)
                     }
                 }
             }

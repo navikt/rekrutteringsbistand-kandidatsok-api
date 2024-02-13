@@ -8,6 +8,7 @@ object KandidatsøkRespons {
     val arbeidsønskeTerm = """{"bool":{"should":[{"match":{"yrkeJobbonskerObj.styrkBeskrivelse":{"fuzziness":"0","operator":"and","query":"Sauegjeter"}}},{"match":{"yrkeJobbonskerObj.sokeTitler":{"fuzziness":"0","operator":"and","query":"Sauegjeter"}}}]}}"""
     val innsatsgruppeTermMedBATTogBFORM: String = """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM"]}}"""
     val målformTerm = """{"bool":{"should":[{"nested":{"path":"sprak","query":{"match":{"sprak.sprakKodeTekst":{"query":"Nynorsk","operator":"and"}}},"score_mode":"sum"}}]}}"""
+    val arbeidsErfaringTerm = """{"bool":{"should":[{"nested":{"path":"yrkeserfaring","query":{"match":{"yrkeserfaring.sokeTitler":{"query":"Barnehageassistent","operator":"and"}}}}}]}}"""
     val kandidatsøkHits = """[
                     {
                         "_index": "veilederkandidat_os4",
