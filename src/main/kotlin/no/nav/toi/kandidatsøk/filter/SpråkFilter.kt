@@ -6,8 +6,8 @@ import org.opensearch.client.opensearch._types.query_dsl.Operator
 
 class SpråkFilter: Filter {
     private var språk: String? = null
-    override fun berikMedParameter(hentParameter: (String) -> String?) {
-        språk = hentParameter("sprak")
+    override fun berikMedParameter(hentParameter: (String) -> Any?) {
+        språk = hentParameter("sprak") as String?
     }
 
     override fun erAktiv() = språk != null

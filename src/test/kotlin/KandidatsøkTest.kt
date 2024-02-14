@@ -48,7 +48,8 @@ class KandidatsøkTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.get("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -58,7 +59,8 @@ class KandidatsøkTest {
 
     @Test
     fun `Må ha token`() {
-        val (_, response, _) = Fuel.get("http://localhost:8080/api/kandidatsok")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{}""")
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(401)
@@ -67,7 +69,8 @@ class KandidatsøkTest {
     @Test
     fun `Må ha gyldig token`() {
         val token = lagToken(issuerId = "falskissuer")
-        val (_, response, _) = Fuel.get("http://localhost:8080/api/kandidatsok")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -77,7 +80,8 @@ class KandidatsøkTest {
     @Test
     fun `Må ha navIdent`() {
         val token = lagToken(claims = mapOf("groups" to listOf(modiaGenerell)))
-        val (_, response, _) = Fuel.get("http://localhost:8080/api/kandidatsok")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -87,7 +91,8 @@ class KandidatsøkTest {
     @Test
     fun `Må ha gruppe-tilhørighet`() {
         val token = lagToken(claims = mapOf("NAVident" to "A123456"))
-        val (_, response, _) = Fuel.get("http://localhost:8080/api/kandidatsok")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -106,7 +111,8 @@ class KandidatsøkTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.get("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -125,7 +131,8 @@ class KandidatsøkTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.get("http://localhost:8080/api/kandidatsok?sted=NO18.1804")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{"sted":"NO18.1804"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -145,7 +152,8 @@ class KandidatsøkTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.get("http://localhost:8080/api/kandidatsok?arbeidsonske=Sauegjeter")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{"arbeidsonske":"Sauegjeter"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -165,7 +173,8 @@ class KandidatsøkTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.get("http://localhost:8080/api/kandidatsok?innsatsgruppe=BATT%3BBFORM")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{"innsatsgruppe":["BATT","BFORM"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -185,7 +194,8 @@ class KandidatsøkTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.get("http://localhost:8080/api/kandidatsok?sprak=Nynorsk")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{"sprak":"Nynorsk"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -205,7 +215,8 @@ class KandidatsøkTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.get("http://localhost:8080/api/kandidatsok?arbeidserfaring=Barnehageassistent")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{"arbeidserfaring":"Barnehageassistent"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 

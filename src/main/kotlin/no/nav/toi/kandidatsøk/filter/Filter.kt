@@ -6,7 +6,7 @@ import org.opensearch.client.util.ObjectBuilder
 typealias FilterFunksjon = BoolQuery.Builder.() -> ObjectBuilder<BoolQuery>
 
 interface Filter {
-    fun berikMedParameter(hentParameter: (String)->String?)
+    fun berikMedParameter(hentParameter: (String)->Any?)
     fun erAktiv(): Boolean
     fun lagESFilterFunksjon(): FilterFunksjon
 }

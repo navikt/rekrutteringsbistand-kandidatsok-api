@@ -2,6 +2,7 @@ package no.nav.toi.kandidatsøk
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
+import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.filter.*
@@ -10,6 +11,10 @@ import org.opensearch.client.opensearch._types.SortOrder
 import org.opensearch.client.opensearch.core.SearchResponse
 
 private const val endepunkt = "/api/kandidatsok"
+
+private data class RequestDto(
+    val kandidatnr: String,
+)
 
 @OpenApi(
     summary = "Søk på kandidater basert på søketermer",
@@ -20,9 +25,10 @@ private const val endepunkt = "/api/kandidatsok"
     methods = [HttpMethod.POST]
 )
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
-    get(endepunkt) { ctx ->
+    post(endepunkt) { ctx ->
+        val request = ctx.bodyAsClass<Map<String,Any>>()
         val filter = søkeFilter()
-            .onEach { it.berikMedParameter(ctx::queryParam) }
+            .onEach { it.berikMedParameter(request::get) }
             .filter(Filter::erAktiv)
             .map(Filter::lagESFilterFunksjon)
         val result = openSearchClient.kandidatSøk(filter)
