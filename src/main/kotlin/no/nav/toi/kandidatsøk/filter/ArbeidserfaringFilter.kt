@@ -5,8 +5,8 @@ import org.opensearch.client.opensearch._types.query_dsl.Operator
 
 class ArbeidserfaringFilter: Filter {
     private var arbeidsErfaring: String? = null
-    override fun berikMedParameter(hentParameter: (String) -> Any?) {
-        arbeidsErfaring=hentParameter("arbeidserfaring") as String?
+    override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
+        arbeidsErfaring=hentParameter("arbeidserfaring")?.somString()
     }
 
     override fun erAktiv() = arbeidsErfaring != null

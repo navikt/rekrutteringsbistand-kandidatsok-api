@@ -5,8 +5,8 @@ import org.opensearch.client.opensearch._types.query_dsl.Operator
 
 class Arbeidsønskefilter: Filter {
     private var arbeidsønske: String? = null
-    override fun berikMedParameter(hentParameter: (String) -> Any?) {
-        arbeidsønske = hentParameter("arbeidsonske") as String?
+    override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
+        arbeidsønske = hentParameter("arbeidsonske")?.somString()
     }
 
     override fun erAktiv() = arbeidsønske!=null

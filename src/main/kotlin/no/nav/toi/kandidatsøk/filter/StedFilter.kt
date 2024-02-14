@@ -4,8 +4,8 @@ import no.nav.toi.*
 
 class StedFilter: Filter {
     private var stedRegex: String? = null
-    override fun berikMedParameter(hentParameter: (String) -> Any?) {
-        stedRegex=(hentParameter("sted") as String?)?.let{
+    override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
+        stedRegex= hentParameter("sted")?.somString()?.let{
             "$it|${it.split(".")[0]}|${it.substring(0,2)}"
         }
     }

@@ -5,8 +5,8 @@ import no.nav.toi.terms
 
 class InnsatsgruppeFilter: Filter {
     private var innsatsgrupper = listOf("BATT","BFORM","IKVAL","VARIG")
-    override fun berikMedParameter(hentParameter: (String) -> Any?) {
-        innsatsgrupper = (hentParameter("innsatsgruppe") as List<*>?)?.map { it as String } ?: innsatsgrupper
+    override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
+        innsatsgrupper = hentParameter("innsatsgruppe")?.somStringListe() ?: innsatsgrupper
     }
 
     override fun erAktiv() = true
