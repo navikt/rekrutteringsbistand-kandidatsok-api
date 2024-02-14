@@ -17,4 +17,11 @@ interface Filter {
 }
 
 fun søkeFilter() =
-    listOf(Arbeidsønskefilter(), InnsatsgruppeFilter(), SpråkFilter(), StedFilter(), ArbeidserfaringFilter())
+    listOf(
+        Arbeidsønskefilter(),
+        InnsatsgruppeFilter(),
+        SpråkFilter(),
+        StedFilter(),
+        ArbeidserfaringFilter(),
+        HovedmålFilter()
+    )

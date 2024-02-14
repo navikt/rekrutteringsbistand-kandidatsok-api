@@ -1,5 +1,4 @@
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.tomakehurst.wiremock.client.WireMock.*
@@ -187,7 +186,7 @@ class KandidatsøkTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.målformTerm), true, false))
+                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.språkTerm), true, false))
                 .willReturn(
                     ok(KandidatsøkRespons.esKandidatsøkRespons)
                 )
@@ -217,6 +216,27 @@ class KandidatsøkTest {
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
             .body("""{"arbeidserfaring":"Barnehageassistent"}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
+    }
+
+    @Test
+    fun `Kan søke kandidater med hovedmål`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.hovedmålTerm), true, false))
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
+                )
+        )
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{"hovedmål":["SKAFFEA","OKEDELT"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
