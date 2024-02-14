@@ -23,5 +23,6 @@ fun søkeFilter() =
         SpråkFilter(),
         StedFilter(),
         ArbeidserfaringFilter(),
-        HovedmålFilter()
+        HovedmålFilter(),
+        KompetanseFilter()
     )

@@ -10,6 +10,7 @@ object KandidatsøkRespons {
     val språkTerm = """{"bool":{"should":[{"nested":{"path":"sprak","query":{"match":{"sprak.sprakKodeTekst":{"query":"Nynorsk","operator":"and"}}},"score_mode":"sum"}}]}}"""
     val arbeidsErfaringTerm = """{"bool":{"should":[{"nested":{"path":"yrkeserfaring","query":{"match":{"yrkeserfaring.sokeTitler":{"query":"Barnehageassistent","operator":"and"}}}}}]}}"""
     val hovedmålTerm: String = """{"terms":{"hovedmaalkode":["SKAFFEA","OKEDELT"]}}"""
+    val kompetanseTerm: String = """{"bool":{"should":[{"match_phrase":{"samletKompetanseObj.samletKompetanseTekst":{"query":"Fagbrev FU-operatør","slop":4}}},{"match_phrase":{"samletKompetanseObj.samletKompetanseTekst":{"query":"Kotlin","slop":4}}}]}}"""
     val kandidatsøkHits = """[
                     {
                         "_index": "veilederkandidat_os4",

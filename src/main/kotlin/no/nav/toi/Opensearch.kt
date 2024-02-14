@@ -85,6 +85,11 @@ fun BoolQuery.Builder.should_(
 ): ObjectBuilder<BoolQuery> =
     should { it.body() }
 
+fun Query.Builder.matchPhrase_(
+    body: MatchPhraseQuery.Builder.() -> ObjectBuilder<MatchPhraseQuery>
+): ObjectBuilder<Query> =
+    matchPhrase { it.body() }
+
 fun Query.Builder.nested_(
     body: NestedQuery.Builder.() -> ObjectBuilder<NestedQuery>
 ): ObjectBuilder<Query> =
