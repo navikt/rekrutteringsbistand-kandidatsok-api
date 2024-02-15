@@ -100,6 +100,11 @@ fun Query.Builder.match_(
 ): ObjectBuilder<Query> =
     match { it.body() }
 
+fun Query.Builder.range_(
+    body: RangeQuery.Builder.() -> ObjectBuilder<RangeQuery>
+): ObjectBuilder<Query> =
+    range { it.body() }
+
 fun MatchQuery.Builder.query(
     field: String
 ): ObjectBuilder<MatchQuery> =

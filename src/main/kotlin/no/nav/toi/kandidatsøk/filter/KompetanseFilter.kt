@@ -24,6 +24,11 @@ class KompetanseFilter: Filter {
                                 slop(4)
                                 query(kompetanse)
                             }
+                            matchPhrase_ {
+                                field("samletKompetanseObj.samletKompetanseTekst")
+                                slop(4)
+                                query(kompetanse)
+                            }
                         }
                     }
                 }
