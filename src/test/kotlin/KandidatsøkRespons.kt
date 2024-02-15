@@ -11,6 +11,7 @@ object KandidatsøkRespons {
     val arbeidsErfaringTerm = """{"bool":{"should":[{"nested":{"path":"yrkeserfaring","query":{"match":{"yrkeserfaring.sokeTitler":{"query":"Barnehageassistent","operator":"and"}}}}}]}}"""
     val hovedmålTerm: String = """{"terms":{"hovedmaalkode":["SKAFFEA","OKEDELT"]}}"""
     val kompetanseTerm: String = """{"bool":{"should":[{"match_phrase":{"samletKompetanseObj.samletKompetanseTekst":{"query":"Fagbrev FU-operatør","slop":4}}},{"match_phrase":{"samletKompetanseObj.samletKompetanseTekst":{"query":"Kotlin","slop":4}}}]}}"""
+    val førerkortTerm: String = """{"bool":{"should":[{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"BE - Personbil med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"D - Buss"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"C1E - Lett lastebil med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"CE - Lastebil med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"D1E - Minibuss med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"DE - Buss med tilhenger"}}},"score_mode":"sum"}}]}}"""
     val kandidatsøkHits = """[
                     {
                         "_index": "veilederkandidat_os4",

@@ -24,5 +24,6 @@ fun søkeFilter() =
         StedFilter(),
         ArbeidserfaringFilter(),
         HovedmålFilter(),
-        KompetanseFilter()
+        KompetanseFilter(),
+        FørerkortFilter()
     )
