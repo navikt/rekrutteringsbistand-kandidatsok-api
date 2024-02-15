@@ -215,7 +215,7 @@ class KandidatsøkTest {
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
-            .body("""{"arbeidserfaring":"Barnehageassistent"}""")
+            .body("""{"arbeidserfaring":["Barnehageassistent","Butikkansvarlig"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
