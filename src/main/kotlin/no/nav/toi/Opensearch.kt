@@ -80,6 +80,11 @@ fun BoolQuery.Builder.must_(
 ): ObjectBuilder<BoolQuery> =
     must { it.body() }
 
+fun BoolQuery.Builder.mustNot_(
+    body: Query.Builder.() -> ObjectBuilder<Query>
+): ObjectBuilder<BoolQuery> =
+    mustNot { it.body() }
+
 fun BoolQuery.Builder.should_(
     body: Query.Builder.() -> ObjectBuilder<Query>
 ): ObjectBuilder<BoolQuery> =
