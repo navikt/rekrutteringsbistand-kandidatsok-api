@@ -40,78 +40,78 @@ class KompetanseforslagTest {
         val wireMock = wmRuntimeInfo.wireMock
         val esresponse = """
             {
-            	"took": 19,
-            	"timed_out": false,
-            	"_shards": {
-            		"total": 3,
-            		"successful": 3,
-            		"skipped": 0,
-            		"failed": 0
-            	},
-            	"hits": {
-            		"total": {
-            			"value": 9,
-            			"relation": "eq"
-            		},
-            		"max_score": null,
-            		"hits": []
-            	},
-            	"aggregations": {
-            		"kompetanse": {
-            			"doc_count_error_upper_bound": 0,
-            			"sum_other_doc_count": 2,
-            			"buckets": [
-            				{
-            					"key": "Betong",
-            					"doc_count": 2
-            				},
-            				{
-            					"key": "Betongarbeid",
-            					"doc_count": 2
-            				},
-            				{
-            					"key": "Bransjekunnskap - tømrerarbeid",
-            					"doc_count": 2
-            				},
-            				{
-            					"key": "Byggarbeid",
-            					"doc_count": 2
-            				},
-            				{
-            					"key": "Bygging av vegger",
-            					"doc_count": 2
-            				},
-            				{
-            					"key": "Gulvlegging og tapetsering",
-            					"doc_count": 2
-            				},
-            				{
-            					"key": "Kompetanse innen tømrerfaget",
-            					"doc_count": 2
-            				},
-            				{
-            					"key": "Snekker- og tømrerarbeid",
-            					"doc_count": 2
-            				},
-            				{
-            					"key": "Takarbeid",
-            					"doc_count": 2
-            				},
-            				{
-            					"key": "Tømrer (AMO)",
-            					"doc_count": 2
-            				},
-            				{
-            					"key": "Administrere kommunikasjon med statlige organer innen næringsmiddelindustrien",
-            					"doc_count": 1
-            				},
-            				{
-            					"key": "Fange dyr i feller",
-            					"doc_count": 1
-            				}
-            			]
-            		}
-            	}
+                "took": 1,
+                "timed_out": false,
+                "_shards": {
+                    "total": 3,
+                    "successful": 3,
+                    "skipped": 0,
+                    "failed": 0
+                },
+                "hits": {
+                    "total": {
+                        "value": 9,
+                        "relation": "eq"
+                    },
+                    "max_score": null,
+                    "hits": []
+                },
+                "aggregations": {
+                    "sterms#kompetanse": {
+                        "doc_count_error_upper_bound": 0,
+                        "sum_other_doc_count": 2,
+                        "buckets": [
+                            {
+                                "key": "Betong",
+                                "doc_count": 2
+                            },
+                            {
+                                "key": "Betongarbeid",
+                                "doc_count": 2
+                            },
+                            {
+                                "key": "Bransjekunnskap - tømrerarbeid",
+                                "doc_count": 2
+                            },
+                            {
+                                "key": "Byggarbeid",
+                                "doc_count": 2
+                            },
+                            {
+                                "key": "Bygging av vegger",
+                                "doc_count": 2
+                            },
+                            {
+                                "key": "Gulvlegging og tapetsering",
+                                "doc_count": 2
+                            },
+                            {
+                                "key": "Kompetanse innen tømrerfaget",
+                                "doc_count": 2
+                            },
+                            {
+                                "key": "Snekker- og tømrerarbeid",
+                                "doc_count": 2
+                            },
+                            {
+                                "key": "Takarbeid",
+                                "doc_count": 2
+                            },
+                            {
+                                "key": "Tømrer (AMO)",
+                                "doc_count": 2
+                            },
+                            {
+                                "key": "Administrere kommunikasjon med statlige organer innen næringsmiddelindustrien",
+                                "doc_count": 1
+                            },
+                            {
+                                "key": "Fange dyr i feller",
+                                "doc_count": 1
+                            }
+                        ]
+                    }
+                }
             }
         """.trimIndent()
 
@@ -147,7 +147,7 @@ class KompetanseforslagTest {
                     }
                 """.trimIndent()))
                 .willReturn(
-                    ok(CvTestRespons.responseOpenSearch(esresponse))
+                    ok(esresponse)
                 )
         )
 
@@ -169,87 +169,61 @@ class KompetanseforslagTest {
         Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(
             """
               {
-                "hits": {
-                  "hits": [
-                    {
-                      "_source": {
-                        "took": 19,
-                        "timed_out": false,
-                        "_shards": {
-                          "total": 3,
-                          "successful": 3,
-                          "skipped": 0,
-                          "failed": 0
+                  "aggregations": {
+                    "kompetanse": {
+                      "buckets": [
+                        {
+                          "key": "Betong",
+                          "doc_count": 2
                         },
-                        "hits": {
-                          "total": {
-                            "value": 9,
-                            "relation": "eq"
-                          },
-                          "max_score": null,
-                          "hits": []
+                        {
+                          "key": "Betongarbeid",
+                          "doc_count": 2
                         },
-                        "aggregations": {
-                          "kompetanse": {
-                            "doc_count_error_upper_bound": 0,
-                            "sum_other_doc_count": 2,
-                            "buckets": [
-                              {
-                                "key": "Betong",
-                                "doc_count": 2
-                              },
-                              {
-                                "key": "Betongarbeid",
-                                "doc_count": 2
-                              },
-                              {
-                                "key": "Bransjekunnskap - tømrerarbeid",
-                                "doc_count": 2
-                              },
-                              {
-                                "key": "Byggarbeid",
-                                "doc_count": 2
-                              },
-                              {
-                                "key": "Bygging av vegger",
-                                "doc_count": 2
-                              },
-                              {
-                                "key": "Gulvlegging og tapetsering",
-                                "doc_count": 2
-                              },
-                              {
-                                "key": "Kompetanse innen tømrerfaget",
-                                "doc_count": 2
-                              },
-                              {
-                                "key": "Snekker- og tømrerarbeid",
-                                "doc_count": 2
-                              },
-                              {
-                                "key": "Takarbeid",
-                                "doc_count": 2
-                              },
-                              {
-                                "key": "Tømrer (AMO)",
-                                "doc_count": 2
-                              },
-                              {
-                                "key": "Administrere kommunikasjon med statlige organer innen næringsmiddelindustrien",
-                                "doc_count": 1
-                              },
-                              {
-                                "key": "Fange dyr i feller",
-                                "doc_count": 1
-                              }
-                            ]
-                          }
+                        {
+                          "key": "Bransjekunnskap - tømrerarbeid",
+                          "doc_count": 2
+                        },
+                        {
+                          "key": "Byggarbeid",
+                          "doc_count": 2
+                        },
+                        {
+                          "key": "Bygging av vegger",
+                          "doc_count": 2
+                        },
+                        {
+                          "key": "Gulvlegging og tapetsering",
+                          "doc_count": 2
+                        },
+                        {
+                          "key": "Kompetanse innen tømrerfaget",
+                          "doc_count": 2
+                        },
+                        {
+                          "key": "Snekker- og tømrerarbeid",
+                          "doc_count": 2
+                        },
+                        {
+                          "key": "Takarbeid",
+                          "doc_count": 2
+                        },
+                        {
+                          "key": "Tømrer (AMO)",
+                          "doc_count": 2
+                        },
+                        {
+                          "key": "Administrere kommunikasjon med statlige organer innen næringsmiddelindustrien",
+                          "doc_count": 1
+                        },
+                        {
+                          "key": "Fange dyr i feller",
+                          "doc_count": 1
                         }
-                      }
+                      ]
                     }
-                  ]
+                  }
                 }
-              }
             """.trimIndent()
         ))
     }

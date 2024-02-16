@@ -1,6 +1,7 @@
 package no.nav.toi.kompetanseforslag
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.javalin.Javalin
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.HttpMethod
@@ -23,6 +24,26 @@ private data class RequestDto(
     val yrker: List<Yrke>
 )
 
+data class KompetanseAggregationResponse(
+    val aggregations: KompetanseAggregations
+)
+
+data class KompetanseAggregations(
+    val kompetanse: KompetanseAggregation
+)
+
+data class KompetanseAggregation(
+    val buckets: List<Bucket>
+)
+
+data class Bucket(
+    val key: String,
+    val doc_count: Int
+)
+
+
+
+
 @OpenApi(
     summary = "Forslag til kompetanser basert på yrke",
     operationId = endepunkt,
@@ -35,14 +56,13 @@ fun Javalin.handleKompetanseforslag(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
         val request = ctx.bodyAsClass<RequestDto>()
         val result = openSearchClient.lookupKompetanseforslag(request)
-        ctx.json(result.toResponseJson())
+        ctx.json(result.toAggregationResponseJson() ?: throw RuntimeException("No aggregations found in response"))
     }
 }
 
 private fun OpenSearchClient.lookupKompetanseforslag(params: RequestDto): SearchResponse<JsonNode> {
     return search<JsonNode> {
         index(DEFAULT_INDEX)
-
         query_ {
             bool_ {
                 should_(
@@ -57,43 +77,33 @@ private fun OpenSearchClient.lookupKompetanseforslag(params: RequestDto): Search
                 )
             }
         }
+
         size(0)
         aggregations("kompetanse") {
-            it.terms {
-                it.field("kompetanseObj.kompKodeNavn.keyword")
-                it.size(12)
+            it.terms {agg ->
+                agg.field("kompetanseObj.kompKodeNavn.keyword")
+                agg.size(12)
             }
         }
     }
 }
 
+fun SearchResponse<JsonNode>.toAggregationResponseJson(): KompetanseAggregationResponse? {
+    val buckets = this.aggregations()["kompetanse"]?.sterms()?.buckets()?.array()
 
-/*
-{
-  "query": {
-    "bool": {
-      "should": [
-        {
-          "match": {
-            "yrkeJobbonskerObj.styrkBeskrivelse": "Mat og livsstils videograf"
-          }
-        },
-        {
-          "match": {
-            "yrkeJobbonskerObj.styrkBeskrivelse": "Kokk"
-          }
-        }
-      ]
-    }
-  },
-  "size": 0,
-  "aggs": {
-    "kompetanse": {
-      "terms": {
-        "field": "kompetanseObj.kompKodeNavn.keyword",
-        "size": 12
-      }
-    }
-  }
+   return KompetanseAggregationResponse(
+        KompetanseAggregations(
+            KompetanseAggregation(
+                buckets?.map {
+                    Bucket(
+                        key = it.key(),
+                        doc_count = it.docCount().toInt()
+                    )
+                } ?: emptyList()
+            )
+        )
+    )
+
 }
- */
+
+
