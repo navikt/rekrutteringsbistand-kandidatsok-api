@@ -16,6 +16,8 @@ acr=1&
 pid=12345678910&
 NAVident=1234
 ```
+for eksempel med kommandoen curl: ` curl --data 'client_id=someclientid&aud=dev-gcp:targetteam:targetapp&acr=1&pid=12345678910&NAVident=1234' https://fakedings.intern.dev.nav.no/fake/custom`
+
 og så legge på svaret som
 ``` 
 Authorization: Bearer <token>
