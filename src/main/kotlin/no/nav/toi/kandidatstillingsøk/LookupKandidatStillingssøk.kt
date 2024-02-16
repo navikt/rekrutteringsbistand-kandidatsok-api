@@ -44,8 +44,8 @@ private fun OpenSearchClient.lookupKandidatStillingssøk(params: RequestDto): Se
         }
         source_ {
             includes(
-                "arenaKandidatnr", "geografiJobbonsker",
-                "yrkeJobbonskerObj", "kommunenummerstring", "kommuneNavn"
+                "geografiJobbonsker",
+                "yrkeJobbonskerObj", "kommunenummerstring", "kommuneNavn", "fodselsnummer"
             )
         }
         size(1)

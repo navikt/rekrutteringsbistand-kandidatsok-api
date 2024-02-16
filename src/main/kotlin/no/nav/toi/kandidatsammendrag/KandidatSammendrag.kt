@@ -46,9 +46,8 @@ private fun OpenSearchClient.lookupKandidatsammendrag(params: RequestDto): Searc
             includes(
                 "fornavn", "etternavn", "arenaKandidatnr", "fodselsdato",
                 "fodselsnummer", "adresselinje1", "postnummer", "poststed",
-                "epostadresse", "telefon", "veileder", "geografiJobbonsker",
-                "yrkeJobbonskerObj", "kommunenummerstring", "kommuneNavn",
-                "veilederIdent", "veilederVisningsnavn", "veilederEpost"
+                "epostadresse", "telefon", "veilederIdent", "veilederVisningsnavn",
+                "veilederEpost"
             )
         }
         size(1)

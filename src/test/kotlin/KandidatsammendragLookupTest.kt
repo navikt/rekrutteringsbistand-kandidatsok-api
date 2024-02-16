@@ -54,11 +54,6 @@ class KandidatsammendragLookupTest {
                           "poststed",
                           "epostadresse",
                           "telefon",
-                          "veileder",
-                          "geografiJobbonsker",
-                          "yrkeJobbonskerObj",
-                          "kommunenummerstring",
-                          "kommuneNavn",
                           "veilederIdent",
                           "veilederVisningsnavn",
                           "veilederEpost"
@@ -108,11 +103,6 @@ class KandidatsammendragLookupTest {
                           "poststed",
                           "epostadresse",
                           "telefon",
-                          "veileder",
-                          "geografiJobbonsker",
-                          "yrkeJobbonskerObj",
-                          "kommunenummerstring",
-                          "kommuneNavn",
                           "veilederIdent",
                           "veilederVisningsnavn",
                           "veilederEpost"

@@ -44,11 +44,11 @@ class KandidatStillingssokLookupTest {
                     {
                       "_source": {
                         "includes": [
-                          "arenaKandidatnr",
                           "geografiJobbonsker",
                           "yrkeJobbonskerObj",
                           "kommunenummerstring",
-                          "kommuneNavn"
+                          "kommuneNavn",
+                          "fodselsnummer"
                         ]
                       },
                       "query": {
@@ -85,11 +85,11 @@ class KandidatStillingssokLookupTest {
                     {
                       "_source": {
                         "includes": [
-                          "arenaKandidatnr",
                           "geografiJobbonsker",
                           "yrkeJobbonskerObj",
                           "kommunenummerstring",
-                          "kommuneNavn"
+                          "kommuneNavn",
+                          "fodselsnummer"
                           ]
                       },
                       "query": {
