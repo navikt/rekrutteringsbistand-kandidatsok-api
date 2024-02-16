@@ -48,7 +48,7 @@ private fun OpenSearchClient.lookupKompetanseforslag(params: RequestDto): Search
                 should_(
                     params.yrker.map { yrke ->
                         {
-                            match_{
+                            match_ {
                                 field("yrkeJobbonskerObj.styrkBeskrivelse")
                                 query(FieldValue.of(yrke.yrke))
                             }
@@ -58,8 +58,15 @@ private fun OpenSearchClient.lookupKompetanseforslag(params: RequestDto): Search
             }
         }
         size(0)
+        aggregations("kompetanse") {
+            it.terms {
+                it.field("kompetanseObj.kompKodeNavn.keyword")
+                it.size(12)
+            }
+        }
     }
 }
+
 
 /*
 {

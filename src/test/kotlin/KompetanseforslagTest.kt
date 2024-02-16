@@ -118,32 +118,32 @@ class KompetanseforslagTest {
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""
-                   {
-                      "query": {
-                        "bool": {
-                          "should": [
-                            {
-                              "match": {
-                                "yrkeJobbonskerObj.styrkBeskrivelse": "Mat og livsstils videograf"
-                              }
-                            },
-                            {
-                              "match": {
-                                "yrkeJobbonskerObj.styrkBeskrivelse": "Kokk"
-                              }
-                            }
-                          ]
-                        }
-                      },
-                      "size": 0,
-                      "aggs": {
+                  {
+                      "aggregations": {
                         "kompetanse": {
                           "terms": {
                             "field": "kompetanseObj.kompKodeNavn.keyword",
                             "size": 12
                           }
                         }
-                      }
+                      },
+                      "query": {
+                        "bool": {
+                          "should": [
+                            {
+                              "match": {
+                                "yrkeJobbonskerObj.styrkBeskrivelse": {"query": "Mat og livsstils videograf"}
+                              }
+                            },
+                            {
+                              "match": {
+                                "yrkeJobbonskerObj.styrkBeskrivelse": {"query":"Kokk"}
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "size": 0
                     }
                 """.trimIndent()))
                 .willReturn(
@@ -168,7 +168,88 @@ class KompetanseforslagTest {
         Assertions.assertThat(response.statusCode).isEqualTo(200)
         Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(
             """
-                todo
+              {
+                "hits": {
+                  "hits": [
+                    {
+                      "_source": {
+                        "took": 19,
+                        "timed_out": false,
+                        "_shards": {
+                          "total": 3,
+                          "successful": 3,
+                          "skipped": 0,
+                          "failed": 0
+                        },
+                        "hits": {
+                          "total": {
+                            "value": 9,
+                            "relation": "eq"
+                          },
+                          "max_score": null,
+                          "hits": []
+                        },
+                        "aggregations": {
+                          "kompetanse": {
+                            "doc_count_error_upper_bound": 0,
+                            "sum_other_doc_count": 2,
+                            "buckets": [
+                              {
+                                "key": "Betong",
+                                "doc_count": 2
+                              },
+                              {
+                                "key": "Betongarbeid",
+                                "doc_count": 2
+                              },
+                              {
+                                "key": "Bransjekunnskap - tømrerarbeid",
+                                "doc_count": 2
+                              },
+                              {
+                                "key": "Byggarbeid",
+                                "doc_count": 2
+                              },
+                              {
+                                "key": "Bygging av vegger",
+                                "doc_count": 2
+                              },
+                              {
+                                "key": "Gulvlegging og tapetsering",
+                                "doc_count": 2
+                              },
+                              {
+                                "key": "Kompetanse innen tømrerfaget",
+                                "doc_count": 2
+                              },
+                              {
+                                "key": "Snekker- og tømrerarbeid",
+                                "doc_count": 2
+                              },
+                              {
+                                "key": "Takarbeid",
+                                "doc_count": 2
+                              },
+                              {
+                                "key": "Tømrer (AMO)",
+                                "doc_count": 2
+                              },
+                              {
+                                "key": "Administrere kommunikasjon med statlige organer innen næringsmiddelindustrien",
+                                "doc_count": 1
+                              },
+                              {
+                                "key": "Fange dyr i feller",
+                                "doc_count": 1
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
             """.trimIndent()
         ))
     }
