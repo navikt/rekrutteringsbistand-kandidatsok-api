@@ -4,7 +4,9 @@ import no.nav.toi.*
 import org.opensearch.client.opensearch._types.query_dsl.ChildScoreMode
 import org.opensearch.client.opensearch._types.query_dsl.Operator
 
-class SpråkFilter: Filter {
+fun List<Filter>.medSpråkFilter() = this + SpråkFilter()
+
+private class SpråkFilter: Filter {
     private var språk: String? = null
     override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
         språk = hentParameter("sprak")?.somString()

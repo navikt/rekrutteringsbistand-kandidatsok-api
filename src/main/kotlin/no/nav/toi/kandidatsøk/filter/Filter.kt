@@ -17,15 +17,13 @@ interface Filter {
     fun lagESFilterFunksjon(): FilterFunksjon
 }
 
-fun søkeFilter() =
-    listOf(
-        Arbeidsønskefilter(),
-        InnsatsgruppeFilter(),
-        SpråkFilter(),
-        StedFilter(),
-        ArbeidserfaringFilter(),
-        HovedmålFilter(),
-        KompetanseFilter(),
-        FørerkortFilter(),
-        UtdanningFilter()
-    )
+fun søkeFilter() = listOf<Filter>()
+    .medArbeidsønskefilter()
+    .medInnsatsgruppeFilter()
+    .medSpråkFilter()
+    .medStedFilter()
+    .medArbeidserfaringFilter()
+    .medHovedmålFilter()
+    .medKompetanseFilter()
+    .medFørerkortFilter()
+    .medUtdanningFilter()

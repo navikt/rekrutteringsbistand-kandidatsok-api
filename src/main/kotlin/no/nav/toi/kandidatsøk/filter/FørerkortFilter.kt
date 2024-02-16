@@ -4,6 +4,7 @@ import no.nav.toi.*
 import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch._types.query_dsl.ChildScoreMode
 
+fun List<Filter>.medFørerkortFilter() = this + FørerkortFilter()
 
 private interface Førerkort {
     val kode: String
@@ -92,7 +93,7 @@ private val alleFørerkort = listOf(
 private fun String.somFørerkort() =
     alleFørerkort.firstOrNull { it.kode == this } ?: throw Exception("Ukjent førerkort: $this")
 
-class FørerkortFilter: Filter {
+private class FørerkortFilter: Filter {
     private var førerkort = emptySet<Førerkort>()
     override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
         førerkort = hentParameter("førerkort")

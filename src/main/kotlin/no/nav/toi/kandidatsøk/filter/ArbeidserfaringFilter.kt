@@ -5,7 +5,9 @@ import org.opensearch.client.json.JsonData
 import org.opensearch.client.opensearch._types.query_dsl.Operator
 import org.opensearch.client.opensearch._types.query_dsl.Query
 
-class ArbeidserfaringFilter: Filter {
+fun List<Filter>.medArbeidserfaringFilter() = this + ArbeidserfaringFilter()
+
+private class ArbeidserfaringFilter: Filter {
     private var arbeidsErfaringer: List<String> = emptyList()
     private var ferskhet: Int? = null
     override fun berikMedParameter(hentParameter: (String) -> Parameter?) {

@@ -3,7 +3,9 @@ package no.nav.toi.kandidatsøk.filter
 import no.nav.toi.must_
 import no.nav.toi.terms
 
-class HovedmålFilter: Filter {
+fun List<Filter>.medHovedmålFilter() = this + HovedmålFilter()
+
+private class HovedmålFilter: Filter {
     private var hovedMål = emptyList<String>()
     override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
         hovedMål = hentParameter("hovedmål")?.somStringListe() ?: hovedMål

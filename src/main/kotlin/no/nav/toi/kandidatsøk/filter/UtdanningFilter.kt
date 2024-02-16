@@ -4,6 +4,8 @@ import no.nav.toi.*
 import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
 import org.opensearch.client.util.ObjectBuilder
 
+fun List<Filter>.medUtdanningFilter() = this + UtdanningFilter()
+
 private interface UtdanningsNivå {
     fun harStringKode(kode: String): Boolean
     fun esInkluder(): BoolQuery.Builder.() -> ObjectBuilder<BoolQuery>
@@ -60,7 +62,7 @@ private fun ekskluderUtdanning(regex: String): BoolQuery.Builder.() -> ObjectBui
 private fun String.tilUtdanningsNivå() = listOf(Videregående, Fagskole, Bachelor, Master, Doktorgrad)
     .firstOrNull { it.harStringKode(this) } ?: throw IllegalArgumentException("$this er ikke en gyldig utdanningsnivå")
 
-class UtdanningFilter: Filter {
+private class UtdanningFilter: Filter {
     private var utdanningsnivå = emptyList<UtdanningsNivå>()
     override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
         utdanningsnivå = hentParameter("utdanningsnivå")?.somStringListe()?.map(String::tilUtdanningsNivå) ?: emptyList()
@@ -84,5 +86,4 @@ class UtdanningFilter: Filter {
             }
         }
     }
-
 }

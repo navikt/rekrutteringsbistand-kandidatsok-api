@@ -2,7 +2,9 @@ package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.*
 
-class StedFilter: Filter {
+fun List<Filter>.medStedFilter() = this + StedFilter()
+
+private class StedFilter: Filter {
     private var stedRegex: String? = null
     override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
         stedRegex= hentParameter("sted")?.somString()?.let{

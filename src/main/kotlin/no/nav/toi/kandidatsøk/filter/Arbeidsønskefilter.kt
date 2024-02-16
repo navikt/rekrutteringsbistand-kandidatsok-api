@@ -3,7 +3,9 @@ package no.nav.toi.kandidatsøk.filter
 import no.nav.toi.*
 import org.opensearch.client.opensearch._types.query_dsl.Operator
 
-class Arbeidsønskefilter: Filter {
+fun List<Filter>.medArbeidsønskefilter() = this + Arbeidsønskefilter()
+
+private class Arbeidsønskefilter: Filter {
     private var arbeidsønske: String? = null
     override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
         arbeidsønske = hentParameter("arbeidsonske")?.somString()
