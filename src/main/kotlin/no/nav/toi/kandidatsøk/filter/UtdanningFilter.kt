@@ -1,39 +1,62 @@
 package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.*
+import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
+import org.opensearch.client.util.ObjectBuilder
 
 private interface UtdanningsNivå {
     fun harStringKode(kode: String): Boolean
-    fun regexInkluder(): String
-    fun regexEkskluder(): String?
+    fun esInkluder(): BoolQuery.Builder.() -> ObjectBuilder<BoolQuery>
+    fun esEkskluder(): BoolQuery.Builder.() -> ObjectBuilder<BoolQuery>
 }
 
 private object Videregående: UtdanningsNivå {
     override fun harStringKode(kode: String) = kode == "videregaende"
-    override fun regexInkluder() = "[3-4][0-9]*"
-    override fun regexEkskluder() = "[5-8][0-9]*"
+    override fun esInkluder() = inkluderUtdanning("[3-4][0-9]*")
+    override fun esEkskluder() = ekskluderUtdanning("[5-8][0-9]*")
 }
 private object Fagskole: UtdanningsNivå {
     override fun harStringKode(kode: String) = kode == "fagskole"
-    override fun regexInkluder() = "5[0-9]*"
-    override fun regexEkskluder() = "[6-8][0-9]*"
+    override fun esInkluder() = inkluderUtdanning("5[0-9]*")
+    override fun esEkskluder() = ekskluderUtdanning("[6-8][0-9]*")
 }
 private object Bachelor: UtdanningsNivå {
     override fun harStringKode(kode: String) = kode == "bachelor"
-    override fun regexInkluder() = "6[0-9]*"
-    override fun regexEkskluder() = "[7-8][0-9]*"
+    override fun esInkluder() = inkluderUtdanning("6[0-9]*")
+    override fun esEkskluder() = ekskluderUtdanning("[7-8][0-9]*")
 }
 private object Master: UtdanningsNivå {
     override fun harStringKode(kode: String) = kode == "master"
-    override fun regexInkluder() = "7[0-9]*"
-    override fun regexEkskluder() = "8[0-9]*"
+    override fun esInkluder() = inkluderUtdanning("7[0-9]*")
+    override fun esEkskluder() = ekskluderUtdanning("8[0-9]*")
 }
 private object Doktorgrad: UtdanningsNivå {
     override fun harStringKode(kode: String) = kode == "doktorgrad"
-    override fun regexInkluder() = "8[0-9]*"
-    override fun regexEkskluder() = null
+    override fun esInkluder() = inkluderUtdanning("8[0-9]*")
+    override fun esEkskluder(): BoolQuery.Builder.() -> ObjectBuilder<BoolQuery> = {this}
 }
 
+private fun inkluderUtdanning(regex: String): BoolQuery.Builder.() -> ObjectBuilder<BoolQuery> = {
+    must_ {
+        nested_ {
+            path("utdanning")
+            query_ {
+                regexp("utdanning.nusKode", regex)
+            }
+        }
+    }
+}
+
+private fun ekskluderUtdanning(regex: String): BoolQuery.Builder.() -> ObjectBuilder<BoolQuery> = {
+    mustNot_ {
+        nested_ {
+            path("utdanning")
+            query_ {
+                regexp("utdanning.nusKode", regex)
+            }
+        }
+    }
+}
 private fun String.tilUtdanningsNivå() = listOf(Videregående, Fagskole, Bachelor, Master, Doktorgrad)
     .firstOrNull { it.harStringKode(this) } ?: throw IllegalArgumentException("$this er ikke en gyldig utdanningsnivå")
 
@@ -52,24 +75,8 @@ class UtdanningFilter: Filter {
                     utdanningsnivå.forEach { utdanningsNivå ->
                         should_ {
                             bool_ {
-                                must_ {
-                                    nested_ {
-                                        path("utdanning")
-                                        query_ {
-                                            regexp("utdanning.nusKode", utdanningsNivå.regexInkluder())
-                                        }
-                                    }
-                                }
-                                utdanningsNivå.regexEkskluder()?.let { regexEksluder ->
-                                    mustNot_ {
-                                        nested_ {
-                                            path("utdanning")
-                                            query_ {
-                                                regexp("utdanning.nusKode", regexEksluder)
-                                            }
-                                        }
-                                    }
-                                } ?: this
+                                utdanningsNivå.esInkluder()()
+                                utdanningsNivå.esEkskluder()()
                             }
                         }
                     }
