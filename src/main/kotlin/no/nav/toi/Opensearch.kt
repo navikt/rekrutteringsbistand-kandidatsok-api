@@ -8,6 +8,9 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.opensearch.client.RestClient
 import org.opensearch.client.json.jackson.JacksonJsonpMapper
 import org.opensearch.client.opensearch.OpenSearchClient
+import org.opensearch.client.opensearch._types.FieldValue
+import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
+import org.opensearch.client.opensearch._types.query_dsl.MatchQuery
 import org.opensearch.client.opensearch._types.query_dsl.Query
 import org.opensearch.client.opensearch._types.query_dsl.TermQuery
 import org.opensearch.client.opensearch.core.SearchRequest
@@ -57,6 +60,29 @@ fun Query.Builder.term_(
     body: TermQuery.Builder.() -> ObjectBuilder<TermQuery>
 ): ObjectBuilder<Query> =
     term { it.body() }
+
+fun Query.Builder.bool_(
+    body: BoolQuery.Builder.() -> ObjectBuilder<BoolQuery>
+): ObjectBuilder<Query> =
+    bool { it.body() }
+
+fun BoolQuery.Builder.should_(
+     queriesBuilders: List<(Query.Builder.() -> Unit)>
+): BoolQuery.Builder = apply {
+    val queries = queriesBuilders.map { builder ->
+        Query.Builder().apply(builder).build()
+    }
+    should(queries)
+}
+
+fun Query.Builder.match_(
+    body: MatchQuery.Builder.() -> ObjectBuilder<MatchQuery>
+): ObjectBuilder<Query> =
+    match { it.body() }
+
+
+
+
 
 fun SearchRequest.Builder.source_(
     body: SourceConfig.Builder.() -> ObjectBuilder<SourceConfig>
