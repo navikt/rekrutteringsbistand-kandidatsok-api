@@ -40,10 +40,6 @@ data class Bucket(
     val key: String,
     val doc_count: Int
 )
-
-
-
-
 @OpenApi(
     summary = "Forslag til kompetanser basert på yrke",
     operationId = endepunkt,
