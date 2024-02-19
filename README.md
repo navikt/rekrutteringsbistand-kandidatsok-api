@@ -5,16 +5,19 @@ TODO
 Vi bruker [fakedings](https://github.com/navikt/fakedings?tab=readme-ov-file) for autentisering
 i lokal utvikling. For å hente et fake token, kan du gjøre et kall ala
 ```http request
-POST /fake/custom
-
+POST /fake/aad
 Host: fakedings.intern.dev.nav.no
 Content-Type: application/x-www-form-urlencoded
 
 client_id=someclientid&
-aud=dev-gcp:targetteam:targetapp&
+aud=dev-gcp:toi:rekrutteringsbistand-kandidatsok-api&
 acr=1&
 pid=12345678910&
 NAVident=1234
+```
+for eksempel med kommandoen curl:
+```sh
+curl --data 'client_id=someclientid&aud=dev-gcp:toi:rekrutteringsbistand-kandidatsok-api&acr=1&pid=12345678910&NAVident=1234' https://fakedings.intern.dev.nav.no/fake/aad
 ```
 og så legge på svaret som
 ``` 
