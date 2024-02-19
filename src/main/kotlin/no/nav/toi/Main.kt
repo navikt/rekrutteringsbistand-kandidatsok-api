@@ -4,6 +4,7 @@ import io.javalin.Javalin
 import io.javalin.config.JavalinConfig
 import io.javalin.http.HttpStatus.BAD_REQUEST
 import io.javalin.http.HttpStatus.INTERNAL_SERVER_ERROR
+import io.javalin.openapi.BearerAuth
 import io.javalin.openapi.plugin.OpenApiPlugin
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
@@ -51,7 +52,9 @@ class App(
                     withOpenApiInfo {
                         it.title = "Kandidatsøk API"
                     }
-
+                    withSecurity {
+                        it.withSecurityScheme(schemeName = "BearerAuth", securityScheme = BearerAuth())
+                    }
                 }
             }
         }
