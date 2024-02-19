@@ -51,6 +51,7 @@ class App(
                     withOpenApiInfo {
                         it.title = "Kandidatsøk API"
                     }
+
                 }
             }
         }

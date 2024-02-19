@@ -7,6 +7,7 @@ import io.javalin.Javalin
 import io.javalin.http.HttpStatus.NOT_FOUND
 import io.javalin.http.bodyValidator
 import io.javalin.openapi.*
+import io.javalin.openapi.HttpMethod.POST
 import no.nav.toi.*
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.FieldValue
@@ -35,7 +36,8 @@ data class ResponseDto(
     requestBody = OpenApiRequestBody([OpenApiContent(RequestDto::class)]),
     responses = [OpenApiResponse("200", [OpenApiContent(ResponseDto::class)])],
     path = path,
-    methods = [HttpMethod.POST]
+    methods = [POST],
+    security = [OpenApiSecurity("BearerAuth")]
 )
 fun Javalin.handleKandidatnavn(openSearchClient: OpenSearchClient, pdlClient: PdlClient) {
     post(path) { ctx ->
