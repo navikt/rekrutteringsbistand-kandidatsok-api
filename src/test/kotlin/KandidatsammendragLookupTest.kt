@@ -153,6 +153,15 @@ class KandidatsammendragLookupTest {
         Assertions.assertThat(response.statusCode).isEqualTo(500)
     }
 
+    @Test
+    fun feil_dersom_ikke_autentisert() {
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsammendrag")
+            .body("""{"yrker": [{"yrke": "yrke"}]}""")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
     private fun lagLokalApp() = App(
         port = 8080,
         azureAppClientId = "1",
