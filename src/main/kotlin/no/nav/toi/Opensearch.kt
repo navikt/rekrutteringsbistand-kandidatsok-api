@@ -6,6 +6,7 @@ import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.opensearch.client.RestClient
+import org.opensearch.client.json.JsonData
 import org.opensearch.client.json.jackson.JacksonJsonpMapper
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.FieldValue
@@ -19,6 +20,7 @@ import org.opensearch.client.opensearch.core.search.TrackHits
 import org.opensearch.client.transport.rest_client.RestClientTransport
 import org.opensearch.client.util.ObjectBuilder
 import java.net.URI
+import java.time.LocalDate
 
 const val DEFAULT_INDEX = "veilederkandidat_current"
 
@@ -80,6 +82,11 @@ fun BoolQuery.Builder.must_(
 ): ObjectBuilder<BoolQuery> =
     must { it.body() }
 
+fun Query.Builder.exists_(
+    body: ExistsQuery.Builder.() -> ObjectBuilder<ExistsQuery>
+): ObjectBuilder<Query> =
+    exists { it.body() }
+
 fun BoolQuery.Builder.mustNot_(
     body: Query.Builder.() -> ObjectBuilder<Query>
 ): ObjectBuilder<BoolQuery> =
@@ -109,6 +116,11 @@ fun Query.Builder.range_(
     body: RangeQuery.Builder.() -> ObjectBuilder<RangeQuery>
 ): ObjectBuilder<Query> =
     range { it.body() }
+
+fun RangeQuery.Builder.gte(value: String): ObjectBuilder<RangeQuery> = gte(JsonData.of(value))
+fun RangeQuery.Builder.gte(date: LocalDate): ObjectBuilder<RangeQuery> = gte(JsonData.of(date.toString()))
+fun RangeQuery.Builder.lte(date: LocalDate): ObjectBuilder<RangeQuery> = lte(JsonData.of(date.toString()))
+fun RangeQuery.Builder.lt(value: String): ObjectBuilder<RangeQuery> = lt(JsonData.of(value))
 
 fun MatchQuery.Builder.query(
     field: String

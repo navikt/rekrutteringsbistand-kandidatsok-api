@@ -37,7 +37,7 @@ private class ArbeidserfaringFilter: Filter {
                                             must_ {
                                                 range_ {
                                                     field("yrkeserfaring.tilDato")
-                                                    gte(JsonData.of("now-${ferskhet}y"))
+                                                    gte("now-${ferskhet}y")
                                                 }
                                             }
                                         }
