@@ -228,6 +228,168 @@ class KompetanseforslagTest {
         ))
     }
 
+    @Test
+    fun `Kan får tomt resultat om et ikke finnes kompetanseforslag`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val esresponse = """
+            {
+            	"took": 0,
+            	"timed_out": false,
+            	"_shards": {
+            		"total": 3,
+            		"successful": 3,
+            		"skipped": 0,
+            		"failed": 0
+            	},
+            	"hits": {
+            		"total": {
+            			"value": 0,
+            			"relation": "eq"
+            		},
+            		"max_score": null,
+            		"hits": []
+            	},
+            	"aggregations": {
+            		"sterms#kompetanse": {
+            			"doc_count_error_upper_bound": 0,
+            			"sum_other_doc_count": 0,
+            			"buckets": []
+            		}
+            	}
+            }
+        """.trimIndent()
+
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""
+                  {
+                      "aggregations": {
+                        "kompetanse": {
+                          "terms": {
+                            "field": "kompetanseObj.kompKodeNavn.keyword",
+                            "size": 12
+                          }
+                        }
+                      },
+                      "query": {
+                        "bool": {
+                          "should": [
+                            {
+                              "match": {
+                                "yrkeJobbonskerObj.styrkBeskrivelse": {"query": "dMat og livsstils videograf"}
+                              }
+                            },
+                            {
+                              "match": {
+                                "yrkeJobbonskerObj.styrkBeskrivelse": {"query":"dKokk"}
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "size": 0
+                    }
+                """.trimIndent()))
+                .willReturn(
+                    ok(esresponse)
+                )
+        )
+
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kompetanseforslag")
+            .body("""
+                {
+                  "yrker": [
+                    {"yrke": "dMat og livsstils videograf"},
+                    {"yrke": "dKokk"}
+                  ]
+                }
+            """.trimIndent())
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(
+            """
+              {
+                  "aggregations": {
+                    "kompetanse": {
+                      "buckets": []
+                    }
+                  }
+                }
+            """.trimIndent()
+        ))
+    }
+
+    @Test
+    fun `Om elasticsearch feiler, skal vi få http 500 feil`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+
+
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""
+                  {
+                      "aggregations": {
+                        "kompetanse": {
+                          "terms": {
+                            "field": "kompetanseObj.kompKodeNavn.keyword",
+                            "size": 12
+                          }
+                        }
+                      },
+                      "query": {
+                        "bool": {
+                          "should": [
+                            {
+                              "match": {
+                                "yrkeJobbonskerObj.styrkBeskrivelse": {"query": "skal feile"}
+                              }
+                            },
+                            {
+                              "match": {
+                                "yrkeJobbonskerObj.styrkBeskrivelse": {"query":"skal feile"}
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "size": 0
+                    }
+                """.trimIndent()))
+                .willReturn(
+                    notFound()
+                )
+        )
+
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kompetanseforslag")
+            .body("""
+                {
+                  "yrker": [
+                    {"yrke": "dMat og livsstils videograf"},
+                    {"yrke": "dKokk"}
+                  ]
+                }
+            """.trimIndent())
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(500)
+    }
+
+    @Test
+    fun feil_dersom_ikke_autentisert() {
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kompetanseforslag")
+            .body("""{"yrker": [{"yrke": "yrke"}]}""")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
     private fun lagLokalApp() = App(
         port = 8080,
         azureAppClientId = "1",
