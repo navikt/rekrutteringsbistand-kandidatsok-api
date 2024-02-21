@@ -14,6 +14,7 @@ import no.nav.toi.kandidatnavn.PdlClient
 import no.nav.toi.kandidatnavn.handleKandidatnavn
 import no.nav.toi.kandidatsammendrag.handleKandidatSammendrag
 import no.nav.toi.kandidatstillingsøk.handleLookupKandidatStillingssøk
+import no.nav.toi.kompetanseforslag.handleKompetanseforslag
 import no.nav.toi.kuberneteshealth.handleHealth
 import no.nav.toi.lookupcv.handleLookupCv
 import no.nav.toi.me.handleMe
@@ -73,6 +74,7 @@ class App(
         javalin.handleMe()
         javalin.handleLookupCv(openSearchClient)
         javalin.handleKandidatSammendrag(openSearchClient)
+        javalin.handleKompetanseforslag(openSearchClient)
         javalin.handleLookupKandidatStillingssøk(openSearchClient)
         javalin.handleKandidatnavn(openSearchClient, PdlClient())
 
