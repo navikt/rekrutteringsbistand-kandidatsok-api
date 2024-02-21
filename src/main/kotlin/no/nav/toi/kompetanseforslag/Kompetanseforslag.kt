@@ -66,7 +66,7 @@ private fun OpenSearchClient.lookupKompetanseforslag(params: RequestDto): Search
                         {
                             match_ {
                                 field("yrkeJobbonskerObj.styrkBeskrivelse")
-                                query(FieldValue.of(yrke.yrke))
+                                query(yrke.yrke)
                             }
                         }
                     }

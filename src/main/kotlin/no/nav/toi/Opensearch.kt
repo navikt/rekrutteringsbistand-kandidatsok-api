@@ -66,7 +66,7 @@ fun Query.Builder.bool_(
     bool { it.body() }
 
 fun BoolQuery.Builder.should_(
-     queriesBuilders: List<(Query.Builder.() -> Unit)>
+    queriesBuilders: List<(Query.Builder.() -> Unit)>
 ): BoolQuery.Builder = apply {
     val queries = queriesBuilders.map { builder ->
         Query.Builder().apply(builder).build()
@@ -80,13 +80,17 @@ fun Query.Builder.match_(
     match { it.body() }
 
 
-
-
-
 fun SearchRequest.Builder.source_(
     body: SourceConfig.Builder.() -> ObjectBuilder<SourceConfig>
 ): SearchRequest.Builder =
     source { it.body() }
+
+fun MatchQuery.Builder.query(
+    field: String
+): ObjectBuilder<MatchQuery> =
+    query {
+        it.stringValue(field)
+    }
 
 fun SourceConfig.Builder.includes(vararg includes: String) =
     filter(
