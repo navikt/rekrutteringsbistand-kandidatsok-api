@@ -75,8 +75,8 @@ fun Javalin.azureAdAuthentication(
                 else -> log.error("Unexpected exception {} while authenticating AzureAD-token", e::class.simpleName, e)
             }
             ctx.status(HttpStatus.UNAUTHORIZED).result("")
-        }.exception(SigningKeyNotFoundException::class.java) { _, ctx ->
-            log.warn("Noen prøvde å aksessere endepunkt med en token signert med en falsk issuer")
+        }.exception(SigningKeyNotFoundException::class.java) { e, ctx ->
+            log.warn("Noen prøvde å aksessere endepunkt med en token signert med en falsk issuer", e)
             ctx.status(HttpStatus.UNAUTHORIZED).result("")
         }
 }
@@ -90,6 +90,7 @@ private fun verifyJwt(
             return verifier.verify(token)
         } catch (e: SigningKeyNotFoundException) {
             // Token ikke utstedt for denne verifieren, prøv neste
+            // TODO Are: Logge excepton for å kunne debugge
         } catch (e: JWTVerificationException) {
             throw e
         }
