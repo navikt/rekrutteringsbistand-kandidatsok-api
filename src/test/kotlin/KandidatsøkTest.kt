@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.toi.App
 import no.nav.toi.RolleUuidSpesifikasjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.toi.AuthenticationConfiguration
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -19,6 +20,9 @@ import java.util.*
 @WireMockTest(httpPort = 10000)
 class KandidatsøkTest {
     private val authPort = 18306
+
+    private val modiaGenerell = UUID.randomUUID().toString()
+    private val modiaOppfølging = UUID.randomUUID().toString()
 
     private val app: App = lagLokalApp()
     private val authServer = MockOAuth2Server()
@@ -429,9 +433,11 @@ class KandidatsøkTest {
 
     private fun lagLokalApp() = App(
         port = 8080,
-        azureAppClientId = "1",
-        azureOpenidConfigIssuer = "http://localhost:$authPort/default",
-        azureOpenidConfigJwksUri = "http://localhost:$authPort/default/jwks",
+        authenticationConfigurations = listOf(AuthenticationConfiguration(
+            audience = "1",
+            issuer = "http://localhost:$authPort/default",
+            jwksUri = "http://localhost:$authPort/default/jwks",
+        )),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
             modiaGenerell = UUID.fromString(modiaGenerell),
             modiaOppfølging = UUID.fromString(modiaOppfølging),
