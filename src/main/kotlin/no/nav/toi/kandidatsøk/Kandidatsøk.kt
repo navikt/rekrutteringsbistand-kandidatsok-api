@@ -31,7 +31,8 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
             .onEach { it.berikMedParameter { request[it]?.let(::Parameter) } }
             .filter(Filter::erAktiv)
             .map(Filter::lagESFilterFunksjon)
-        val result = openSearchClient.kandidatSøk(filter)
+        val side = ctx.queryParam("side")?.toInt() ?: 1
+        val result = openSearchClient.kandidatSøk(filter, side)
         val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
         if (fodselsnummer != null) {
             AuditLogg.loggOppslagKandidatStillingssøk(fodselsnummer, ctx.authenticatedUser().navIdent)
@@ -40,7 +41,7 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
     }
 }
 
-private fun OpenSearchClient.kandidatSøk(filter: List<FilterFunksjon>): SearchResponse<JsonNode> {
+private fun OpenSearchClient.kandidatSøk(filter: List<FilterFunksjon>, side: Int): SearchResponse<JsonNode> {
     return search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {
@@ -57,7 +58,7 @@ private fun OpenSearchClient.kandidatSøk(filter: List<FilterFunksjon>): SearchR
         trackTotalHits(true)
         sort("tidsstempel", SortOrder.Desc)
         size(25)
-        from(0)
+        from(25*(side-1))
     }
 }
 
