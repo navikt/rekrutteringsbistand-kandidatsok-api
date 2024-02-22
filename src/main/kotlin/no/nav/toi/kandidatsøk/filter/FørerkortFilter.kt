@@ -118,7 +118,7 @@ private class FørerkortFilter: Filter {
                                 query_ {
                                     term_ {
                                         field("forerkort.forerkortKodeKlasse")
-                                        value(FieldValue.of(førerkort.kode))
+                                        value(førerkort.kode)
                                     }
                                 }
                             }

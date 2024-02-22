@@ -67,6 +67,13 @@ fun Query.Builder.term_(
 ): ObjectBuilder<Query> =
     term { it.body() }
 
+fun Query.Builder.multiMatch_(
+    body: MultiMatchQuery.Builder.() -> ObjectBuilder<MultiMatchQuery>
+): ObjectBuilder<Query> =
+    multiMatch { it.body() }
+
+fun TermQuery.Builder.value(value: String): ObjectBuilder<TermQuery> = value(FieldValue.of(value))
+
 fun SearchRequest.Builder.source_(
     body: SourceConfig.Builder.() -> ObjectBuilder<SourceConfig>
 ): SearchRequest.Builder =

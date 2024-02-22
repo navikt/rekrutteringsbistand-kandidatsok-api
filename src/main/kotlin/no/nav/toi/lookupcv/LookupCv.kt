@@ -41,7 +41,7 @@ private fun OpenSearchClient.lookupCv(params: RequestDto): SearchResponse<JsonNo
         index(DEFAULT_INDEX)
         query_ {
             term_ {
-                field("kandidatnr").value(FieldValue.of(params.kandidatnr))
+                field("kandidatnr").value(params.kandidatnr)
             }
         }
         size(1)

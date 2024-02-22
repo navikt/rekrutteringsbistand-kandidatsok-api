@@ -40,7 +40,7 @@ private fun OpenSearchClient.lookupKandidatsammendrag(params: RequestDto): Searc
     return search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {
-            term_ { field("kandidatnr").value(FieldValue.of(params.kandidatnr)) }
+            term_ { field("kandidatnr").value(params.kandidatnr) }
         }
         source_ {
             includes(
