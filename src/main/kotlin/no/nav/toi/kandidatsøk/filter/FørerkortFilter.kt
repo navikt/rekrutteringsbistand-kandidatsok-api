@@ -1,7 +1,6 @@
 package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.*
-import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch._types.query_dsl.ChildScoreMode
 
 fun List<Filter>.medFørerkortFilter() = this + FørerkortFilter()
