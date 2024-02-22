@@ -430,6 +430,46 @@ class KandidatsøkTest {
         Assertions.assertThat(response.statusCode).isEqualTo(200)
         JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
     }
+    @Test
+    fun `Kan søke kandidat med alle filtre på en gang`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.stedTerm,
+                        KandidatsøkRespons.arbeidsønskeTerm, KandidatsøkRespons.queryMedKMultiMatch,
+                        KandidatsøkRespons.utdanningTerm, KandidatsøkRespons.prioriterteMålgrupperTerm,
+                        KandidatsøkRespons.nyligArbeidsErfaringTerm, KandidatsøkRespons.hovedmålTerm,
+                        KandidatsøkRespons.kompetanseTerm, KandidatsøkRespons.førerkortTerm,
+                        KandidatsøkRespons.språkTerm, innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM),
+                    true, false))
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
+                )
+        )
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""
+                {
+                    "fritekst":"søkeord",
+                    "sted":"NO18.1804",
+                    "arbeidsonske":"Sauegjeter",
+                    "innsatsgruppe":["BATT","BFORM"],
+                    "sprak":"Nynorsk",
+                    "arbeidserfaring":["Hvalfanger","Kokk"],"ferskhet":2,
+                    "hovedmål":["SKAFFEA","OKEDELT"],
+                    "kompetanse":["Fagbrev FU-operatør","Kotlin"],
+                    "førerkort":["D - Buss","BE - Personbil med tilhenger"],
+                    "utdanningsnivå":["videregaende","bachelor","doktorgrad"],
+                    "prioritertMålgruppe":["senior","unge","hullICv"],
+                    "fritekst":"søkeord"
+                }""".trimIndent())
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
+    }
 
     private fun lagLokalApp() = App(
         port = 8080,
