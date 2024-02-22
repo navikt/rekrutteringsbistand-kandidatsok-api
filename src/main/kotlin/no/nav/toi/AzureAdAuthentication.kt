@@ -50,20 +50,25 @@ fun Context.authenticatedUser() = attribute<AuthenticatedUser>("authenticatedUse
         throw InternalServerErrorResponse()
     }
 
+data class AuthenticationConfiguration(
+    val issuer: String,
+    val jwksUri: String,
+    val audience: String,
+)
+
 /**
  * Setter opp token-verifisering på en path på Javalin-serveren
  */
 fun Javalin.azureAdAuthentication(
     path: String,
-    azureAppClientId: String,
-    azureOpenidConfigIssuer: String,
-    azureOpenidConfigJwksUri: String,
+    authenticationConfigurations: List<AuthenticationConfiguration>,
     rolleUuidSpesifikasjon: RolleUuidSpesifikasjon,
 ): Javalin? {
-    val verifier = jwtVerifier(azureOpenidConfigJwksUri, azureOpenidConfigIssuer, azureAppClientId)
-    return before(path) {
-        val jwt = verifier.verify(it.hentToken())
-        it.attribute("authenticatedUser", AuthenticatedUser.fromJwt(jwt, rolleUuidSpesifikasjon))
+    val verifiers = authenticationConfigurations.map { jwtVerifier(it) }
+    return before(path) { ctx ->
+        val jwt = verifyJwt(verifiers, ctx.hentToken())
+
+        ctx.attribute("authenticatedUser", AuthenticatedUser.fromJwt(jwt, rolleUuidSpesifikasjon))
     }
         .exception(JWTVerificationException::class.java) { e, ctx ->
             when (e) {
@@ -82,6 +87,23 @@ fun Javalin.azureAdAuthentication(
                 ctx.status(HttpStatus.UNAUTHORIZED).result("")
             }
         }
+}
+
+private fun verifyJwt(
+    verifiers: List<JWTVerifier>,
+    token: String
+): DecodedJWT {
+    for (verifier in verifiers) {
+        try {
+            return verifier.verify(token)
+        } catch (e: SigningKeyNotFoundException) {
+            // Token ikke utstedt for denne verifieren, prøv neste
+        } catch (e: JWTVerificationException) {
+            throw e
+        }
+    }
+
+    throw SigningKeyNotFoundException("Token ikke signert av noen av issuerene", null)
 }
 
 /**
@@ -104,12 +126,10 @@ private fun Context.hentToken(): String {
  * Setter opp en jwtVerifier som verifiserer token
  */
 private fun jwtVerifier(
-    azureOpenidConfigJwksUri: String,
-    azureOpenidConfigIssuer: String,
-    azureAppClientId: String
-): JWTVerifier = JWT.require(algorithm(azureOpenidConfigJwksUri))
-    .withIssuer(azureOpenidConfigIssuer)
-    .withAudience(azureAppClientId)
+    authenticationConfiguration: AuthenticationConfiguration,
+): JWTVerifier = JWT.require(algorithm(authenticationConfiguration.jwksUri))
+    .withIssuer(authenticationConfiguration.issuer)
+    .withAudience(authenticationConfiguration.audience)
     .withClaimPresence(navIdentClaim)
     .withClaimPresence("groups")
     .build()

@@ -74,15 +74,24 @@ fun Query.Builder.multiMatch_(
 
 fun TermQuery.Builder.value(value: String): ObjectBuilder<TermQuery> = value(FieldValue.of(value))
 
-fun SearchRequest.Builder.source_(
-    body: SourceConfig.Builder.() -> ObjectBuilder<SourceConfig>
-): SearchRequest.Builder =
-    source { it.body() }
-
 fun Query.Builder.bool_(
     body: BoolQuery.Builder.() -> ObjectBuilder<BoolQuery>
 ): ObjectBuilder<Query> =
     bool { it.body() }
+
+fun BoolQuery.Builder.should_(
+    queriesBuilders: List<(Query.Builder.() -> Unit)>
+): BoolQuery.Builder = apply {
+    val queries = queriesBuilders.map { builder ->
+        Query.Builder().apply(builder).build()
+    }
+    should(queries)
+}
+
+fun SearchRequest.Builder.source_(
+    body: SourceConfig.Builder.() -> ObjectBuilder<SourceConfig>
+): SearchRequest.Builder =
+    source { it.body() }
 
 fun BoolQuery.Builder.must_(
     body: Query.Builder.() -> ObjectBuilder<Query>

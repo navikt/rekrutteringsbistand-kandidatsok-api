@@ -12,6 +12,7 @@ import io.javalin.validation.ValidationException
 import no.nav.toi.kandidatsammendrag.handleKandidatSammendrag
 import no.nav.toi.kandidatstillingsøk.handleLookupKandidatStillingssøk
 import no.nav.toi.kandidatsøk.handleKandidatSøk
+import no.nav.toi.kompetanseforslag.handleKompetanseforslag
 import no.nav.toi.kuberneteshealth.handleHealth
 import no.nav.toi.lookupcv.handleLookupCv
 import no.nav.toi.me.handleMe
@@ -26,9 +27,7 @@ import java.util.*
  */
 class App(
     private val port: Int = 8080,
-    private val azureAppClientId: String,
-    private val azureOpenidConfigIssuer: String,
-    private val azureOpenidConfigJwksUri: String,
+    private val authenticationConfigurations: List<AuthenticationConfiguration>,
     private val rolleUuidSpesifikasjon: RolleUuidSpesifikasjon,
     openSearchUsername: String,
     openSearchPassword: String,
@@ -70,14 +69,14 @@ class App(
         javalin.handleMe()
         javalin.handleLookupCv(openSearchClient)
         javalin.handleKandidatSammendrag(openSearchClient)
+        javalin.handleKompetanseforslag(openSearchClient)
         javalin.handleLookupKandidatStillingssøk(openSearchClient)
         javalin.handleKandidatSøk(openSearchClient)
 
+
         javalin.azureAdAuthentication(
             path = "/api/*",
-            azureAppClientId = azureAppClientId,
-            azureOpenidConfigIssuer = azureOpenidConfigIssuer,
-            azureOpenidConfigJwksUri = azureOpenidConfigJwksUri,
+            authenticationConfigurations = authenticationConfigurations,
             rolleUuidSpesifikasjon = rolleUuidSpesifikasjon,
         )
 
@@ -97,11 +96,25 @@ class App(
     }
 }
 
+private val fakedingsAuthenticationConfiguration = AuthenticationConfiguration(
+    jwksUri = "https://fakedings.intern.dev.nav.no/fake/jwks",
+    issuer = "https://fakedings.intern.dev.nav.no/fake/aad",
+    audience = "dev-gcp:toi:rekrutteringsbistand-kandidatsok-api",
+)
+
 fun main() {
     App(
-        azureAppClientId = System.getenv("AZURE_APP_CLIENT_ID")!!,
-        azureOpenidConfigIssuer = System.getenv("AZURE_OPENID_CONFIG_ISSUER")!!,
-        azureOpenidConfigJwksUri = System.getenv("AZURE_OPENID_CONFIG_JWKS_URI")!!,
+        authenticationConfigurations = listOfNotNull(
+            AuthenticationConfiguration(
+                audience = System.getenv("AZURE_APP_CLIENT_ID")!!,
+                issuer = System.getenv("AZURE_OPENID_CONFIG_ISSUER")!!,
+                jwksUri  = System.getenv("AZURE_OPENID_CONFIG_JWKS_URI")!!,
+            ),
+            if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp")
+                fakedingsAuthenticationConfiguration
+            else
+                null
+        ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
             modiaGenerell = UUID.fromString(System.getenv("MODIA_GENERELL_GRUPPE")!!),
             modiaOppfølging = UUID.fromString(System.getenv("MODIA_OPPFOLGING_GRUPPE")!!),
