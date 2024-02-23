@@ -1,5 +1,5 @@
 # rekrutteringsbistand-kandidatsok-api
-TODO
+API for kandidat-/jobbsøkerdata i systemet Rekrutteringsbistand. Skal forhåpentligvis gradvis ta over en del ansvar fra den eldre appen [rekrutteringsbistand-kandidat-api](https://github.com/navikt/rekrutteringsbistand-kandidat-api), som i realiteten handler mer om kandidatlister enn kandidater.
 
 ## Fakedings-autentisering (lokal utikling)
 Vi bruker [fakedings](https://github.com/navikt/fakedings?tab=readme-ov-file) for autentisering

@@ -121,7 +121,7 @@ class KandidatStillingssokLookupTest {
         )
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
             .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
