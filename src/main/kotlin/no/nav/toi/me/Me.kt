@@ -2,7 +2,7 @@ package no.nav.toi.me
 
 import io.javalin.Javalin
 import io.javalin.openapi.*
-import no.nav.toi.authenticatedUser
+import no.nav.toi.auth.authenticatedUser
 
 private const val endepunktMe = "/api/me"
 

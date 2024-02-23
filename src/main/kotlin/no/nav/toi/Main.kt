@@ -10,6 +10,8 @@ import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
+import no.nav.toi.auth.AuthenticationConfiguration
+import no.nav.toi.auth.azureAdAuthentication
 import no.nav.toi.kandidatnavn.PdlClient
 import no.nav.toi.kandidatnavn.handleKandidatnavn
 import no.nav.toi.kandidatsammendrag.handleKandidatSammendrag

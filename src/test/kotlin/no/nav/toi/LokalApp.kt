@@ -1,6 +1,7 @@
 package no.nav.toi
 
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.toi.auth.AuthenticationConfiguration
 import java.util.*
 
 

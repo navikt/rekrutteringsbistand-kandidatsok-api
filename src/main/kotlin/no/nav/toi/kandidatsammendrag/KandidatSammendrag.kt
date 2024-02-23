@@ -5,6 +5,7 @@ import io.javalin.Javalin
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
+import no.nav.toi.auth.authenticatedUser
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch.core.SearchResponse

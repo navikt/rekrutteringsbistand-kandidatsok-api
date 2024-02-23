@@ -9,6 +9,7 @@ import io.javalin.http.bodyValidator
 import io.javalin.openapi.*
 import io.javalin.openapi.HttpMethod.POST
 import no.nav.toi.*
+import no.nav.toi.auth.authenticatedUser
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch.core.SearchResponse

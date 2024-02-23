@@ -1,4 +1,4 @@
-package no.nav.toi
+package no.nav.toi.auth
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.auth0.jwk.SigningKeyNotFoundException
@@ -14,13 +14,18 @@ import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.InternalServerErrorResponse
 import io.javalin.http.UnauthorizedResponse
+import no.nav.toi.Rolle
+import no.nav.toi.RolleUuidSpesifikasjon
 import org.eclipse.jetty.http.HttpHeader
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.security.interfaces.RSAPublicKey
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 private const val navIdentClaim = "NAVident"
+private val log: Logger = LoggerFactory.getLogger("no.nav.toi.auth")
 
 /**
  * Representerer en autensiert bruker
@@ -89,13 +94,9 @@ private fun verifyJwt(
         try {
             return verifier.verify(token)
         } catch (e: SigningKeyNotFoundException) {
-            // Token ikke utstedt for denne verifieren, prøv neste
-            // TODO Are: Logge excepton for å kunne debugge
-        } catch (e: JWTVerificationException) {
-            throw e
+            log.info("Token er ikke utstedt for denne verifieren, prøver neste", e)
         }
     }
-
     throw SigningKeyNotFoundException("Token ikke signert av noen av issuerene", null)
 }
 
