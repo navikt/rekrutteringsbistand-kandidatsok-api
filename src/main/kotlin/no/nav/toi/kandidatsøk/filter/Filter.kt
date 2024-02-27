@@ -15,6 +15,7 @@ interface Filter {
     fun berikMedParameter(hentParameter: (String)->Parameter?)
     fun erAktiv(): Boolean
     fun lagESFilterFunksjon(): FilterFunksjon
+    fun auditLog(navIdent: String) {}
 }
 
 fun søkeFilter() = listOf<Filter>()

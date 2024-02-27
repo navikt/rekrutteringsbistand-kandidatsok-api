@@ -30,13 +30,9 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
         val filter = søkeFilter()
             .onEach { it.berikMedParameter { request[it]?.let(::Parameter) } }
             .filter(Filter::erAktiv)
-            .map(Filter::lagESFilterFunksjon)
         val side = ctx.queryParam("side")?.toInt() ?: 1
-        val result = openSearchClient.kandidatSøk(filter, side)
-        val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
-        if (fodselsnummer != null) {
-            AuditLogg.loggOppslagKandidatStillingssøk(fodselsnummer, ctx.authenticatedUser().navIdent)
-        }
+        val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side)
+        filter.forEach { it.auditLog(ctx.authenticatedUser().navIdent) }
         ctx.json(result.toResponseJson())
     }
 }

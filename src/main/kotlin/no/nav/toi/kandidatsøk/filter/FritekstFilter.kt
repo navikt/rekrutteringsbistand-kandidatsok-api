@@ -8,6 +8,7 @@ private interface SøkeType {
     fun erAktiv(): Boolean
     fun passendeSøketype(søkeord: String): Boolean
     fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon
+    fun auditLog(userid: String?, navIdent: String) {}
 }
 
 private object IdentSøk: SøkeType {
@@ -30,6 +31,10 @@ private object IdentSøk: SøkeType {
                 }
             }
         }
+    }
+
+    override fun auditLog(userid: String?, navIdent: String) {
+        AuditLogg.loggOppslagKAndidatsøk(userid!!, navIdent)
     }
 }
 private object KandidatnummerSøk: SøkeType {
@@ -72,6 +77,10 @@ private class Søk(private val søkeOrd: String?) {
     fun lagESFilterFunksjon(): FilterFunksjon {
         return type.lagESFilterFunksjon(søkeOrd)
     }
+
+    fun auditLog(navIdent: String) {
+        type.auditLog(søkeOrd, navIdent)
+    }
 }
 
 private fun String.tilType() =
@@ -86,4 +95,9 @@ private class FritekstFilter: Filter {
     override fun erAktiv() = søk.erAktiv()
 
     override fun lagESFilterFunksjon() = søk.lagESFilterFunksjon()
+
+    override fun auditLog(navIdent: String) {
+        if(erAktiv())
+            søk.auditLog(navIdent)
+    }
 }
