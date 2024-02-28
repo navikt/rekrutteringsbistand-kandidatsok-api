@@ -6,7 +6,6 @@ import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
 import org.opensearch.client.opensearch.OpenSearchClient
-import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch.core.SearchResponse
 
 private const val endepunkt = "/api/lookup-cv"
@@ -41,7 +40,7 @@ private fun OpenSearchClient.lookupCv(params: RequestDto): SearchResponse<JsonNo
         index(DEFAULT_INDEX)
         query_ {
             term_ {
-                field("kandidatnr").value(FieldValue.of(params.kandidatnr))
+                field("kandidatnr").value(params.kandidatnr)
             }
         }
         size(1)

@@ -1,7 +1,6 @@
 package no.nav.toi.kompetanseforslag
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.javalin.Javalin
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.HttpMethod
@@ -10,7 +9,6 @@ import io.javalin.openapi.OpenApiContent
 import io.javalin.openapi.OpenApiRequestBody
 import no.nav.toi.*
 import org.opensearch.client.opensearch.OpenSearchClient
-import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch.core.SearchResponse
 
 

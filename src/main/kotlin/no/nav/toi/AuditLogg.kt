@@ -47,4 +47,12 @@ object AuditLogg {
         auditLogger.log(message)
         secureLog.info("auditlogger: {}", message)
     }
+
+    fun loggOppslagKAndidatsøk(userid: String, navIdent: String) {
+        logCefMessage(
+            navIdent = navIdent,
+            userid = userid,
+            msg = "NAV-ansatt har søkt på et spesifikt ident-nummer i kandidatsøket."
+        )
+    }
 }

@@ -6,6 +6,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
+import com.auth0.jwt.exceptions.MissingClaimException
 import com.auth0.jwt.exceptions.TokenExpiredException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.RSAKeyProvider
@@ -78,6 +79,13 @@ fun Javalin.azureAdAuthentication(
         }.exception(SigningKeyNotFoundException::class.java) { _, ctx ->
             log.warn("Noen prøvde å aksessere endepunkt med en token signert med en falsk issuer")
             ctx.status(HttpStatus.UNAUTHORIZED).result("")
+        }.exception(MissingClaimException::class.java) { e, ctx ->
+            if(e.claimName=="groups") {
+                ctx.status(HttpStatus.FORBIDDEN).result("")
+            } else {
+                log.warn("Noen prøvde å aksessere endepunkt med en token med manglende claim", e)
+                ctx.status(HttpStatus.UNAUTHORIZED).result("")
+            }
         }
 }
 

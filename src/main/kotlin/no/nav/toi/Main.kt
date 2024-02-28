@@ -11,6 +11,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
 import no.nav.toi.kandidatsammendrag.handleKandidatSammendrag
 import no.nav.toi.kandidatstillingsøk.handleLookupKandidatStillingssøk
+import no.nav.toi.kandidatsøk.handleKandidatSøk
 import no.nav.toi.kompetanseforslag.handleKompetanseforslag
 import no.nav.toi.kuberneteshealth.handleHealth
 import no.nav.toi.lookupcv.handleLookupCv
@@ -70,6 +71,7 @@ class App(
         javalin.handleKandidatSammendrag(openSearchClient)
         javalin.handleKompetanseforslag(openSearchClient)
         javalin.handleLookupKandidatStillingssøk(openSearchClient)
+        javalin.handleKandidatSøk(openSearchClient)
 
 
         javalin.azureAdAuthentication(

@@ -6,7 +6,6 @@ import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
 import org.opensearch.client.opensearch.OpenSearchClient
-import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch.core.SearchResponse
 
 private const val endepunkt = "/api/kandidatsammendrag"
@@ -40,7 +39,7 @@ private fun OpenSearchClient.lookupKandidatsammendrag(params: RequestDto): Searc
     return search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {
-            term_ { field("kandidatnr").value(FieldValue.of(params.kandidatnr)) }
+            term_ { field("kandidatnr").value(params.kandidatnr) }
         }
         source_ {
             includes(
