@@ -29,6 +29,7 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
         val request = ctx.bodyAsClass<Map<String,Any>>()
         val filter = søkeFilter()
             .onEach { it.berikMedParameter { request[it]?.let(::Parameter) } }
+            .onEach { it.berikMedAuthenticatedUser(ctx.authenticatedUser()) }
             .filter(Filter::erAktiv)
         val side = ctx.queryParam("side")?.toInt() ?: 1
         val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side)

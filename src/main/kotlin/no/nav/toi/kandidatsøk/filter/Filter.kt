@@ -1,5 +1,6 @@
 package no.nav.toi.kandidatsøk.filter
 
+import no.nav.toi.AuthenticatedUser
 import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
 import org.opensearch.client.util.ObjectBuilder
 
@@ -16,6 +17,7 @@ interface Filter {
     fun erAktiv(): Boolean
     fun lagESFilterFunksjon(): FilterFunksjon
     fun auditLog(navIdent: String) {}
+    fun berikMedAuthenticatedUser(authenticatedUser: AuthenticatedUser) {}
 }
 
 fun søkeFilter() = listOf<Filter>()
@@ -30,3 +32,4 @@ fun søkeFilter() = listOf<Filter>()
     .medUtdanningFilter()
     .medPrioritertMålgruppeFilter()
     .medFritekstFilter()
+    .medPorteføljeFilter()
