@@ -8,27 +8,31 @@ import org.opensearch.client.opensearch._types.query_dsl.Operator
 fun List<Filter>.medSpråkFilter() = this + SpråkFilter()
 
 private class SpråkFilter: Filter {
-    private var språk: String? = null
+    private var språk = emptyList<String>()
     override fun berikMedParameter(filterParametre: FilterParametre) {
-        språk = filterParametre.språk
+        språk = filterParametre.språk ?: emptyList()
     }
 
-    override fun erAktiv() = språk != null
+    override fun erAktiv() = språk.isNotEmpty()
 
     override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
             bool_ {
-                should_ {
-                    nested_ {
-                        path("sprak")
-                        query_ {
-                            match_ {
-                                field("sprak.sprakKodeTekst")
-                                operator(Operator.And)
-                                query(språk!!)
+                apply {
+                    språk.forEach {språk ->
+                        should_ {
+                            nested_ {
+                                path("sprak")
+                                query_ {
+                                    match_ {
+                                        field("sprak.sprakKodeTekst")
+                                        operator(Operator.And)
+                                        query(språk)
+                                    }
+                                }
+                                scoreMode(ChildScoreMode.Sum)
                             }
                         }
-                        scoreMode(ChildScoreMode.Sum)
                     }
                 }
             }
