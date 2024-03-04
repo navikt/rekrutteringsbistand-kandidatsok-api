@@ -17,8 +17,8 @@ data class FilterParametre(
     val portefølje: String?,
     val valgtKontor: List<String>?,
     val innsatsgruppe: List<String>?,
-    val ønsketYrke: String?, // TODO: feil type List<String>,
-    val ønsketSted: String?, // TODO: feil type List<String>,
+    val ønsketYrke: List<String>?,
+    val ønsketSted: String?, // TODO: feil type List<String>?,
     val borPåØnsketSted: Boolean?,
     val kompetanse: List<String>?,
     val førerkort: List<String>?,
@@ -27,7 +27,7 @@ data class FilterParametre(
     val utdanningsnivå:List<String>?,
     val arbeidserfaring:List<String>?,
     val ferskhet: Int?,
-    val språk: String? // TODO: feil type List<String>,
+    val språk: String? // TODO: feil type List<String>?,
 )
 
 @OpenApi(

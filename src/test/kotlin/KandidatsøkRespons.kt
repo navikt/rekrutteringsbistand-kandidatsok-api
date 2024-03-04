@@ -7,7 +7,7 @@ object KandidatsøkRespons {
         }
 
     val stedTerm = """{"bool":{"should":[{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO18.1804|NO18|NO"}}}]}}}}]}}"""
-    val arbeidsønskeTerm = """{"bool":{"should":[{"match":{"yrkeJobbonskerObj.styrkBeskrivelse":{"fuzziness":"0","operator":"and","query":"Sauegjeter"}}},{"match":{"yrkeJobbonskerObj.sokeTitler":{"fuzziness":"0","operator":"and","query":"Sauegjeter"}}}]}}"""
+    val arbeidsønskeTerm = """{"bool":{"should":[{"match":{"yrkeJobbonskerObj.styrkBeskrivelse":{"query":"Sauegjeter","fuzziness":"0","operator":"and"}}},{"match":{"yrkeJobbonskerObj.sokeTitler":{"query":"Sauegjeter","fuzziness":"0","operator":"and"}}},{"match":{"yrkeJobbonskerObj.styrkBeskrivelse":{"query":"Saueklipper","fuzziness":"0","operator":"and"}}},{"match":{"yrkeJobbonskerObj.sokeTitler":{"query":"Saueklipper","fuzziness":"0","operator":"and"}}}]}}"""
     val innsatsgruppeTermMedBATTogBFORM = """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM"]}}"""
     val språkTerm = """{"bool":{"should":[{"nested":{"path":"sprak","query":{"match":{"sprak.sprakKodeTekst":{"query":"Nynorsk","operator":"and"}}},"score_mode":"sum"}}]}}"""
     val arbeidsErfaringTerm = """{"bool":{"should":[{"nested":{"path":"yrkeserfaring","query":{"match":{"yrkeserfaring.sokeTitler":{"query":"Barnehageassistent","operator":"and"}}}}},{"nested":{"path":"yrkeserfaring","query":{"match":{"yrkeserfaring.sokeTitler":{"query":"Butikkansvarlig","operator":"and"}}}}}]}}"""
