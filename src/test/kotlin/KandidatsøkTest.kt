@@ -452,6 +452,26 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
     }
     @Test
+    fun `Kan søke på kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.valgtKontorTerm), true, false))
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
+                )
+        )
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{"portefølje":"kontor","valgtKontor":["NAV Hamar","NAV Lofoten"]}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
+    }
+    @Test
     fun `Kan søke kandidat med fritekstsøk`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
