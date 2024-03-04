@@ -8,6 +8,7 @@ import no.nav.toi.*
 import no.nav.toi.kandidatsøk.filter.*
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.SortOrder
+import org.opensearch.client.opensearch.core.SearchRequest
 import org.opensearch.client.opensearch.core.SearchResponse
 
 private const val endepunkt = "/api/kandidatsok"
@@ -30,6 +31,25 @@ data class FilterParametre(
     val språk: List<String>?
 )
 
+private interface Sortering {
+    fun erAktiv(parameterVerdi: String?): Boolean
+    fun lagSorteringES(): SearchRequest.Builder.() -> SearchRequest.Builder
+}
+
+private object SisteFørst: Sortering {
+    override fun erAktiv(parameterVerdi: String?) = parameterVerdi == null || "nyeste" == parameterVerdi
+    override fun lagSorteringES(): SearchRequest.Builder.() -> SearchRequest.Builder = {
+        sort("tidsstempel", SortOrder.Desc)
+    }
+}
+
+private object FlestKriterier: Sortering {
+    override fun erAktiv(parameterVerdi: String?) = "score" == parameterVerdi
+    override fun lagSorteringES(): SearchRequest.Builder.() -> SearchRequest.Builder = {this}
+}
+
+private fun String?.tilSortering() = listOf(SisteFørst,FlestKriterier).first { it.erAktiv(this) }
+
 @OpenApi(
     summary = "Søk på kandidater basert på søketermer",
     operationId = endepunkt,
@@ -42,18 +62,19 @@ data class FilterParametre(
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
         val request = ctx.bodyAsClass<FilterParametre>()
+        val sorterting = ctx.queryParam("sortering").tilSortering()
         val filter = søkeFilter()
             .onEach { it.berikMedParameter (request) }
             .onEach { it.berikMedAuthenticatedUser(ctx.authenticatedUser()) }
             .filter(Filter::erAktiv)
         val side = ctx.queryParam("side")?.toInt() ?: 1
-        val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side)
+        val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side, sorterting)
         filter.forEach { it.auditLog(ctx.authenticatedUser().navIdent) }
         ctx.json(result.toResponseJson())
     }
 }
 
-private fun OpenSearchClient.kandidatSøk(filter: List<FilterFunksjon>, side: Int): SearchResponse<JsonNode> {
+private fun OpenSearchClient.kandidatSøk(filter: List<FilterFunksjon>, side: Int, sorterting: Sortering): SearchResponse<JsonNode> {
     return search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {
@@ -68,7 +89,7 @@ private fun OpenSearchClient.kandidatSøk(filter: List<FilterFunksjon>, side: In
             )
         }
         trackTotalHits(true)
-        sort("tidsstempel", SortOrder.Desc)
+        sorterting.lagSorteringES()()
         size(25)
         from(25*(side-1))
     }
