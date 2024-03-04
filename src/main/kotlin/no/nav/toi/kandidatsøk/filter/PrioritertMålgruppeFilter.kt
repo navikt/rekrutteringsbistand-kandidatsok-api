@@ -1,6 +1,7 @@
 package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.FilterParametre
 import java.time.LocalDate
 
 fun List<Filter>.medPrioritertMålgruppeFilter() = this + PrioritertMålgruppeFilter()
@@ -156,8 +157,8 @@ private fun String.tilMålgruppe() = listOf(Unge, Senior, HullICv).first { it.ha
 
 private class PrioritertMålgruppeFilter: Filter {
     private var prioriterteMålgrupper = emptyList<Målgruppe>()
-    override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
-        prioriterteMålgrupper = hentParameter("prioritertMålgruppe")?.somStringListe()?.map(String::tilMålgruppe) ?: prioriterteMålgrupper
+    override fun berikMedParameter(filterParametre: FilterParametre) {
+        prioriterteMålgrupper = filterParametre.prioritertMålgruppe?.map(String::tilMålgruppe)  ?: emptyList()
     }
 
     override fun erAktiv() = prioriterteMålgrupper.isNotEmpty()

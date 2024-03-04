@@ -1,6 +1,7 @@
 package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.FilterParametre
 import org.opensearch.client.opensearch._types.query_dsl.ChildScoreMode
 
 fun List<Filter>.medFørerkortFilter() = this + FørerkortFilter()
@@ -94,13 +95,12 @@ private fun String.somFørerkort() =
 
 private class FørerkortFilter: Filter {
     private var førerkort = emptySet<Førerkort>()
-    override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
-        førerkort = hentParameter("førerkort")
-            ?.somStringListe()
+    override fun berikMedParameter(filterParametre: FilterParametre) {
+        førerkort = filterParametre.førerkort
             ?.map(String::somFørerkort)
             ?.flatMap(Førerkort::alleSomKanKjøreDetteKortet)
             ?.toSet()
-            ?: førerkort
+            ?: emptySet()
     }
 
     override fun erAktiv() = førerkort.isNotEmpty()

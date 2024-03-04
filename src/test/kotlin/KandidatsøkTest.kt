@@ -156,7 +156,7 @@ class KandidatsøkTest {
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
-            .body("""{"sted":"NO18.1804"}""")
+            .body("""{"ønsketSted":"NO18.1804"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -177,7 +177,7 @@ class KandidatsøkTest {
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
-            .body("""{"arbeidsonske":"Sauegjeter"}""")
+            .body("""{"ønsketYrke":"Sauegjeter"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -219,7 +219,7 @@ class KandidatsøkTest {
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
-            .body("""{"sprak":"Nynorsk"}""")
+            .body("""{"språk":"Nynorsk"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -513,10 +513,10 @@ class KandidatsøkTest {
             .body("""
                 {
                     "fritekst":"søkeord",
-                    "sted":"NO18.1804",
-                    "arbeidsonske":"Sauegjeter",
+                    "ønsketSted":"NO18.1804",
+                    "ønsketYrke":"Sauegjeter",
                     "innsatsgruppe":["BATT","BFORM"],
-                    "sprak":"Nynorsk",
+                    "språk":"Nynorsk",
                     "arbeidserfaring":["Hvalfanger","Kokk"],"ferskhet":2,
                     "hovedmål":["SKAFFEA","OKEDELT"],
                     "kompetanse":["Fagbrev FU-operatør","Kotlin"],

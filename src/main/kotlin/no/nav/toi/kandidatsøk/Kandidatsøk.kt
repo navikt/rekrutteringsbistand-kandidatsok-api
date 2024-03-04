@@ -12,23 +12,38 @@ import org.opensearch.client.opensearch.core.SearchResponse
 
 private const val endepunkt = "/api/kandidatsok"
 
-private data class RequestDto(
-    val kandidatnr: String,
+data class FilterParametre(
+    val fritekst: String?,
+    val portefølje: String?,
+    val valgtKontor: List<String>?,
+    val innsatsgruppe: List<String>?,
+    val ønsketYrke: String?, // TODO: feil type List<String>,
+    val ønsketSted: String?, // TODO: feil type List<String>,
+    val borPåØnsketSted: Boolean?,
+    val kompetanse: List<String>?,
+    val førerkort: List<String>?,
+    val prioritertMålgruppe: List<String>?,
+    val hovedmål:List<String>?,
+    val utdanningsnivå:List<String>?,
+    val arbeidserfaring:List<String>?,
+    val ferskhet: Int?,
+    val språk: String? // TODO: feil type List<String>,
 )
 
 @OpenApi(
     summary = "Søk på kandidater basert på søketermer",
     operationId = endepunkt,
     tags = [],
+    requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
     responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
-        val request = ctx.bodyAsClass<Map<String,Any>>()
+        val request = ctx.bodyAsClass<FilterParametre>()
         val filter = søkeFilter()
-            .onEach { it.berikMedParameter { request[it]?.let(::Parameter) } }
+            .onEach { it.berikMedParameter (request) }
             .onEach { it.berikMedAuthenticatedUser(ctx.authenticatedUser()) }
             .filter(Filter::erAktiv)
         val side = ctx.queryParam("side")?.toInt() ?: 1

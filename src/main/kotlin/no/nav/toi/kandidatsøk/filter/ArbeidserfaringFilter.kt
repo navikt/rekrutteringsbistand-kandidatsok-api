@@ -1,6 +1,7 @@
 package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.FilterParametre
 import org.opensearch.client.json.JsonData
 import org.opensearch.client.opensearch._types.query_dsl.Operator
 import org.opensearch.client.opensearch._types.query_dsl.Query
@@ -10,9 +11,9 @@ fun List<Filter>.medArbeidserfaringFilter() = this + ArbeidserfaringFilter()
 private class ArbeidserfaringFilter: Filter {
     private var arbeidsErfaringer: List<String> = emptyList()
     private var ferskhet: Int? = null
-    override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
-        arbeidsErfaringer=hentParameter("arbeidserfaring")?.somStringListe() ?: arbeidsErfaringer
-        ferskhet=hentParameter("ferskhet")?.somInt()
+    override fun berikMedParameter(filterParametre: FilterParametre) {
+        arbeidsErfaringer=filterParametre.arbeidserfaring ?: emptyList()
+        ferskhet=filterParametre.ferskhet
     }
 
     override fun erAktiv() = arbeidsErfaringer.isNotEmpty()

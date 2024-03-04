@@ -1,6 +1,7 @@
 package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.AuthenticatedUser
+import no.nav.toi.kandidatsøk.FilterParametre
 import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
 import org.opensearch.client.util.ObjectBuilder
 
@@ -13,7 +14,7 @@ class Parameter(private val verdi: Any) {
 }
 
 interface Filter {
-    fun berikMedParameter(hentParameter: (String)->Parameter?)
+    fun berikMedParameter(filterParametre: FilterParametre)
     fun erAktiv(): Boolean
     fun lagESFilterFunksjon(): FilterFunksjon
     fun auditLog(navIdent: String) {}

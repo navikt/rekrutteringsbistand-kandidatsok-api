@@ -1,6 +1,7 @@
 package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.FilterParametre
 
 fun List<Filter>.medFritekstFilter() = this + FritekstFilter()
 
@@ -88,8 +89,8 @@ private fun String.tilType() =
 
 private class FritekstFilter: Filter {
     private var søk: Søk = Søk(null)
-    override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
-        søk = Søk(hentParameter("fritekst")?.somString())
+    override fun berikMedParameter(filterParametre: FilterParametre) {
+        søk = Søk(filterParametre.fritekst)
     }
 
     override fun erAktiv() = søk.erAktiv()

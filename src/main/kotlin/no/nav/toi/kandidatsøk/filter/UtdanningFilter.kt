@@ -1,6 +1,7 @@
 package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.FilterParametre
 import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
 import org.opensearch.client.util.ObjectBuilder
 
@@ -64,8 +65,8 @@ private fun String.tilUtdanningsNivå() = listOf(Videregående, Fagskole, Bachel
 
 private class UtdanningFilter: Filter {
     private var utdanningsnivå = emptyList<UtdanningsNivå>()
-    override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
-        utdanningsnivå = hentParameter("utdanningsnivå")?.somStringListe()?.map(String::tilUtdanningsNivå) ?: emptyList()
+    override fun berikMedParameter(filterParametre: FilterParametre) {
+        utdanningsnivå = filterParametre.utdanningsnivå?.map(String::tilUtdanningsNivå) ?: emptyList()
     }
 
     override fun erAktiv() = utdanningsnivå.isNotEmpty()

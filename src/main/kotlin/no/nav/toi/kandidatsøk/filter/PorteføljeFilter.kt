@@ -1,6 +1,7 @@
 package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.FilterParametre
 
 fun List<Filter>.medPorteføljeFilter() = this + PorteføljeFilter()
 
@@ -20,8 +21,7 @@ private object MineBrukere: Type {
     }
 }
 
-private class ValgtKontor(hentParameter: (String) -> Parameter?) : Type {
-    private val valgteKontor = hentParameter("valgtKontor")?.somStringListe() ?: emptyList()
+private class ValgtKontor(private val valgteKontor: List<String>) : Type {
     override fun lagESFilterFunksjon(navIdent: String?): FilterFunksjon = {
         must_ {
             bool_ {
@@ -45,9 +45,9 @@ private object IkkeAktiv: Type {
     override fun lagESFilterFunksjon(navIdent: String?): FilterFunksjon ={this}
 }
 
-private fun String.typePorteføljeSpørring(hentParameter: (String) -> Parameter?) = when(this) {
+private fun String.typePorteføljeSpørring(valgteKontor: () -> List<String>) = when(this) {
     "mine" -> MineBrukere
-    "kontor" -> ValgtKontor(hentParameter)
+    "kontor" -> ValgtKontor(valgteKontor())
     else -> throw IllegalArgumentException("$this er ikke en gyldig porteføljetype-spørring")
 }
 
@@ -56,8 +56,8 @@ private class PorteføljeFilter: Filter {
     private var portefølje: Type = IkkeAktiv
     private var authenticatedUser: AuthenticatedUser? = null
 
-    override fun berikMedParameter(hentParameter: (String) -> Parameter?) {
-        portefølje = hentParameter("portefølje")?.somString()?.typePorteføljeSpørring(hentParameter) ?: portefølje
+    override fun berikMedParameter(filterParametre: FilterParametre) {
+        portefølje = filterParametre.portefølje?.typePorteføljeSpørring { filterParametre.valgtKontor!! } ?: IkkeAktiv
     }
 
     override fun erAktiv() = portefølje.erAktiv()
