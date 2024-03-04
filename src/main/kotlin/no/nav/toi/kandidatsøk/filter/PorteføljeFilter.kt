@@ -40,12 +40,13 @@ private class ValgtKontor(private val valgteKontor: List<String>) : Type {
     }
 }
 
-private object IkkeAktiv: Type {
+private object Alle: Type {
     override fun erAktiv() = false
     override fun lagESFilterFunksjon(navIdent: String?): FilterFunksjon ={this}
 }
 
 private fun String.typePorteføljeSpørring(valgteKontor: () -> List<String>) = when(this) {
+    "alle" -> Alle
     "mine" -> MineBrukere
     "kontor" -> ValgtKontor(valgteKontor())
     else -> throw IllegalArgumentException("$this er ikke en gyldig porteføljetype-spørring")
@@ -53,11 +54,11 @@ private fun String.typePorteføljeSpørring(valgteKontor: () -> List<String>) = 
 
 private class PorteføljeFilter: Filter {
 
-    private var portefølje: Type = IkkeAktiv
+    private var portefølje: Type = Alle
     private var authenticatedUser: AuthenticatedUser? = null
 
     override fun berikMedParameter(filterParametre: FilterParametre) {
-        portefølje = filterParametre.portefølje?.typePorteføljeSpørring { filterParametre.valgtKontor!! } ?: IkkeAktiv
+        portefølje = filterParametre.portefølje?.typePorteføljeSpørring { filterParametre.valgtKontor!! } ?: Alle
     }
 
     override fun erAktiv() = portefølje.erAktiv()
