@@ -18,7 +18,7 @@ data class FilterParametre(
     val valgtKontor: List<String>?,
     val innsatsgruppe: List<String>?,
     val ønsketYrke: List<String>?,
-    val ønsketSted: String?, // TODO: feil type List<String>?,
+    val ønsketSted: List<String>?,
     val borPåØnsketSted: Boolean?,
     val kompetanse: List<String>?,
     val førerkort: List<String>?,

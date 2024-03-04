@@ -156,7 +156,7 @@ class KandidatsøkTest {
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
-            .body("""{"ønsketSted":"NO18.1804"}""")
+            .body("""{"ønsketSted":["NO18.1804","NO50.5001","NO02","NO"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -513,7 +513,7 @@ class KandidatsøkTest {
             .body("""
                 {
                     "fritekst":"søkeord",
-                    "ønsketSted":"NO18.1804",
+                    "ønsketSted":["NO18.1804","NO50.5001","NO02","NO"],
                     "ønsketYrke":["Sauegjeter", "Saueklipper"],
                     "innsatsgruppe":["BATT","BFORM"],
                     "språk":"Nynorsk",
