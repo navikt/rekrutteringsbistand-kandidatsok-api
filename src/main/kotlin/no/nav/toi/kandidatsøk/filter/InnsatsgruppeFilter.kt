@@ -6,10 +6,15 @@ import no.nav.toi.terms
 
 fun List<Filter>.medInnsatsgruppeFilter() = this + InnsatsgruppeFilter()
 
+private val lovligeVerdier = listOf("ANDRE","IKVAL","VARIG","BFORM","BATT","IVURD","BKART","OPPFI","VURDI","VURDU")
+private val defaultInnsatsgrupper = listOf("BATT","BFORM","IKVAL","VARIG")
+
 private class InnsatsgruppeFilter: Filter {
-    private var innsatsgrupper = listOf("BATT","BFORM","IKVAL","VARIG")
+    private lateinit var innsatsgrupper: List<String>
+
     override fun berikMedParameter(filterParametre: FilterParametre) {
-        innsatsgrupper = filterParametre.innsatsgruppe ?: innsatsgrupper
+        val innkommendeParameter = filterParametre.innsatsgruppe?.filter { it in lovligeVerdier }
+        innsatsgrupper = if(innkommendeParameter?.isNotEmpty() == true) innkommendeParameter else defaultInnsatsgrupper
     }
 
     override fun erAktiv() = true

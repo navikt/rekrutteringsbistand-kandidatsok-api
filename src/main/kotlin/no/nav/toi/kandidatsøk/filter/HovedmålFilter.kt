@@ -7,7 +7,7 @@ import no.nav.toi.terms
 fun List<Filter>.medHovedmålFilter() = this + HovedmålFilter()
 
 private class HovedmålFilter: Filter {
-    private var hovedMål = emptyList<String>()
+    private lateinit var hovedMål: List<String>
     override fun berikMedParameter(filterParametre: FilterParametre) {
         hovedMål = filterParametre.hovedmål ?: emptyList()
     }
