@@ -13,7 +13,7 @@ private class InnsatsgruppeFilter: Filter {
     private lateinit var innsatsgrupper: List<String>
 
     override fun berikMedParameter(filterParametre: FilterParametre) {
-        val innkommendeParameter = filterParametre.innsatsgruppe?.filter { it in lovligeVerdier }
+        val innkommendeParameter = filterParametre.innsatsgruppe?.filter { it in lovligeVerdier }?.flatMap { if(it=="ANDRE") listOf(it,"IVURD","BKART","OPPFI","VURDI","VURDU") else listOf(it) }
         innsatsgrupper = if(innkommendeParameter?.isNotEmpty() == true) innkommendeParameter else defaultInnsatsgrupper
     }
 
