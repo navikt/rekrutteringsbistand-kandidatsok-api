@@ -41,15 +41,26 @@ private class ValgtKontor(private val valgteKontor: List<String>) : Type {
     }
 }
 
+private class MittKontor(private val orgenhet: String) : Type {
+    override fun lagESFilterFunksjon(navIdent: String?): FilterFunksjon = {
+        must_ {
+            term_ {
+                field("orgenhet")
+                value(orgenhet)
+            }
+        }
+    }
+}
+
 private object Alle: Type {
     override fun erAktiv() = false
     override fun lagESFilterFunksjon(navIdent: String?): FilterFunksjon ={this}
 }
 
-private fun String.typePorteføljeSpørring(valgteKontor: () -> List<String>) = when(this) {
+private fun String.typePorteføljeSpørring(valgteKontor: () -> List<String>, orgenhet: () -> String) = when(this) {
     "alle" -> Alle
     "mine" -> MineBrukere
-    "kontor" -> ValgtKontor(valgteKontor())
+    "kontor" -> MittKontor(orgenhet())
     "valgte" -> ValgtKontor(valgteKontor())
     else -> throw Valideringsfeil("$this er ikke en gyldig porteføljetype-spørring")
 }
@@ -60,7 +71,7 @@ private class PorteføljeFilter: Filter {
     private var authenticatedUser: AuthenticatedUser? = null
 
     override fun berikMedParameter(filterParametre: FilterParametre) {
-        portefølje = filterParametre.portefølje?.typePorteføljeSpørring { filterParametre.valgtKontor ?: throw Valideringsfeil("Må sende med valgtKontor-variabel også")} ?: Alle
+        portefølje = filterParametre.portefølje?.typePorteføljeSpørring( { filterParametre.valgtKontor ?: throw Valideringsfeil("Må sende med valgtKontor-variabel også")}, {filterParametre.orgenhet ?: throw Valideringsfeil("Må sende med orgenhet-felt også")}) ?: Alle
     }
 
     override fun erAktiv() = portefølje.erAktiv()

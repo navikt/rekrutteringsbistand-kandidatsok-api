@@ -30,7 +30,8 @@ data class FilterParametre(
     val utdanningsnivå:List<String>?,
     val arbeidserfaring:List<String>?,
     val ferskhet: Int?,
-    val språk: List<String>?
+    val språk: List<String>?,
+    val orgenhet: String?
 )
 
 private interface Sortering {
