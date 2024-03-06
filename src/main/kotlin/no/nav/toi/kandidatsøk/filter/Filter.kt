@@ -34,3 +34,5 @@ fun søkeFilter() = listOf<Filter>()
     .medPrioritertMålgruppeFilter()
     .medFritekstFilter()
     .medPorteføljeFilter()
+
+class Valideringsfeil(msg: String): Exception(msg)

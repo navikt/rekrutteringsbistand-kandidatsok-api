@@ -61,7 +61,7 @@ private fun ekskluderUtdanning(regex: String): BoolQuery.Builder.() -> ObjectBui
     }
 }
 private fun String.tilUtdanningsNivå() = listOf(Videregående, Fagskole, Bachelor, Master, Doktorgrad)
-    .firstOrNull { it.harStringKode(this) } ?: throw IllegalArgumentException("$this er ikke en gyldig utdanningsnivå")
+    .firstOrNull { it.harStringKode(this) } ?: throw Valideringsfeil("$this er ikke en gyldig utdanningsnivå")
 
 private class UtdanningFilter: Filter {
     private var utdanningsnivå = emptyList<UtdanningsNivå>()

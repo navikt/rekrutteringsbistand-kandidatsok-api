@@ -153,7 +153,7 @@ private object HullICv: Målgruppe {
     }
 }
 
-private fun String.tilMålgruppe() = listOf(Unge, Senior, HullICv).first { it.harKode(this) }
+private fun String.tilMålgruppe() = listOf(Unge, Senior, HullICv).firstOrNull { it.harKode(this) } ?: throw Valideringsfeil("$this er en ukjent målgruppe")
 
 private class PrioritertMålgruppeFilter: Filter {
     private var prioriterteMålgrupper = emptyList<Målgruppe>()

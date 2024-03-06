@@ -1,5 +1,6 @@
 package no.nav.toi.kandidatsøk.filter
 
+import io.javalin.validation.ValidationError
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.FilterParametre
 
@@ -49,7 +50,8 @@ private fun String.typePorteføljeSpørring(valgteKontor: () -> List<String>) = 
     "alle" -> Alle
     "mine" -> MineBrukere
     "kontor" -> ValgtKontor(valgteKontor())
-    else -> throw IllegalArgumentException("$this er ikke en gyldig porteføljetype-spørring")
+    "valgte" -> ValgtKontor(valgteKontor())
+    else -> throw Valideringsfeil("$this er ikke en gyldig porteføljetype-spørring")
 }
 
 private class PorteføljeFilter: Filter {
@@ -58,7 +60,7 @@ private class PorteføljeFilter: Filter {
     private var authenticatedUser: AuthenticatedUser? = null
 
     override fun berikMedParameter(filterParametre: FilterParametre) {
-        portefølje = filterParametre.portefølje?.typePorteføljeSpørring { filterParametre.valgtKontor!! } ?: Alle
+        portefølje = filterParametre.portefølje?.typePorteføljeSpørring { filterParametre.valgtKontor ?: throw Valideringsfeil("Må sende med valgtKontor-variabel også")} ?: Alle
     }
 
     override fun erAktiv() = portefølje.erAktiv()

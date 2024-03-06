@@ -2,8 +2,10 @@ package no.nav.toi.kandidatsøk
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
+import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
+import io.javalin.validation.ValidationError
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.filter.*
 import org.opensearch.client.opensearch.OpenSearchClient
@@ -63,14 +65,18 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
         val request = ctx.bodyAsClass<FilterParametre>()
         val sorterting = ctx.queryParam("sortering").tilSortering()
-        val filter = søkeFilter()
-            .onEach { it.berikMedParameter (request) }
-            .onEach { it.berikMedAuthenticatedUser(ctx.authenticatedUser()) }
-            .filter(Filter::erAktiv)
-        val side = ctx.queryParam("side")?.toInt() ?: 1
-        val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side, sorterting)
-        filter.forEach { it.auditLog(ctx.authenticatedUser().navIdent) }
-        ctx.json(result.toResponseJson())
+        try {
+            val filter = søkeFilter()
+                .onEach { it.berikMedParameter(request) }
+                .onEach { it.berikMedAuthenticatedUser(ctx.authenticatedUser()) }
+                .filter(Filter::erAktiv)
+            val side = ctx.queryParam("side")?.toInt() ?: 1
+            val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side, sorterting)
+            filter.forEach { it.auditLog(ctx.authenticatedUser().navIdent) }
+            ctx.json(result.toResponseJson())
+        } catch (e: Valideringsfeil) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+        }
     }
 }
 

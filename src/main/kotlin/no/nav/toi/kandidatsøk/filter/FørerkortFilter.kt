@@ -91,7 +91,7 @@ private val alleFørerkort = listOf(
     Snøscooter
 )
 private fun String.somFørerkort() =
-    alleFørerkort.firstOrNull { it.kode == this } ?: throw Exception("Ukjent førerkort: $this")
+    alleFørerkort.firstOrNull { it.kode == this } ?: throw Valideringsfeil("Ukjent førerkort: $this")
 
 private class FørerkortFilter: Filter {
     private var førerkort = emptySet<Førerkort>()
