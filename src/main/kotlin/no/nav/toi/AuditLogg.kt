@@ -52,7 +52,7 @@ object AuditLogg {
         logCefMessage(
             navIdent = navIdent,
             userid = userid,
-            msg = "NAV-ansatt har søkt på et spesifikt ident-nummer i kandidatsøket."
+            msg = "NAV-ansatt har gjort spesifikt kandidatsøk på brukeren."
         )
     }
 }
