@@ -17,6 +17,7 @@ private object MineBrukere: Type {
             term_ {
                 field("veileder")
                 value(navIdent!!)
+                caseInsensitive(true)
             }
         }
     }
