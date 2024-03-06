@@ -1,5 +1,6 @@
 package no.nav.toi.kandidatsøk
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
 import io.javalin.http.HttpStatus
@@ -15,6 +16,7 @@ import org.opensearch.client.opensearch.core.SearchResponse
 
 private const val endepunkt = "/api/kandidatsok"
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class FilterParametre(
     val fritekst: String?,
     val portefølje: String?,
