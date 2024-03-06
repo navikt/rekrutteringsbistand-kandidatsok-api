@@ -27,6 +27,7 @@ object KandidatsøkRespons {
     val mineBrukereTerm = """{"term": {"veileder": {"value":"A123456","case_insensitive":true}}}"""
     val valgtKontorTerm = """{"bool":{"should":[{"term":{"navkontor":{"value":"NAV Hamar"}}},{"term":{"navkontor":{"value":"NAV Lofoten"}}}]}}"""
     val mittKontorTerm = """{"term": {"orgenhet": {"value":"1234"}}}"""
+    val mittKontorUtenValgtTerm = """{"term": {"orgenhet": {"value":""}}}"""
     val kandidatsøkHits = """[
                     {
                         "_index": "veilederkandidat_os4",
