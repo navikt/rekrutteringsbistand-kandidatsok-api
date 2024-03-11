@@ -18,7 +18,7 @@ import kotlin.math.max
 private const val endepunkt = "/api/kandidatsok/navigering"
 
 private data class Respons(
-    val number: Long,
+    val antall: Long,
     val kandidatnumre: List<String>
 )
 

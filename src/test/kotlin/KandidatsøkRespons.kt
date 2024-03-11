@@ -1801,7 +1801,7 @@ object KandidatsøkRespons {
     """.trimIndent()
     val navigeringRespons = """
             {
-              "number": 4,
+              "antall": 4,
               "kandidatnumre": ["PAM01adk3st0t", "PAM01bboynq3y", "PAM014lhcwy96", "PAM010nudgb5v"]
             }
         """.trimIndent()
