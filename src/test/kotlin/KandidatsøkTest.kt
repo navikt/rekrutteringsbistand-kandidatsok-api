@@ -702,6 +702,109 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
     }
 
+    @Test
+    fun `krever token for å søke kandidatnumre for navigering`() {
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering?side=11")
+            .body("{}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `krever gruppetilhørighet for å søke kandidatnumre for navigering`() {
+        val navIdent = "A123456"
+        val token = lagToken(claims = mapOf("NAVident" to navIdent))
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering?side=11")
+            .body("{}")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
+    fun `kan søke kandidatnumre for navigering`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson(KandidatsøkRespons.navigeringQuery(KandidatsøkRespons.stedTerm,
+                    KandidatsøkRespons.arbeidsønskeTerm, KandidatsøkRespons.queryMedKMultiMatchTerm,
+                    KandidatsøkRespons.utdanningTerm, KandidatsøkRespons.prioriterteMålgrupperTerm,
+                    KandidatsøkRespons.nyligArbeidsErfaringTerm, KandidatsøkRespons.hovedmålTerm,
+                    KandidatsøkRespons.kompetanseTerm, KandidatsøkRespons.førerkortTerm,
+                    KandidatsøkRespons.språkTerm, innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM, from = 25),
+                    true, false))
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkNavigeringRespons)
+                )
+        )
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering?side=11")
+            .body("""
+                {
+                    "fritekst":"søkeord",
+                    "ønsketSted":["Bodø.NO18.1804","Kristiansund.NO50.5001","Akershus.NO02","Norge.NO"],
+                    "ønsketYrke":["Sauegjeter", "Saueklipper"],
+                    "innsatsgruppe":["BATT","BFORM"],
+                    "språk":["Nynorsk","Norsk"],
+                    "arbeidserfaring":["Hvalfanger","Kokk"],"ferskhet":2,
+                    "hovedmål":["SKAFFEA","OKEDELT"],
+                    "kompetanse":["Fagbrev FU-operatør","Kotlin"],
+                    "førerkort":["D - Buss","BE - Personbil med tilhenger"],
+                    "utdanningsnivå":["videregaende","bachelor","doktorgrad"],
+                    "prioritertMålgruppe":["senior","unge","hullICv"],
+                    "fritekst":"søkeord"
+                }""".trimIndent())
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(KandidatsøkRespons.navigeringRespons, result.get().toPrettyString(), true)
+    }
+
+    @Test
+    fun `søk av kandidatnumre for navigering søker ikke på negativ from`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson(KandidatsøkRespons.navigeringQuery(KandidatsøkRespons.stedTerm,
+                    KandidatsøkRespons.arbeidsønskeTerm, KandidatsøkRespons.queryMedKMultiMatchTerm,
+                    KandidatsøkRespons.utdanningTerm, KandidatsøkRespons.prioriterteMålgrupperTerm,
+                    KandidatsøkRespons.nyligArbeidsErfaringTerm, KandidatsøkRespons.hovedmålTerm,
+                    KandidatsøkRespons.kompetanseTerm, KandidatsøkRespons.førerkortTerm,
+                    KandidatsøkRespons.språkTerm, innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM, from = 0),
+                    true, false))
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkNavigeringRespons)
+                )
+        )
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering?side=2")
+            .body("""
+                {
+                    "fritekst":"søkeord",
+                    "ønsketSted":["Bodø.NO18.1804","Kristiansund.NO50.5001","Akershus.NO02","Norge.NO"],
+                    "ønsketYrke":["Sauegjeter", "Saueklipper"],
+                    "innsatsgruppe":["BATT","BFORM"],
+                    "språk":["Nynorsk","Norsk"],
+                    "arbeidserfaring":["Hvalfanger","Kokk"],"ferskhet":2,
+                    "hovedmål":["SKAFFEA","OKEDELT"],
+                    "kompetanse":["Fagbrev FU-operatør","Kotlin"],
+                    "førerkort":["D - Buss","BE - Personbil med tilhenger"],
+                    "utdanningsnivå":["videregaende","bachelor","doktorgrad"],
+                    "prioritertMålgruppe":["senior","unge","hullICv"],
+                    "fritekst":"søkeord"
+                }""".trimIndent())
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(KandidatsøkRespons.navigeringRespons, result.get().toPrettyString(),true)
+    }
+
     private fun lagLokalApp() = App(
         port = 8080,
         authenticationConfigurations = listOf(AuthenticationConfiguration(

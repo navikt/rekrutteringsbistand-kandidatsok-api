@@ -36,24 +36,6 @@ data class FilterParametre(
     val orgenhet: String?
 )
 
-private interface Sortering {
-    fun erAktiv(parameterVerdi: String?): Boolean
-    fun lagSorteringES(): SearchRequest.Builder.() -> SearchRequest.Builder
-}
-
-private object SisteFørst: Sortering {
-    override fun erAktiv(parameterVerdi: String?) = parameterVerdi == null || "nyeste" == parameterVerdi
-    override fun lagSorteringES(): SearchRequest.Builder.() -> SearchRequest.Builder = {
-        sort("tidsstempel", SortOrder.Desc)
-    }
-}
-
-private object FlestKriterier: Sortering {
-    override fun erAktiv(parameterVerdi: String?) = "score" == parameterVerdi
-    override fun lagSorteringES(): SearchRequest.Builder.() -> SearchRequest.Builder = {this}
-}
-
-private fun String?.tilSortering() = listOf(SisteFørst,FlestKriterier).first { it.erAktiv(this) }
 
 @OpenApi(
     summary = "Søk på kandidater basert på søketermer",

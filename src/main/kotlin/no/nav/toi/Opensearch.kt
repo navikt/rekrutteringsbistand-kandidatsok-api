@@ -93,6 +93,11 @@ fun SearchRequest.Builder.source_(
 ): SearchRequest.Builder =
     source { it.body() }
 
+fun SearchRequest.Builder.source(
+    value: Boolean
+): SearchRequest.Builder =
+    source { it.fetch(value) }
+
 fun BoolQuery.Builder.must_(
     body: Query.Builder.() -> ObjectBuilder<Query>
 ): ObjectBuilder<BoolQuery> =

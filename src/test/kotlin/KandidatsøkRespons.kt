@@ -5,6 +5,10 @@ object KandidatsøkRespons {
         .let { terms ->
             """{"_source":{"includes":["fodselsnummer","fornavn","etternavn","arenaKandidatnr","kvalifiseringsgruppekode","yrkeJobbonskerObj","geografiJobbonsker","kommuneNavn","postnummer"]},"from":$from,"query":{"bool":{"must":$terms}},"size":25,"track_total_hits":true${if(sortering)""","sort":[{"tidsstempel":{"order":"desc"}}]""" else ""}}"""
         }
+    fun navigeringQuery(vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM","IKVAL","VARIG"]}}""", from: Int = 0) = (extraTerms.toList() + innsatsgruppeTerm)
+        .let { terms ->
+            """{"_source":false,"from":$from,"query":{"bool":{"must":$terms}},"size":500,"track_total_hits":true${if(sortering)""","sort":[{"tidsstempel":{"order":"desc"}}]""" else ""}}"""
+        }
 
     val stedTerm = """{"bool":{"should":[{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO18.1804|NO18|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO50.5001|NO50|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO02.*|NO02|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO.*|NO|NO"}}}]}}}}]}}"""
     val stedMedMåBoPåTerm = """{"bool": {"should": [{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO03.0301|NO03|NO"}}}]}}}},{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO46.4601|NO46|NO"}}}]}}}},{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO.*|NO|NO"}}}]}}}},{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO15.*|NO15|NO"}}}]}}}}]}},{"bool": {"should": [{"regexp": {"kommunenummerstring": {"value":"0301"}}},{"regexp": {"kommunenummerstring": {"value":"4601"}}},{"regexp": {"kommunenummerstring": {"value":".*"}}},{"regexp": {"kommunenummerstring": {"value":"15.*"}}}]}}"""
@@ -1737,4 +1741,68 @@ object KandidatsøkRespons {
             }
         }
     """.trimIndent()
+
+    val esKandidatsøkNavigeringRespons = """
+        {
+    "took": 3,
+    "timed_out": false,
+    "_shards": {
+        "total": 3,
+        "successful": 3,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 4,
+            "relation": "eq"
+        },
+        "max_score": null,
+        "hits": [
+            {
+                "_index": "veilederkandidat_os4",
+                "_type": "_doc",
+                "_id": "PAM01adk3st0t",
+                "_score": null,
+                "sort": [
+                    1669907619371
+                ]
+            },
+            {
+                "_index": "veilederkandidat_os4",
+                "_type": "_doc",
+                "_id": "PAM01bboynq3y",
+                "_score": null,
+                "sort": [
+                    1655117980393
+                ]
+            },
+            {
+                "_index": "veilederkandidat_os4",
+                "_type": "_doc",
+                "_id": "PAM014lhcwy96",
+                "_score": null,
+                "sort": [
+                    1653045721992
+                ]
+            },
+            {
+                "_index": "veilederkandidat_os4",
+                "_type": "_doc",
+                "_id": "PAM010nudgb5v",
+                "_score": null,
+                "sort": [
+                    1653044445785
+                ]
+            }
+        ]
+    }
+}
+    """.trimIndent()
+    val navigeringRespons = """
+            {
+              "number": 4,
+              "kandidatnumre": ["PAM01adk3st0t", "PAM01bboynq3y", "PAM014lhcwy96", "PAM010nudgb5v"]
+            }
+        """.trimIndent()
 }
