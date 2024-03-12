@@ -14,9 +14,7 @@ import org.opensearch.client.opensearch._types.SortOrder
 import org.opensearch.client.opensearch._types.query_dsl.*
 import org.opensearch.client.opensearch.core.SearchRequest
 import org.opensearch.client.opensearch.core.SearchResponse
-import org.opensearch.client.opensearch.core.search.SourceConfig
-import org.opensearch.client.opensearch.core.search.SourceFilter
-import org.opensearch.client.opensearch.core.search.TrackHits
+import org.opensearch.client.opensearch.core.search.*
 import org.opensearch.client.transport.rest_client.RestClientTransport
 import org.opensearch.client.util.ObjectBuilder
 import java.net.URI
@@ -51,6 +49,22 @@ inline fun <reified T> OpenSearchClient.search(
     crossinline body: SearchRequest.Builder.() -> ObjectBuilder<SearchRequest>
 ): SearchResponse<T> =
     search({ it.body() }, T::class.java)
+
+fun SearchRequest.Builder.suggest_(
+    body: Suggester.Builder.() -> ObjectBuilder<Suggester>
+): SearchRequest.Builder =
+    suggest { it.body() }
+
+fun Suggester.Builder.suggesters_(
+    key: String,
+    body: FieldSuggester.Builder.() -> ObjectBuilder<FieldSuggester>
+): Suggester.Builder =
+    suggesters(key) { it.body() }
+
+fun FieldSuggester.Builder.completion_(
+    body: CompletionSuggester.Builder.() -> ObjectBuilder<CompletionSuggester>
+): ObjectBuilder<FieldSuggester> =
+    completion { it.body() }
 
 fun SearchRequest.Builder.query_(
     body: Query.Builder.() -> ObjectBuilder<Query>
