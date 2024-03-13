@@ -189,7 +189,9 @@ private fun esRequest(prefix: String, field: String) = """
           }
         }
       },
-      "_source": true
+      "_source": {
+        "includes": []
+      }
     }
 """.trimIndent()
 

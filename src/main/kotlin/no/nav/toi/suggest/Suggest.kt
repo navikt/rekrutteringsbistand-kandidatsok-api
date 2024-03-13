@@ -74,5 +74,7 @@ private fun OpenSearchClient.suggest(query: String, field: String) = search<Json
             }
         }
     }
-    source(true)
+    source_ {
+        includes()
+    }
 }
