@@ -143,6 +143,32 @@ class SuggestTest {
         JSONAssert.assertEquals(result.get().toPrettyString(), suggestSvar, true)
     }
 
+    @Test
+    fun `Svar på sted`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(WireMock.equalToJson(esStedRequest, true, false))
+                .willReturn(WireMock.ok(esStedSvar))
+        )
+        val (_, response, result) = Fuel.post("$endepunkt/sted")
+            .body("""{"query":"Bod"}""")
+            .leggPåAutensiering()
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(result.get().toPrettyString(), """
+            [{
+                "geografiKodeTekst":"Bodø",
+                "geografiKode":"123"
+            },
+            {
+                "geografiKodeTekst":"Boden",
+                "geografiKode":"abc"
+            }]
+        """.trimMargin(), true)
+    }
+
     private fun lagLokalApp() = App(
         port = 8080,
         authenticationConfigurations = listOf(
@@ -177,6 +203,88 @@ class SuggestTest {
         header("Authorization", "Bearer ${lagToken(navIdent = "A123456").serialize()}")
 }
 
+private val esStedRequest = """
+    {
+      "suggest": {
+        "forslag": {
+          "prefix": "Bod",
+          "completion": {
+            "field": "geografiJobbonsker.geografiKodeTekst.completion",
+            "size": 15,
+            "skip_duplicates": true
+          }
+        }
+      },
+      "_source": {
+        "includes": [
+          "geografiJobbonsker"
+        ]
+      }
+    }
+""".trimIndent()
+
+private val esStedSvar = """
+    {
+    	"took": 1,
+    	"timed_out": false,
+    	"_shards": {
+    		"total": 3,
+    		"successful": 3,
+    		"skipped": 0,
+    		"failed": 0
+    	},
+    	"hits": {
+    		"total": {
+    			"value": 0,
+    			"relation": "eq"
+    		},
+    		"max_score": null,
+    		"hits": []
+    	},
+    	"suggest": {
+    		"completion#forslag": [
+    			{
+    				"text": "Bod",
+    				"offset": 0,
+    				"length": 3,
+    				"options": [
+    					{
+    						"text": "Bodø",
+    						"_index": "veilederkandidat_os4",
+    						"_type": "_doc",
+    						"_id": "PAM013tc53ryp",
+    						"_nested": {
+    							"field": "geografiJobbonsker",
+    							"offset": 2
+    						},
+    						"_score": 1.0,
+    						"_source": {
+    							"geografiKodeTekst": "Bodø",
+    							"geografiKode": "123"
+    						}
+    					},
+                        {
+    						"text": "Boden",
+    						"_index": "veilederkandidat_os4",
+    						"_type": "_doc",
+    						"_id": "PAM0123456789",
+    						"_nested": {
+    							"field": "geografiJobbonsker",
+    							"offset": 2
+    						},
+    						"_score": 1.0,
+    						"_source": {
+    							"geografiKodeTekst": "Boden",
+    							"geografiKode": "abc"
+    						}
+    					}
+    				]
+    			}
+    		]
+    	}
+    }
+""".trimIndent()
+
 private fun esRequest(prefix: String, field: String) = """
     {
       "suggest": {
@@ -190,7 +298,7 @@ private fun esRequest(prefix: String, field: String) = """
         }
       },
       "_source": {
-        "includes": []
+        "includes": ["doed"]
       }
     }
 """.trimIndent()
