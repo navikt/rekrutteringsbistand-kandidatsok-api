@@ -11,6 +11,8 @@ import org.opensearch.client.json.jackson.JacksonJsonpMapper
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch._types.SortOrder
+import org.opensearch.client.opensearch._types.aggregations.Aggregation
+import org.opensearch.client.opensearch._types.aggregations.TermsAggregation
 import org.opensearch.client.opensearch._types.query_dsl.*
 import org.opensearch.client.opensearch.core.SearchRequest
 import org.opensearch.client.opensearch.core.SearchResponse
@@ -65,6 +67,17 @@ fun FieldSuggester.Builder.completion_(
     body: CompletionSuggester.Builder.() -> ObjectBuilder<CompletionSuggester>
 ): ObjectBuilder<FieldSuggester> =
     completion { it.body() }
+
+fun SearchRequest.Builder.aggregations_(
+    key: String,
+    body: Aggregation.Builder.() -> ObjectBuilder<Aggregation>
+): SearchRequest.Builder =
+    aggregations(key) { it.body() }
+
+fun Aggregation.Builder.terms_(
+    body: TermsAggregation.Builder.() -> ObjectBuilder<TermsAggregation>
+): ObjectBuilder<Aggregation> =
+    terms { it.body() }
 
 fun SearchRequest.Builder.query_(
     body: Query.Builder.() -> ObjectBuilder<Query>

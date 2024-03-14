@@ -169,6 +169,36 @@ class SuggestTest {
         """.trimMargin(), true)
     }
 
+    @Test
+    fun `Svar på kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(WireMock.equalToJson(esKontorRequest, true, false))
+                .willReturn(WireMock.ok(esKontorSvar))
+        )
+        val (_, response, result) = Fuel.post("$endepunkt/kontor")
+            .body("""{"query":"nav"}""")
+            .leggPåAutensiering()
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(result.get().toPrettyString(), """
+            [
+                "NAV Hamar",
+                "NAV Drammen",
+                "NAV Råde",
+                "NAV Lofoten",
+                "NAV Østensjø",
+                "NAV Asker",
+                "NAV Lillehammer-Gausdal",
+                "NAV Fredrikstad",
+                "NAV Grimstad",
+                "NAV Molde"
+            ]
+        """.trimMargin(), true)
+    }
+
     private fun lagLokalApp() = App(
         port = 8080,
         authenticationConfigurations = listOf(
@@ -202,6 +232,97 @@ class SuggestTest {
     private fun Request.leggPåAutensiering() =
         header("Authorization", "Bearer ${lagToken(navIdent = "A123456").serialize()}")
 }
+
+private val esKontorRequest = """
+    {
+      "query": {
+        "match_phrase": {
+          "navkontor.text": {
+            "query": "nav",
+            "slop": 5
+          }
+        }
+      },
+      "aggregations": {
+        "suggestions": {
+          "terms": {
+            "field": "navkontor"
+          }
+        }
+      },
+      "size": 0,
+      "_source": false
+    }
+""".trimIndent()
+
+private val esKontorSvar = """
+    {
+    "took": 6,
+    "timed_out": false,
+    "_shards": {
+        "total": 3,
+        "successful": 3,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 113,
+            "relation": "eq"
+        },
+        "max_score": null,
+        "hits": []
+    },
+    "aggregations": {
+        "sterms#suggestions": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 23,
+            "buckets": [
+                {
+                    "key": "NAV Hamar",
+                    "doc_count": 21
+                },
+                {
+                    "key": "NAV Drammen",
+                    "doc_count": 14
+                },
+                {
+                    "key": "NAV Råde",
+                    "doc_count": 14
+                },
+                {
+                    "key": "NAV Lofoten",
+                    "doc_count": 13
+                },
+                {
+                    "key": "NAV Østensjø",
+                    "doc_count": 11
+                },
+                {
+                    "key": "NAV Asker",
+                    "doc_count": 7
+                },
+                {
+                    "key": "NAV Lillehammer-Gausdal",
+                    "doc_count": 4
+                },
+                {
+                    "key": "NAV Fredrikstad",
+                    "doc_count": 2
+                },
+                {
+                    "key": "NAV Grimstad",
+                    "doc_count": 2
+                },
+                {
+                    "key": "NAV Molde",
+                    "doc_count": 2
+                }
+            ]
+        }
+    }
+}
+""".trimIndent()
 
 private val esStedRequest = """
     {

@@ -17,6 +17,7 @@ import no.nav.toi.kompetanseforslag.handleKompetanseforslag
 import no.nav.toi.kuberneteshealth.handleHealth
 import no.nav.toi.lookupcv.handleLookupCv
 import no.nav.toi.me.handleMe
+import no.nav.toi.suggest.handleKontorSuggest
 import no.nav.toi.suggest.handleStedSuggest
 import no.nav.toi.suggest.handleSuggest
 import org.slf4j.Logger
@@ -78,6 +79,7 @@ class App(
         javalin.handleKandidatSøkForNavigering(openSearchClient)
         javalin.handleSuggest(openSearchClient)
         javalin.handleStedSuggest(openSearchClient)
+        javalin.handleKontorSuggest(openSearchClient)
 
 
         javalin.azureAdAuthentication(
