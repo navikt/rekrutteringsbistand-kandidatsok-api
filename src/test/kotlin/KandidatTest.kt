@@ -1,0 +1,196 @@
+import com.fasterxml.jackson.databind.JsonNode
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.jackson.responseObject
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
+import com.github.tomakehurst.wiremock.junit5.WireMockTest
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.toi.App
+import no.nav.toi.AuthenticationConfiguration
+import no.nav.toi.RolleUuidSpesifikasjon
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.skyscreamer.jsonassert.JSONAssert
+import java.util.*
+
+private const val endepunkt = "http://localhost:8080/api"
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@WireMockTest(httpPort = 10000)
+class KandidatTest {
+    private val authPort = 18306
+
+    private val modiaGenerell = UUID.randomUUID().toString()
+    private val modiaOppfølging = UUID.randomUUID().toString()
+
+    private val app: App = lagLokalApp()
+    private val authServer = MockOAuth2Server()
+
+    @BeforeAll
+    fun setUp() {
+        app.start()
+        authServer.start(port = authPort)
+    }
+
+    @AfterAll
+    fun tearDown() {
+        app.close()
+        authServer.shutdown()
+    }
+
+    @Test
+    fun `trenger token for å spørre endepunkt om arenanummer`() {
+        val fødselsnummer = "12312312312"
+        val (_, response, result) = Fuel.post("$endepunkt/arena-kandidatnr")
+            .body("""{"fodselsnummer":"$fødselsnummer"}""")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `map fødselsnummer til arenakandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val fødselsnummer = "12312312312"
+        val kandidatnummer = "PAM123456789"
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["arenaKandidatnr"]}}""", true, false))
+                .willReturn(WireMock.ok("""
+                    {
+                    	"took": 1,
+                    	"timed_out": false,
+                    	"_shards": {
+                    		"total": 3,
+                    		"successful": 3,
+                    		"skipped": 0,
+                    		"failed": 0
+                    	},
+                    	"hits": {
+                    		"total": {
+                    			"value": 1,
+                    			"relation": "eq"
+                    		},
+                    		"max_score": 3.2580965,
+                    		"hits": [
+                    			{
+                    				"_index": "veilederkandidat_os4",
+                    				"_type": "_doc",
+                    				"_id": "$kandidatnummer",
+                    				"_score": 3.2580965,
+                    				"_source": {
+                    					"arenaKandidatnr": "$kandidatnummer"
+                    				}
+                    			}
+                    		]
+                    	}
+                    }
+                """.trimIndent()))
+        )
+        val (_, response, result) = Fuel.post("$endepunkt/arena-kandidatnr")
+            .body("""{"fodselsnummer":"$fødselsnummer"}""")
+            .leggPåAutensiering()
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(result.get().toPrettyString(), """{"arenaKandidatnr": "$kandidatnummer"}""", true)
+    }
+
+    @Test
+    fun `trenger token for å spørre endepunkt om navn`() {
+        val fødselsnummer = "12312312312"
+        val (_, response, result) = Fuel.post("$endepunkt/navn")
+            .body("""{"fodselsnummer":"$fødselsnummer"}""")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `map fødselsnummer til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val fødselsnummer = "12312312312"
+        val fornavn = "Kjæreste"
+        val etternavn = "Parodisk"
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""", true, false))
+                .willReturn(WireMock.ok("""
+                    {
+                    	"took": 1,
+                    	"timed_out": false,
+                    	"_shards": {
+                    		"total": 3,
+                    		"successful": 3,
+                    		"skipped": 0,
+                    		"failed": 0
+                    	},
+                    	"hits": {
+                    		"total": {
+                    			"value": 1,
+                    			"relation": "eq"
+                    		},
+                    		"max_score": 3.2580965,
+                    		"hits": [
+                    			{
+                    				"_index": "veilederkandidat_os4",
+                    				"_type": "_doc",
+                    				"_id": "PAM123456789",
+                    				"_score": 3.2580965,
+                    				"_source": {
+                    					"fornavn": "$fornavn",
+                                        "etternavn": "$etternavn"
+                    				}
+                    			}
+                    		]
+                    	}
+                    }
+                """.trimIndent()))
+        )
+        val (_, response, result) = Fuel.post("$endepunkt/navn")
+            .body("""{"fodselsnummer":"$fødselsnummer"}""")
+            .leggPåAutensiering()
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(result.get().toPrettyString(), """{"fornavn": "$fornavn","etternavn": "$etternavn"}""", true)
+    }
+
+    private fun lagLokalApp() = App(
+        port = 8080,
+        authenticationConfigurations = listOf(
+            AuthenticationConfiguration(
+                audience = "1",
+                issuer = "http://localhost:$authPort/default",
+                jwksUri = "http://localhost:$authPort/default/jwks",
+            )
+        ),
+        rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
+            modiaGenerell = UUID.fromString(modiaGenerell),
+            modiaOppfølging = UUID.fromString(modiaOppfølging),
+        ),
+        openSearchUsername = "user",
+        openSearchPassword = "pass",
+        openSearchUri = "http://localhost:10000/opensearch",
+    )
+
+    private fun lagToken(
+        issuerId: String = "http://localhost:$authPort/default",
+        aud: String = "1",
+        navIdent: String = "A000001",
+        claims: Map<String, Any> = mapOf("NAVident" to navIdent, "groups" to listOf(modiaGenerell))
+    ) = authServer.issueToken(
+        issuerId = issuerId,
+        subject = "subject",
+        audience = aud,
+        claims = claims
+    )
+
+    private fun Request.leggPåAutensiering() =
+        header("Authorization", "Bearer ${lagToken(navIdent = "A123456").serialize()}")
+
+}

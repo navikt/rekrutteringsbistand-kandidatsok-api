@@ -9,6 +9,8 @@ import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
+import no.nav.toi.kandidatsammendrag.handleKandidatKandidatnr
+import no.nav.toi.kandidatsammendrag.handleKandidatNavn
 import no.nav.toi.kandidatsammendrag.handleKandidatSammendrag
 import no.nav.toi.kandidatstillingsøk.handleLookupKandidatStillingssøk
 import no.nav.toi.kandidatsøk.handleKandidatSøk
@@ -80,6 +82,8 @@ class App(
         javalin.handleSuggest(openSearchClient)
         javalin.handleStedSuggest(openSearchClient)
         javalin.handleKontorSuggest(openSearchClient)
+        javalin.handleKandidatNavn(openSearchClient)
+        javalin.handleKandidatKandidatnr(openSearchClient)
 
 
         javalin.azureAdAuthentication(
