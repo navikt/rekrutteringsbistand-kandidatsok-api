@@ -13,10 +13,12 @@ private const val endepunkt = "/api/navn"
 private data class KandidatNavnRequestDto(
     val fodselsnummer: String,
 )
+private enum class Kilde { REKRUTTERINGSBISTAND }
 
 private data class KandidatNavnResponsDto(
     val fornavn: String,
-    val etternavn: String
+    val etternavn: String,
+    val kilde: Kilde
 )
 
 @OpenApi(
@@ -33,7 +35,7 @@ fun Javalin.handleKandidatNavn(openSearchClient: OpenSearchClient) {
         val request = ctx.bodyAsClass<KandidatNavnRequestDto>()
         val result = openSearchClient.lookupKandidatNavn(request.fodselsnummer)
         result.hits().hits().firstOrNull()?.source()?.let {
-            ctx.json(KandidatNavnResponsDto(it["fornavn"]!!.asText(), it["etternavn"]!!.asText()))
+            ctx.json(KandidatNavnResponsDto(it["fornavn"]!!.asText(), it["etternavn"]!!.asText(), Kilde.REKRUTTERINGSBISTAND))
         } ?: ctx.status(404)
     }
 }

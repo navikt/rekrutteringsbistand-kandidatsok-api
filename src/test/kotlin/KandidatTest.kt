@@ -157,7 +157,7 @@ class KandidatTest {
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), """{"fornavn": "$fornavn","etternavn": "$etternavn"}""", true)
+        JSONAssert.assertEquals(result.get().toPrettyString(), """{"fornavn": "$fornavn","etternavn": "$etternavn", "kilde":"REKRUTTERINGSBISTAND"}""", true)
     }
 
     private fun lagLokalApp() = App(
