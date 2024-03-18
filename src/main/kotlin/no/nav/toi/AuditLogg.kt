@@ -32,6 +32,22 @@ object AuditLogg {
         )
     }
 
+    fun loggOppslagNavn(userid: String, navIdent: String) {
+        logCefMessage(
+            navIdent = navIdent,
+            userid = userid,
+            msg = "NAV-ansatt har hentet ut navn for en kandidat basert på fødselsnummer"
+        )
+    }
+
+    fun loggOppslagKandidatnummer(userid: String, navIdent: String) {
+        logCefMessage(
+            navIdent = navIdent,
+            userid = userid,
+            msg = "NAV-ansatt har hentet ut kandidatnummer for en kandidat basert på fødselsnummer"
+        )
+    }
+
     private fun logCefMessage(navIdent: String, userid: String, msg: String) {
         val message = CefMessage.builder()
             .applicationName("Rekrutteringsbistand")

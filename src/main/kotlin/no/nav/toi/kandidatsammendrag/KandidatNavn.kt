@@ -34,6 +34,7 @@ fun Javalin.handleKandidatNavn(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
         val request = ctx.bodyAsClass<KandidatNavnRequestDto>()
         val result = openSearchClient.lookupKandidatNavn(request.fodselsnummer)
+        AuditLogg.loggOppslagNavn(request.fodselsnummer, ctx.authenticatedUser().navIdent)
         result.hits().hits().firstOrNull()?.source()?.let {
             ctx.json(KandidatNavnResponsDto(it["fornavn"]!!.asText(), it["etternavn"]!!.asText(), Kilde.REKRUTTERINGSBISTAND))
         } ?: ctx.status(404)

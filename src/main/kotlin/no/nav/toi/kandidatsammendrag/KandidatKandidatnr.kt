@@ -31,6 +31,7 @@ fun Javalin.handleKandidatKandidatnr(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
         val request = ctx.bodyAsClass<KandidatKandidatnrRequestDto>()
         val result = openSearchClient.lookupKandidatNavn(request.fodselsnummer)
+        AuditLogg.loggOppslagKandidatnummer(request.fodselsnummer, ctx.authenticatedUser().navIdent)
         result.hits().hits().firstOrNull()?.source()?.get("arenaKandidatnr")
             ?.let(JsonNode::asText)
             ?.let(::KandidatKandidatnrResponsDto)
