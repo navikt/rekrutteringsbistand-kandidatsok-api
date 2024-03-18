@@ -39,3 +39,5 @@ spec:
       value: {{adGruppeModiaGenerellTilgang}}
     - name: MODIA_OPPFOLGING_GRUPPE
       value: {{adGruppeModiaOppfolging}}
+    - name: PDL_URL
+      value: {{pdlUrl}}

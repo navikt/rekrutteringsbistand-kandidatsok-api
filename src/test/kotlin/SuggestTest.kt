@@ -214,7 +214,12 @@ class SuggestTest {
         ),
         openSearchUsername = "user",
         openSearchPassword = "pass",
-        openSearchUri = "http://localhost:10000/opensearch",
+        openSearchUri = "http://localhost:10000",
+        pdlUrl = "http://localhost:10000/pdl",
+        azureSecret = "secret",
+        azureClientId = "1",
+        azureUrl = "http://localhost:$authPort",
+        pdlScope = "http://localhost/.default"
     )
 
     private fun lagToken(

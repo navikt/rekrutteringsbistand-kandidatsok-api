@@ -29,6 +29,7 @@ private const val navIdentClaim = "NAVident"
 class AuthenticatedUser(
     val navIdent: String,
     val roller: Set<Rolle>,
+    val jwt: String
 ) {
     companion object {
         fun fromJwt(jwt: DecodedJWT, rolleUuidSpesifikasjon: RolleUuidSpesifikasjon) =
@@ -37,6 +38,7 @@ class AuthenticatedUser(
                 roller = jwt.getClaim("groups")
                     .asList(UUID::class.java)
                     .let { rolleUuidSpesifikasjon.rollerForUuider(it) },
+                jwt = jwt.token,
             )
     }
 }

@@ -160,6 +160,123 @@ class KandidatTest {
         JSONAssert.assertEquals(result.get().toPrettyString(), """{"fornavn": "$fornavn","etternavn": "$etternavn", "kilde":"REKRUTTERINGSBISTAND"}""", true)
     }
 
+    @Test
+    fun `map fødselsnummer til navn fra PDL om det ikke finnes i ES`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val fødselsnummer = "12312312312"
+        val fornavn = "Kjæreste"
+        val mellomnavn: String? = "Mellom"
+        val etternavn = "Parodisk"
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""", true, false))
+                .willReturn(WireMock.ok("""
+                    {
+                    	"took": 1,
+                    	"timed_out": false,
+                    	"_shards": {
+                    		"total": 3,
+                    		"successful": 3,
+                    		"skipped": 0,
+                    		"failed": 0
+                    	},
+                    	"hits": {
+                    		"total": {
+                    			"value": 0,
+                    			"relation": "eq"
+                    		},
+                    		"max_score": 3.2580965,
+                    		"hits": []
+                    	}
+                    }
+                """.trimIndent()))
+        )
+        wireMock.register(
+            WireMock.post("/pdl")
+                .withRequestBody(WireMock.equalToJson("""
+                    {
+                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
+                        "variables": {
+                            "ident":"$fødselsnummer"
+                        }
+                    }
+                """.trimIndent(),false,false))
+                .willReturn(WireMock.ok("""
+                    {
+                      "data": {
+                        "hentPerson": {
+                          "navn": [
+                            {
+                              "fornavn": "$fornavn",
+                              "mellomnavn": "$mellomnavn",
+                              "etternavn": "$etternavn"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                """.trimIndent()))
+        )
+        val (_, response, result) = Fuel.post("$endepunkt/navn")
+            .body("""{"fodselsnummer":"$fødselsnummer"}""")
+            .leggPåAutensiering()
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(result.get().toPrettyString(), """{"fornavn": "$fornavn $mellomnavn","etternavn": "$etternavn", "kilde":"PDL"}""", true)
+    }
+
+    @Test
+    fun `fødselsnummer som ikke eksisterer i hverken pdl eller ES returnerer 404`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val fødselsnummer = "12312312312"
+        val fornavn = "Kjæreste"
+        val mellomnavn: String? = "Mellom"
+        val etternavn = "Parodisk"
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""", true, false))
+                .willReturn(WireMock.ok("""
+                    {
+                    	"took": 1,
+                    	"timed_out": false,
+                    	"_shards": {
+                    		"total": 3,
+                    		"successful": 3,
+                    		"skipped": 0,
+                    		"failed": 0
+                    	},
+                    	"hits": {
+                    		"total": {
+                    			"value": 0,
+                    			"relation": "eq"
+                    		},
+                    		"max_score": 3.2580965,
+                    		"hits": []
+                    	}
+                    }
+                """.trimIndent()))
+        )
+        wireMock.register(
+            WireMock.post("/pdl")
+                .withRequestBody(WireMock.equalToJson("""
+                    {
+                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
+                        "variables": {
+                            "ident":"$fødselsnummer"
+                        }
+                    }
+                """.trimIndent(),false,false))
+                .willReturn(WireMock.notFound())
+        )
+        val (_, response, result) = Fuel.post("$endepunkt/navn")
+            .body("""{"fodselsnummer":"$fødselsnummer"}""")
+            .leggPåAutensiering()
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(404)
+    }
+
     private fun lagLokalApp() = App(
         port = 8080,
         authenticationConfigurations = listOf(
@@ -175,7 +292,12 @@ class KandidatTest {
         ),
         openSearchUsername = "user",
         openSearchPassword = "pass",
-        openSearchUri = "http://localhost:10000/opensearch",
+        openSearchUri = "http://localhost:10000",
+        pdlUrl = "http://localhost:10000/pdl",
+        azureSecret = "secret",
+        azureClientId = "1",
+        azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
+        pdlScope = "http://localhost/.default"
     )
 
     private fun lagToken(

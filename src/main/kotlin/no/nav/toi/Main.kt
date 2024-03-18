@@ -9,6 +9,8 @@ import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
+import no.nav.toi.accesstoken.AccessTokenClient
+import no.nav.toi.kandidatsammendrag.PdlKlient
 import no.nav.toi.kandidatsammendrag.handleKandidatKandidatnr
 import no.nav.toi.kandidatsammendrag.handleKandidatNavn
 import no.nav.toi.kandidatsammendrag.handleKandidatSammendrag
@@ -38,6 +40,11 @@ class App(
     openSearchUsername: String,
     openSearchPassword: String,
     openSearchUri: String,
+    pdlUrl: String,
+    azureSecret: String,
+    azureClientId: String,
+    pdlScope: String,
+    azureUrl: String
 ) : Closeable {
 
     lateinit var javalin: Javalin
@@ -47,6 +54,7 @@ class App(
         openSearchPassword = openSearchPassword,
         openSearchUri = openSearchUri,
     )
+    private val pdlKlient = PdlKlient(pdlUrl, AccessTokenClient(azureSecret,azureClientId,pdlScope,azureUrl))
 
     fun configureOpenApi(config: JavalinConfig) {
         val openApiConfiguration = OpenApiPluginConfiguration().apply {
@@ -82,7 +90,7 @@ class App(
         javalin.handleSuggest(openSearchClient)
         javalin.handleStedSuggest(openSearchClient)
         javalin.handleKontorSuggest(openSearchClient)
-        javalin.handleKandidatNavn(openSearchClient)
+        javalin.handleKandidatNavn(openSearchClient, pdlKlient)
         javalin.handleKandidatKandidatnr(openSearchClient)
 
 
@@ -125,7 +133,7 @@ fun main() {
             if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp")
                 fakedingsAuthenticationConfiguration
             else
-                null
+                null,
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
             modiaGenerell = UUID.fromString(System.getenv("MODIA_GENERELL_GRUPPE")!!),
@@ -134,6 +142,11 @@ fun main() {
         openSearchUsername = System.getenv("OPEN_SEARCH_USERNAME")!!,
         openSearchPassword = System.getenv("OPEN_SEARCH_PASSWORD")!!,
         openSearchUri = System.getenv("OPEN_SEARCH_URI")!!,
+        pdlUrl = System.getenv("PDL_URL")!!,
+        azureSecret = System.getenv("AZURE_APP_CLIENT_SECRET"),
+        azureClientId = System.getenv("AZURE_APP_CLIENT_ID"),
+        pdlScope = System.getenv("PDL_SCOPE"),
+        azureUrl = System.getenv("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
     ).start()
 }
 
