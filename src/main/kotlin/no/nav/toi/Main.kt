@@ -126,9 +126,9 @@ fun main() {
     App(
         authenticationConfigurations = listOfNotNull(
             AuthenticationConfiguration(
-                audience = System.getenv("AZURE_APP_CLIENT_ID")!!,
-                issuer = System.getenv("AZURE_OPENID_CONFIG_ISSUER")!!,
-                jwksUri  = System.getenv("AZURE_OPENID_CONFIG_JWKS_URI")!!,
+                audience = getenv("AZURE_APP_CLIENT_ID"),
+                issuer = getenv("AZURE_OPENID_CONFIG_ISSUER"),
+                jwksUri  = getenv("AZURE_OPENID_CONFIG_JWKS_URI"),
             ),
             if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp")
                 fakedingsAuthenticationConfiguration
@@ -136,19 +136,21 @@ fun main() {
                 null,
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
-            modiaGenerell = UUID.fromString(System.getenv("MODIA_GENERELL_GRUPPE")!!),
-            modiaOppfølging = UUID.fromString(System.getenv("MODIA_OPPFOLGING_GRUPPE")!!),
+            modiaGenerell = UUID.fromString(getenv("MODIA_GENERELL_GRUPPE")),
+            modiaOppfølging = UUID.fromString(getenv("MODIA_OPPFOLGING_GRUPPE")!!),
         ),
-        openSearchUsername = System.getenv("OPEN_SEARCH_USERNAME")!!,
-        openSearchPassword = System.getenv("OPEN_SEARCH_PASSWORD")!!,
-        openSearchUri = System.getenv("OPEN_SEARCH_URI")!!,
-        pdlUrl = System.getenv("PDL_URL")!!,
-        azureSecret = System.getenv("AZURE_APP_CLIENT_SECRET"),
-        azureClientId = System.getenv("AZURE_APP_CLIENT_ID"),
-        pdlScope = System.getenv("PDL_SCOPE"),
-        azureUrl = System.getenv("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+        openSearchUsername = getenv("OPEN_SEARCH_USERNAME"),
+        openSearchPassword = getenv("OPEN_SEARCH_PASSWORD"),
+        openSearchUri = getenv("OPEN_SEARCH_URI"),
+        pdlUrl = getenv("PDL_URL"),
+        azureSecret = getenv("AZURE_APP_CLIENT_SECRET"),
+        azureClientId = getenv("AZURE_APP_CLIENT_ID"),
+        pdlScope = getenv("PDL_SCOPE"),
+        azureUrl = getenv("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
     ).start()
 }
+
+private fun getenv(key: String) = System.getenv(key) ?: throw IllegalArgumentException("Det finnes ingen system-variabel ved navn $key")
 
 
 val Any.log: Logger
