@@ -8,9 +8,11 @@ import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.ehcache.config.units.MemoryUnit
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
 
+private val secureLog = LoggerFactory.getLogger("secureLog")!!
 
 class AccessTokenClient(
     private val secret: String,
@@ -33,7 +35,7 @@ class AccessTokenClient(
             "requested_token_use" to "on_behalf_of"
         )
 
-        val (_, _, result) = FuelManager()
+        val (_, response, result) = FuelManager()
             .post(url, formData)
             .responseObject<AccessTokenResponse>()
 
@@ -42,7 +44,10 @@ class AccessTokenClient(
                 return result.get()
             }
 
-            is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av access_token: ", result.getException())
+            is Result.Failure -> {
+                secureLog.error("Noe feil skjedde ved henting av access_token. msg: ${response.body().asString(null)}", result.getException())
+                throw RuntimeException("Noe feil skjedde ved henting av access_token: ", result.getException())
+            }
         }
     }
 }
