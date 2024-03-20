@@ -45,7 +45,7 @@ class AccessTokenClient(
             }
 
             is Result.Failure -> {
-                secureLog.error("Noe feil skjedde ved henting av access_token. msg: ${response.body().asString(null)}", result.getException())
+                secureLog.error("Noe feil skjedde ved henting av access_token. msg: ${response.body().asString("application/json")}", result.getException())
                 throw RuntimeException("Noe feil skjedde ved henting av access_token: ", result.getException())
             }
         }
