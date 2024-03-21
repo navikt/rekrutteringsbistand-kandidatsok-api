@@ -28,7 +28,7 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
                 it.fornavn + (it.mellomnavn?.let { " $it" } ?: "") to it.etternavn
             }
 
-            is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av aktørId: ", result.getException())
+            is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av navn fra PDL: ", result.getException())
         }
     }
 
