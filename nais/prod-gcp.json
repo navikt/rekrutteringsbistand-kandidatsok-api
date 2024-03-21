@@ -2,5 +2,8 @@
     "adGruppeModiaGenerellTilgang": "ea34edea-1e80-4759-a1d2-fbe696cf1709",
     "adGruppeModiaOppfolging": "b9bc6348-d25c-450d-85c2-044c0955fbe3",
     "ingress": [
-    ]
+    ],
+    "pdlUrl": "https://pdl-api.prod-fss-pub.nais.io/graphql",
+    "pdlScope": "api://prod-fss.pdl.pdl-api/.default",
+    "pdlHost": "pdl-api.prod-fss-pub.nais.io"
 }

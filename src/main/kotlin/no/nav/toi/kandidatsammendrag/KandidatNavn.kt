@@ -13,7 +13,7 @@ private const val endepunkt = "/api/navn"
 private data class KandidatNavnRequestDto(
     val fodselsnummer: String,
 )
-private enum class Kilde { REKRUTTERINGSBISTAND }
+private enum class Kilde { REKRUTTERINGSBISTAND, PDL }
 
 private data class KandidatNavnResponsDto(
     val fornavn: String,
@@ -30,13 +30,15 @@ private data class KandidatNavnResponsDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKandidatNavn(openSearchClient: OpenSearchClient) {
+fun Javalin.handleKandidatNavn(openSearchClient: OpenSearchClient, pdlKlient: PdlKlient) {
     post(endepunkt) { ctx ->
         val request = ctx.bodyAsClass<KandidatNavnRequestDto>()
         val result = openSearchClient.lookupKandidatNavn(request.fodselsnummer)
         AuditLogg.loggOppslagNavn(request.fodselsnummer, ctx.authenticatedUser().navIdent)
         result.hits().hits().firstOrNull()?.source()?.let {
             ctx.json(KandidatNavnResponsDto(it["fornavn"]!!.asText(), it["etternavn"]!!.asText(), Kilde.REKRUTTERINGSBISTAND))
+        } ?: pdlKlient.hentFornavnOgEtternavn(request.fodselsnummer, ctx.authenticatedUser().jwt)?.let { (fornavn, etternavn) ->
+            ctx.json(KandidatNavnResponsDto(fornavn,etternavn, Kilde.PDL))
         } ?: ctx.status(404)
     }
 }
