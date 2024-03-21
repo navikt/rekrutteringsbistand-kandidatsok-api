@@ -1,7 +1,7 @@
 # rekrutteringsbistand-kandidatsok-api
 TODO
 
-## Fakedings-autentisering (lokal utikling)
+## Fakedings-autentisering (lokal utikling) 
 Vi bruker [fakedings](https://github.com/navikt/fakedings?tab=readme-ov-file) for autentisering
 i lokal utvikling. For å hente et fake token, kan du gjøre et kall ala
 ```http request
