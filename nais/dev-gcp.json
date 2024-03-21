@@ -8,5 +8,6 @@
         "https://rekrutteringsbistand-kandidatsok-api.intern.dev.nav.no/api"
     ],
     "pdlUrl": "https://pdl-api.dev-fss-pub.nais.io/graphql",
-    "pdlScope": "api://dev-fss.pdl.pdl-api/.default"
+    "pdlScope": "api://dev-fss.pdl.pdl-api/.default",
+    "pdlHost": "pdl-api.dev-fss-pub.nais.io"
 }

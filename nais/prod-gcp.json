@@ -4,5 +4,6 @@
     "ingress": [
     ],
     "pdlUrl": "https://pdl-api.prod-fss-pub.nais.io/graphql",
-    "pdlScope": "api://prod-fss.pdl.pdl-api/.default"
+    "pdlScope": "api://prod-fss.pdl.pdl-api/.default",
+    "pdlHost": "pdl-api.prod-fss-pub.nais.io"
 }

@@ -34,6 +34,9 @@ spec:
     inbound:
       rules:
         - application: rekrutteringsbistand
+    outbound:
+      external:
+        - host: {{ pdlHost }}
   env:
     - name: MODIA_GENERELL_GRUPPE
       value: {{adGruppeModiaGenerellTilgang}}
