@@ -24,9 +24,9 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
         if(response.statusCode == 404) return null
 
         when (result) {
-            is Result.Success -> return result.get().data.hentPerson?.navn?.first()?.let {
+            is Result.Success -> return result.get().data.hentPerson?.navn?.firstOrNull()?.let {
                 it.fornavn + (it.mellomnavn?.let { " $it" } ?: "") to it.etternavn
-            }
+            } ?: throw RuntimeException("Person som ble hentet har ikke navn")
 
             is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av navn fra PDL: ", result.getException())
         }
