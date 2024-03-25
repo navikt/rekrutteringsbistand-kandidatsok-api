@@ -64,7 +64,7 @@ object AuditLogg {
         secureLog.info("auditlogger: {}", message)
     }
 
-    fun loggOppslagKAndidatsøk(userid: String, navIdent: String) {
+    fun loggOppslagKandidatsøk(userid: String, navIdent: String) {
         logCefMessage(
             navIdent = navIdent,
             userid = userid,

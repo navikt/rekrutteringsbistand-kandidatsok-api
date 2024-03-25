@@ -35,7 +35,7 @@ private object IdentSøk: SøkeType {
     }
 
     override fun auditLog(userid: String?, navIdent: String) {
-        AuditLogg.loggOppslagKAndidatsøk(userid!!, navIdent)
+        AuditLogg.loggOppslagKandidatsøk(userid!!, navIdent)
     }
 }
 private object KandidatnummerSøk: SøkeType {
