@@ -26,7 +26,7 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
         when (result) {
             is Result.Success -> return result.get().data.hentPerson?.navn?.firstOrNull()?.let {
                 it.fornavn + (it.mellomnavn?.let { " $it" } ?: "") to it.etternavn
-            } ?: throw RuntimeException("Person som ble hentet har ikke navn")
+            } ?: throw RuntimeException("Person som ble hentet har ikke navn. Skal bare kunne skje i dev")
 
             is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av navn fra PDL: ", result.getException())
         }
