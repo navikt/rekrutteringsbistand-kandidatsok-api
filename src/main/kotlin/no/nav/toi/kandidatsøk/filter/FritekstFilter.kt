@@ -52,8 +52,9 @@ private object KandidatnummerSøk: SøkeType {
     }
 
     override fun auditLog(userid: String?, navIdent: String, returnerteFødselsnummer: String?) {
-        requireNotNull(returnerteFødselsnummer)
-        AuditLogg.loggOppslagKandidatsøk(returnerteFødselsnummer, navIdent, true)
+        if(returnerteFødselsnummer!=null) {
+            AuditLogg.loggOppslagKandidatsøk(returnerteFødselsnummer, navIdent, true)
+        }
     }
 }
 private object MultiMatchSøk:SøkeType {
