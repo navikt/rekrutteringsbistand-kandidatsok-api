@@ -48,13 +48,13 @@ object AuditLogg {
         )
     }
 
-    private fun logCefMessage(navIdent: String, userid: String, msg: String) {
+    private fun logCefMessage(navIdent: String, userid: String, msg: String, authorizationDecision: AuthorizationDecision = AuthorizationDecision.PERMIT) {
         val message = CefMessage.builder()
             .applicationName("Rekrutteringsbistand")
             .loggerName("rekrutteringsbistand-kandidatsok-api")
             .event(CefMessageEvent.ACCESS)
             .name("Sporingslogg")
-            .authorizationDecision(AuthorizationDecision.PERMIT)
+            .authorizationDecision(authorizationDecision)
             .sourceUserId(navIdent)
             .destinationUserId(userid)
             .timeEnded(System.currentTimeMillis())
@@ -64,11 +64,12 @@ object AuditLogg {
         secureLog.info("auditlogger: {}", message)
     }
 
-    fun loggOppslagKandidatsøk(userid: String, navIdent: String) {
+    fun loggOppslagKandidatsøk(userid: String, navIdent: String, fikkTreff: Boolean) {
         logCefMessage(
             navIdent = navIdent,
             userid = userid,
-            msg = "NAV-ansatt har gjort spesifikt kandidatsøk på brukeren"
+            msg = "NAV-ansatt har gjort spesifikt kandidatsøk på brukeren",
+            authorizationDecision = if(fikkTreff) AuthorizationDecision.PERMIT else AuthorizationDecision.DENY
         )
     }
 }
