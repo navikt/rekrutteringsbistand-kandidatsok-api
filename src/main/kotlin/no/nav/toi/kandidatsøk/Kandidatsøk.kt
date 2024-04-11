@@ -60,7 +60,7 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
             filter.forEach {
                 it.auditLog(
                     ctx.authenticatedUser().navIdent,
-                    result.hits.hits.map { it._source }.map { it["fodselsnummer"] }.map(JsonNode::asText).firstOrNull()
+                    result.hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
                 )
             }
             ctx.json(result)
