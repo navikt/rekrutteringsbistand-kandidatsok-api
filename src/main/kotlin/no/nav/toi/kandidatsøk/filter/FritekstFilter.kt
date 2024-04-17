@@ -9,7 +9,7 @@ private interface SøkeType {
     fun erAktiv(): Boolean
     fun passendeSøketype(søkeord: String): Boolean
     fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon
-    fun auditLog(userid: String?, navIdent: String, returnerteFødselsnummer: String?) {}
+    fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {}
 }
 
 private object IdentSøk: SøkeType {
@@ -34,9 +34,9 @@ private object IdentSøk: SøkeType {
         }
     }
 
-    override fun auditLog(userid: String?, navIdent: String, returnerteFødselsnummer: String?) {
-        requireNotNull(userid)
-        AuditLogg.loggOppslagKandidatsøk(userid, navIdent, userid == returnerteFødselsnummer)
+    override fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {
+        requireNotNull(søkeord)
+        AuditLogg.loggSpesifiktKandidatsøk(søkeord, navIdent, søkeord == returnerteFødselsnummer)
     }
 }
 private object KandidatnummerSøk: SøkeType {
@@ -51,13 +51,13 @@ private object KandidatnummerSøk: SøkeType {
         }
     }
 
-    override fun auditLog(userid: String?, navIdent: String, returnerteFødselsnummer: String?) {
+    override fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {
         if(returnerteFødselsnummer!=null) {
-            AuditLogg.loggOppslagKandidatsøk(returnerteFødselsnummer, navIdent, true)
+            AuditLogg.loggSpesifiktKandidatsøk(returnerteFødselsnummer, navIdent, true)
         }
     }
 }
-private object MultiMatchSøk:SøkeType {
+private object MultiMatchSøk: SøkeType {
     override fun erAktiv() = true
     override fun passendeSøketype(søkeord: String) = true
     override fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon = {
@@ -67,6 +67,10 @@ private object MultiMatchSøk:SøkeType {
                 fields(listOf("fritekst^1", "fornavn^1", "etternavn^1", "yrkeJobbonskerObj.styrkBeskrivelse^1.5", "yrkeJobbonskerObj.sokeTitler^1"))
             }
         }
+    }
+
+    override fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {
+        AuditLogg.loggGenereltKandidatsøk(søkeord, navIdent)
     }
 }
 private object Null: SøkeType {

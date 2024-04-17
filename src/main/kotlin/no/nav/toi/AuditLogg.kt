@@ -48,7 +48,12 @@ object AuditLogg {
         )
     }
 
-    private fun logCefMessage(navIdent: String, userid: String, msg: String, authorizationDecision: AuthorizationDecision = AuthorizationDecision.PERMIT) {
+    private fun logCefMessage(
+        navIdent: String,
+        userid: String,
+        msg: String,
+        authorizationDecision: AuthorizationDecision = AuthorizationDecision.PERMIT
+    ) {
         val message = CefMessage.builder()
             .applicationName("Rekrutteringsbistand")
             .loggerName("rekrutteringsbistand-kandidatsok-api")
@@ -64,12 +69,23 @@ object AuditLogg {
         secureLog.info("auditlogger: {}", message)
     }
 
-    fun loggOppslagKandidatsøk(userid: String, navIdent: String, fikkTreff: Boolean) {
+    fun loggSpesifiktKandidatsøk(userid: String, navIdent: String, fikkTreff: Boolean) {
         logCefMessage(
             navIdent = navIdent,
             userid = userid,
             msg = "NAV-ansatt har gjort spesifikt kandidatsøk på brukeren",
-            authorizationDecision = if(fikkTreff) AuthorizationDecision.PERMIT else AuthorizationDecision.DENY
+            authorizationDecision = if (fikkTreff) AuthorizationDecision.PERMIT else AuthorizationDecision.DENY
         )
     }
+
+    fun loggGenereltKandidatsøk(fritekst: String?, navIdent: String) {
+        logCefMessage(
+            navIdent = navIdent,
+            userid = "",
+            msg = "NAV-ansatt har gjort generelt kandidatsøk" +
+                    (fritekst?.let { " med fritekst $it" } ?: ""),
+            authorizationDecision = AuthorizationDecision.PERMIT
+        )
+    }
+
 }
