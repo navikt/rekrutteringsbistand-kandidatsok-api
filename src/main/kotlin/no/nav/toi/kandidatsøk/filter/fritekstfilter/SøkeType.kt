@@ -7,7 +7,7 @@ sealed interface SøkeType {
     fun erAktiv(): Boolean
     fun passendeSøketype(søkeord: String): Boolean
     fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon
-    fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {}
+    fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?)
     companion object {
         fun fraFritekstSøk(fritekstSøk: String?) = if(fritekstSøk == null) NullSøk else
             listOf(IdentSøk, KandidatnummerSøk, MultiMatchSøk).first { it.passendeSøketype(fritekstSøk) }
@@ -82,5 +82,9 @@ private object NullSøk: SøkeType {
     }
     override fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon {
         throw IllegalStateException()
+    }
+
+    override fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {
+        AuditLogg.loggGenereltKandidatsøk(null, navIdent)
     }
 }
