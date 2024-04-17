@@ -20,7 +20,7 @@ object AuditLogg {
         logCefMessage(
             navIdent = navIdent,
             userid = userid,
-            msg = "NAV-ansatt har sett etter stilling for kandidat, med kontaktinformasjon og informasjon om veileder fra brukers CV"
+            msg = "NAV-ansatt har sett kontaktinformasjon og informasjon om veileder fra brukers CV"
         )
     }
 
@@ -39,7 +39,7 @@ object AuditLogg {
             msg = "NAV-ansatt har hentet navn til bruker basert på fødselsnummer"
         )
     }
-    
+
     private fun logCefMessage(
         navIdent: String,
         userid: String,
