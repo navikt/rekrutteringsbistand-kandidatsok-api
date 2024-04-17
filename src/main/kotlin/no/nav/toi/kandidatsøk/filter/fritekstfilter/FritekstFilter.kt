@@ -11,12 +11,13 @@ private class FritekstFilter: Filter {
         søk = Søk(filterParametre.fritekst)
     }
 
-    override fun erAktiv() = søk.erAktiv()
+    override fun erAktiv() = true
 
-    override fun lagESFilterFunksjon() = søk.lagESFilterFunksjon()
+    override fun lagESFilterFunksjon() = if(søk.erAktiv()) søk.lagESFilterFunksjon() else {
+        {this}
+    }
 
     override fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {
-        if(erAktiv())
-            søk.auditLog(navIdent, returnerteFødselsnummer)
+        søk.auditLog(navIdent, returnerteFødselsnummer)
     }
 }

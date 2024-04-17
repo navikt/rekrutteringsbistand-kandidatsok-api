@@ -56,6 +56,8 @@ private object KandidatnummerSøk: SøkeType {
     override fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {
         if(returnerteFødselsnummer!=null) {
             AuditLogg.loggSpesifiktKandidatsøk(returnerteFødselsnummer, navIdent, true)
+        } else {
+            AuditLogg.loggGenereltKandidatsøk(søkeord, navIdent)
         }
     }
 }
