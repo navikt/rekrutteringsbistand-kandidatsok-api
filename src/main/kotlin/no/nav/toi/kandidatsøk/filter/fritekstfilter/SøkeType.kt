@@ -1,15 +1,17 @@
-package no.nav.toi.kandidatsøk.filter
+package no.nav.toi.kandidatsøk.filter.fritekstfilter
 
 import no.nav.toi.*
-import no.nav.toi.kandidatsøk.FilterParametre
+import no.nav.toi.kandidatsøk.filter.FilterFunksjon
 
-fun List<Filter>.medFritekstFilter() = this + FritekstFilter()
-
-private interface SøkeType {
+sealed interface SøkeType {
     fun erAktiv(): Boolean
     fun passendeSøketype(søkeord: String): Boolean
     fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon
     fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {}
+    companion object {
+        fun fraFritekstSøk(fritekstSøk: String?) = if(fritekstSøk == null) NullSøk else
+            listOf(IdentSøk, KandidatnummerSøk, MultiMatchSøk).first { it.passendeSøketype(fritekstSøk) }
+    }
 }
 
 private object IdentSøk: SøkeType {
@@ -73,43 +75,12 @@ private object MultiMatchSøk: SøkeType {
         AuditLogg.loggGenereltKandidatsøk(søkeord, navIdent)
     }
 }
-private object Null: SøkeType {
+private object NullSøk: SøkeType {
     override fun erAktiv() = false
     override fun passendeSøketype(søkeord: String): Boolean {
         throw IllegalStateException()
     }
     override fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon {
         throw IllegalStateException()
-    }
-}
-
-private class Søk(private val søkeOrd: String?) {
-    private val type = søkeOrd?.tilType() ?: Null
-    fun erAktiv() = type.erAktiv()
-    fun lagESFilterFunksjon(): FilterFunksjon {
-        return type.lagESFilterFunksjon(søkeOrd)
-    }
-
-    fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {
-        type.auditLog(søkeOrd, navIdent, returnerteFødselsnummer)
-    }
-}
-
-private fun String.tilType() =
-    listOf(IdentSøk, KandidatnummerSøk, MultiMatchSøk).first { it.passendeSøketype(this) }
-
-private class FritekstFilter: Filter {
-    private var søk: Søk = Søk(null)
-    override fun berikMedParameter(filterParametre: FilterParametre) {
-        søk = Søk(filterParametre.fritekst)
-    }
-
-    override fun erAktiv() = søk.erAktiv()
-
-    override fun lagESFilterFunksjon() = søk.lagESFilterFunksjon()
-
-    override fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {
-        if(erAktiv())
-            søk.auditLog(navIdent, returnerteFødselsnummer)
     }
 }
