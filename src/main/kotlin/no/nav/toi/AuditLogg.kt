@@ -20,7 +20,7 @@ object AuditLogg {
         logCefMessage(
             navIdent = navIdent,
             userid = userid,
-            msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidat sammendragsinformasjon"
+            msg = "NAV-ansatt har sett etter stilling for kandidat, med kontaktinformasjon og informasjon om veileder fra brukers CV"
         )
     }
 
@@ -28,7 +28,7 @@ object AuditLogg {
         logCefMessage(
             navIdent = navIdent,
             userid = userid,
-            msg = "NAV-ansatt har åpnet en stilling i kontekst av kandidat med kandidat stillingssøksinformasjon"
+            msg = "NAV-ansatt har sett etter stilling for kandidat, med jobbprofil fra brukers CV"
         )
     }
 
@@ -36,18 +36,10 @@ object AuditLogg {
         logCefMessage(
             navIdent = navIdent,
             userid = userid,
-            msg = "NAV-ansatt har hentet ut navn for en kandidat basert på fødselsnummer"
+            msg = "NAV-ansatt har hentet navn til bruker basert på fødselsnummer"
         )
     }
-
-    fun loggOppslagKandidatnummer(userid: String, navIdent: String) {
-        logCefMessage(
-            navIdent = navIdent,
-            userid = userid,
-            msg = "NAV-ansatt har hentet ut kandidatnummer for en kandidat basert på fødselsnummer"
-        )
-    }
-
+    
     private fun logCefMessage(
         navIdent: String,
         userid: String,
