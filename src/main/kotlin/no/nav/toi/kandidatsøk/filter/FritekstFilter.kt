@@ -9,7 +9,7 @@ private interface SøkeType {
     fun erAktiv(): Boolean
     fun passendeSøketype(søkeord: String): Boolean
     fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon
-    fun auditLog(userid: String?, navIdent: String) {}
+    fun auditLog(userid: String?, navIdent: String, returnerteFødselsnummer: String?) {}
 }
 
 private object IdentSøk: SøkeType {
@@ -34,8 +34,9 @@ private object IdentSøk: SøkeType {
         }
     }
 
-    override fun auditLog(userid: String?, navIdent: String) {
-        AuditLogg.loggOppslagKandidatsøk(userid!!, navIdent)
+    override fun auditLog(userid: String?, navIdent: String, returnerteFødselsnummer: String?) {
+        requireNotNull(userid)
+        AuditLogg.loggOppslagKandidatsøk(userid, navIdent, userid == returnerteFødselsnummer)
     }
 }
 private object KandidatnummerSøk: SøkeType {
@@ -47,6 +48,12 @@ private object KandidatnummerSøk: SøkeType {
                 field("kandidatnr")
                 value(søkeOrd!!)
             }
+        }
+    }
+
+    override fun auditLog(userid: String?, navIdent: String, returnerteFødselsnummer: String?) {
+        if(returnerteFødselsnummer!=null) {
+            AuditLogg.loggOppslagKandidatsøk(returnerteFødselsnummer, navIdent, true)
         }
     }
 }
@@ -79,8 +86,8 @@ private class Søk(private val søkeOrd: String?) {
         return type.lagESFilterFunksjon(søkeOrd)
     }
 
-    fun auditLog(navIdent: String) {
-        type.auditLog(søkeOrd, navIdent)
+    fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {
+        type.auditLog(søkeOrd, navIdent, returnerteFødselsnummer)
     }
 }
 
@@ -97,8 +104,8 @@ private class FritekstFilter: Filter {
 
     override fun lagESFilterFunksjon() = søk.lagESFilterFunksjon()
 
-    override fun auditLog(navIdent: String) {
+    override fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {
         if(erAktiv())
-            søk.auditLog(navIdent)
+            søk.auditLog(navIdent, returnerteFødselsnummer)
     }
 }

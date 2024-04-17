@@ -17,7 +17,7 @@ interface Filter {
     fun berikMedParameter(filterParametre: FilterParametre)
     fun erAktiv(): Boolean
     fun lagESFilterFunksjon(): FilterFunksjon
-    fun auditLog(navIdent: String) {}
+    fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {}
     fun berikMedAuthenticatedUser(authenticatedUser: AuthenticatedUser) {}
 }
 

@@ -56,9 +56,14 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
                 .onEach { it.berikMedAuthenticatedUser(ctx.authenticatedUser()) }
                 .filter(Filter::erAktiv)
             val side = ctx.queryParam("side")?.toInt() ?: 1
-            val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side, sorterting)
-            filter.forEach { it.auditLog(ctx.authenticatedUser().navIdent) }
-            ctx.json(result.toResponseJson())
+            val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side, sorterting).toResponseJson()
+            filter.forEach {
+                it.auditLog(
+                    ctx.authenticatedUser().navIdent,
+                    result.hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
+                )
+            }
+            ctx.json(result)
         } catch (e: Valideringsfeil) {
             ctx.status(HttpStatus.BAD_REQUEST)
         }

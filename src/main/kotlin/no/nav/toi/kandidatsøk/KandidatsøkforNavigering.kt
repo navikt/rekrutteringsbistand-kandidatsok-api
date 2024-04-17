@@ -42,7 +42,6 @@ fun Javalin.handleKandidatSøkForNavigering(openSearchClient: OpenSearchClient) 
                 .filter(Filter::erAktiv)
             val side = ctx.queryParam("side")?.toInt() ?: 1
             val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side, sorterting)
-            filter.forEach { it.auditLog(ctx.authenticatedUser().navIdent) }
             ctx.json(result.hentUtKandidatnumre())
         } catch (e: Valideringsfeil) {
             ctx.status(HttpStatus.BAD_REQUEST)
