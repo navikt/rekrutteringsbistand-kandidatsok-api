@@ -76,7 +76,6 @@ object AuditLogg {
             msg = "NAV-ansatt har gjort spesifikt kandidatsøk på brukeren",
             authorizationDecision = if (fikkTreff) AuthorizationDecision.PERMIT else AuthorizationDecision.DENY
         )
-        listOf(1,2).sorted()
     }
 
     fun loggGenereltKandidatsøk(fritekst: String?, navIdent: String) {
