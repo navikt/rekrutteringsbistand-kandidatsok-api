@@ -5,55 +5,57 @@ import no.nav.toi.kandidatsøk.filter.FilterFunksjon
 
 sealed interface SøkeType {
     fun erAktiv(): Boolean
-    fun passendeSøketype(søkeord: String): Boolean
-    fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon
-    fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?)
+    fun passendeSøketype(): Boolean
+    fun lagESFilterFunksjon(): FilterFunksjon
+    fun auditLog(navIdent: String, returnerteFødselsnummer: String?)
     companion object {
         fun fraFritekstSøk(fritekstSøk: String?) = if(fritekstSøk == null) NullSøk else
-            listOf(IdentSøk, KandidatnummerSøk, MultiMatchSøk).first { it.passendeSøketype(fritekstSøk) }
+            listOf(::IdentSøk, ::KandidatnummerSøk, ::MultiMatchSøk).map { it(fritekstSøk) }.first { it.passendeSøketype() }
     }
 }
 
-private object IdentSøk: SøkeType {
+private class IdentSøk(søkeord: String?): SøkeType {
+    private val søkeord = søkeord ?: throw IllegalArgumentException()
     override fun erAktiv() = true
-    override fun passendeSøketype(søkeord: String) = Regex("^\\d+$").matches(søkeord) && søkeord.length>10
-    override fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon = {
+    override fun passendeSøketype() = Regex("^\\d+$").matches(søkeord) && søkeord.length>10
+    override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
             bool_ {
                 should_ {
                     term_ {
                         field("aktorId")
-                        value(søkeOrd!!)
+                        value(søkeord)
                     }
                 }
                 should_ {
                     term_ {
                         field("fodselsnummer")
-                        value(søkeOrd!!)
+                        value(søkeord)
                     }
                 }
             }
         }
     }
 
-    override fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {
+    override fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {
         requireNotNull(søkeord)
         AuditLogg.loggSpesifiktKandidatsøk(søkeord, navIdent, søkeord == returnerteFødselsnummer)
     }
 }
-private object KandidatnummerSøk: SøkeType {
+private class KandidatnummerSøk(søkeord: String?): SøkeType {
+    private val søkeord = søkeord ?: throw IllegalArgumentException()
     override fun erAktiv() = true
-    override fun passendeSøketype(søkeord: String) = Regex("^[a-zA-Z]{2}[0-9]+").matches(søkeord) || Regex("^PAM[0-9a-zA-Z]+").matches(søkeord)
-    override fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon = {
+    override fun passendeSøketype() = Regex("^[a-zA-Z]{2}[0-9]+").matches(søkeord) || Regex("^PAM[0-9a-zA-Z]+").matches(søkeord)
+    override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
             term_ {
                 field("kandidatnr")
-                value(søkeOrd!!)
+                value(søkeord)
             }
         }
     }
 
-    override fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {
+    override fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {
         if(returnerteFødselsnummer!=null) {
             AuditLogg.loggSpesifiktKandidatsøk(returnerteFødselsnummer, navIdent, true)
         } else {
@@ -61,32 +63,33 @@ private object KandidatnummerSøk: SøkeType {
         }
     }
 }
-private object MultiMatchSøk: SøkeType {
+private class MultiMatchSøk(søkeord: String?): SøkeType {
+    private val søkeord = søkeord ?: throw IllegalArgumentException()
     override fun erAktiv() = true
-    override fun passendeSøketype(søkeord: String) = true
-    override fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon = {
+    override fun passendeSøketype() = true
+    override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
             multiMatch_ {
-                query(søkeOrd)
+                query(søkeord)
                 fields(listOf("fritekst^1", "fornavn^1", "etternavn^1", "yrkeJobbonskerObj.styrkBeskrivelse^1.5", "yrkeJobbonskerObj.sokeTitler^1"))
             }
         }
     }
 
-    override fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {
+    override fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {
         AuditLogg.loggGenereltKandidatsøk(søkeord, navIdent)
     }
 }
 private object NullSøk: SøkeType {
     override fun erAktiv() = false
-    override fun passendeSøketype(søkeord: String): Boolean {
+    override fun passendeSøketype(): Boolean {
         throw IllegalStateException()
     }
-    override fun lagESFilterFunksjon(søkeOrd: String?): FilterFunksjon {
+    override fun lagESFilterFunksjon(): FilterFunksjon {
         throw IllegalStateException()
     }
 
-    override fun auditLog(søkeord: String?, navIdent: String, returnerteFødselsnummer: String?) {
+    override fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {
         AuditLogg.loggGenereltKandidatsøk(null, navIdent)
     }
 }
