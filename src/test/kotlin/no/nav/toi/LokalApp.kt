@@ -5,11 +5,17 @@ import java.util.*
 
 
 const val modiaGenerell = "67a06857-0028-4a90-bf4c-9c9a92c7d733"
-const val modiaOppfølging = "554a66fb-fbec-4b92-90c1-0d9c085c362c"
+private const val jobbsøkerrettetConst = "67a06857-0028-4a90-bf4c-9c9a92c7d733" // TODO: Må oppdateres med rette dev-verdier
+private const val arbeidsgiverrettetConst = "67a06857-0028-4a90-bf4c-9c9a92c7d733" // TODO: Må oppdateres med rette dev-verdier
+private const val utviklerConst = "67a06857-0028-4a90-bf4c-9c9a92c7d733" // TODO: Må oppdateres med rette dev-verdier
 
 private const val authPort = 18306
 
-class LokalApp {
+class LokalApp(
+    private val jobbsøkerrettet: String = jobbsøkerrettetConst,
+    private val arbeidsgiverrettet: String = arbeidsgiverrettetConst,
+    private val utvikler: String = utviklerConst
+) {
     private val app: App = lagLokalApp()
     private val authServer = MockOAuth2Server()
 
@@ -47,7 +53,9 @@ private fun lagLokalApp() = App(
     ),
     rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
         modiaGenerell = UUID.fromString(modiaGenerell),
-        modiaOppfølging = UUID.fromString(modiaOppfølging),
+        jobbsøkerrettet = UUID.fromString(jobbsøkerrettetConst),
+        arbeidsgiverrettet = UUID.fromString(arbeidsgiverrettetConst),
+        utvikler = UUID.fromString(utviklerConst)
     ),
     openSearchUsername = "user",
     openSearchPassword = "pass",

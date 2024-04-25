@@ -25,7 +25,6 @@ class KandidatTest {
     private val authPort = 18306
 
     private val modiaGenerell = UUID.randomUUID().toString()
-    private val modiaOppfølging = UUID.randomUUID().toString()
 
     private val app: App = lagLokalApp()
     private val authServer = MockOAuth2Server()
@@ -288,7 +287,9 @@ class KandidatTest {
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
             modiaGenerell = UUID.fromString(modiaGenerell),
-            modiaOppfølging = UUID.fromString(modiaOppfølging),
+            jobbsøkerrettet = UUID.randomUUID(),
+            arbeidsgiverrettet = UUID.randomUUID(),
+            utvikler = UUID.randomUUID(),
         ),
         openSearchUsername = "user",
         openSearchPassword = "pass",

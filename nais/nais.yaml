@@ -26,7 +26,9 @@ spec:
           - NAVident
         groups:
           - id: {{adGruppeModiaGenerellTilgang}}
-          - id: {{adGruppeModiaOppfolging}}
+          - id: {{adGruppeJobbsøkerrettet}}
+          - id: {{adGruppeArbeidsgiverrettet}}
+          - id: {{adGruppeUtvikler}}
   openSearch:
     access: read
     instance: kandidat
@@ -40,8 +42,12 @@ spec:
   env:
     - name: MODIA_GENERELL_GRUPPE
       value: {{adGruppeModiaGenerellTilgang}}
-    - name: MODIA_OPPFOLGING_GRUPPE
-      value: {{adGruppeModiaOppfolging}}
+    - name: REKRUTTERINGSBISTAND_JOBBSOKERRETTET
+      value: {{adGruppeJobbsøkerrettet}}
+    - name: REKRUTTERINGSBISTAND_ARBEIDSGIVERRETTET
+      value: {{adGruppeArbeidsgiverrettet}}
+    - name: REKRUTTERINGSBISTAND_UTVIKLER
+      value: {{adGruppeUtvikler}}
     - name: PDL_URL
       value: {{pdlUrl}}
     - name: PDL_SCOPE
