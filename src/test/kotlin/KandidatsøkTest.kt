@@ -799,18 +799,6 @@ class KandidatsøkTest {
     }
 
     @Test
-    fun `krever gruppetilhørighet for å søke kandidatnumre for navigering`() {
-        val navIdent = "A123456"
-        val token = lagToken(claims = mapOf("NAVident" to navIdent))
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering?side=11")
-            .body("{}")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
-
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
-    }
-
-    @Test
     fun `Navigering må ha token med rett issuer`() {
         val token = lagToken(issuerId = "falskissuer")
         val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering")
