@@ -188,6 +188,17 @@ class KandidatsøkTest {
     }
 
     @Test
+    fun `om man ikke har gruppetilhørighet skal man ikke få gjort kandidatsøk`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val token = lagToken(groups = emptyList())
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
     fun `Om kall feiler under henting av cv fra elasticsearch, får vi HTTP 500`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
@@ -783,6 +794,18 @@ class KandidatsøkTest {
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
+
+    @Test
+    fun `om man ikke har gruppetilhørighet skal man ikke få navigert`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val token = lagToken(groups = emptyList())
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
 
     @Test
     fun `kan søke kandidatnumre for navigering`(wmRuntimeInfo: WireMockRuntimeInfo) {
