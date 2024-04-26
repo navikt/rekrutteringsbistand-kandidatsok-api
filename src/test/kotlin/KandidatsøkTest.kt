@@ -811,6 +811,122 @@ class KandidatsøkTest {
     }
 
     @Test
+    fun `Navigering må ha token med rett issuer`() {
+        val token = lagToken(issuerId = "falskissuer")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `Navigering må ha navIdent`() {
+        val token = lagToken(claims = mapOf("groups" to listOf(utvikler)))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `Navigering må ha rett audience`() {
+        val token = lagToken(aud = "Feil aud")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `Navigering må ikke være utgått`() {
+        val token = lagToken(expiry = -1)
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `Navigering må ha rett algoritme`() {
+        val payload = lagToken(claims = mapOf("groups" to listOf(utvikler))).serialize().split(".")[1]
+
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering")
+            .body("""{}""")
+            .header("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.$payload.")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `modia generell skal ikke ha tilgang til navigering`() {
+        val token = lagToken(groups = listOf(modiaGenerell))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
+    fun `jobbsøkerrettet skal ikke ha tilgang til navigering`() {
+        val token = lagToken(groups = listOf(jobbsøkerrettet))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
+    fun `arbeidsgiverrettet skal ha tilgang til navigering`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson(KandidatsøkRespons.navigeringQuery(), true, false))
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
+                )
+        )
+        val token = lagToken(groups = listOf(arbeidsgiverrettet))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `utvikler skal ha tilgang til navigering`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson(KandidatsøkRespons.navigeringQuery(), true, false))
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
+                )
+        )
+        val token = lagToken(groups = listOf(utvikler))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
     fun `kan søke kandidatnumre for navigering`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
