@@ -901,7 +901,7 @@ class KandidatsøkTest {
         )),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
             modiaGenerell = UUID.fromString(modiaGenerell),
-            jobbsøkerrettet = UUID.fromString(utvikler),
+            jobbsøkerrettet = UUID.fromString(jobbsøkerrettet),
             arbeidsgiverrettet = UUID.fromString(arbeidsgiverrettet),
             utvikler = UUID.fromString(utvikler)
         ),

@@ -11,10 +11,7 @@ import com.auth0.jwt.exceptions.TokenExpiredException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.RSAKeyProvider
 import io.javalin.Javalin
-import io.javalin.http.Context
-import io.javalin.http.HttpStatus
-import io.javalin.http.InternalServerErrorResponse
-import io.javalin.http.UnauthorizedResponse
+import io.javalin.http.*
 import org.eclipse.jetty.http.HttpHeader
 import java.net.URI
 import java.security.interfaces.RSAPublicKey
@@ -34,7 +31,7 @@ class AuthenticatedUser(
     fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle): Unit {
         val ingenGyldigRolle: Boolean = this.roller.none { it in gyldigeRoller }
         if(ingenGyldigRolle) {
-            throw UnauthorizedResponse()
+            throw ForbiddenResponse()
         }
     }
 
