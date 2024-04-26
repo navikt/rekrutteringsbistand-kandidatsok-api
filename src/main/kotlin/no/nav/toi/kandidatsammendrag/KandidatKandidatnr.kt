@@ -29,6 +29,7 @@ private data class KandidatKandidatnrResponsDto(
 )
 fun Javalin.handleKandidatKandidatnr(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
+        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
         val request = ctx.bodyAsClass<KandidatKandidatnrRequestDto>()
         val result = openSearchClient.lookupKandidatNavn(request.fodselsnummer)
         result.hits().hits().firstOrNull()?.source()?.get("arenaKandidatnr")

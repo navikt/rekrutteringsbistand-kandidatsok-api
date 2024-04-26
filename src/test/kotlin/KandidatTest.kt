@@ -62,8 +62,16 @@ class KandidatTest {
         val kandidatnummer = "PAM123456789"
         wireMock.register(
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["arenaKandidatnr"]}}""", true, false))
-                .willReturn(WireMock.ok("""
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["arenaKandidatnr"]}}""",
+                        true,
+                        false
+                    )
+                )
+                .willReturn(
+                    WireMock.ok(
+                        """
                     {
                     	"took": 1,
                     	"timed_out": false,
@@ -92,7 +100,9 @@ class KandidatTest {
                     		]
                     	}
                     }
-                """.trimIndent()))
+                """.trimIndent()
+                    )
+                )
         )
         val (_, response, result) = Fuel.post("$endepunkt/arena-kandidatnr")
             .body("""{"fodselsnummer":"$fødselsnummer"}""")
@@ -116,7 +126,11 @@ class KandidatTest {
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), """{"fornavn": "$fornavn","etternavn": "$etternavn", "kilde":"REKRUTTERINGSBISTAND"}""", true)
+        JSONAssert.assertEquals(
+            result.get().toPrettyString(),
+            """{"fornavn": "$fornavn","etternavn": "$etternavn", "kilde":"REKRUTTERINGSBISTAND"}""",
+            true
+        )
     }
 
     @Test
@@ -128,8 +142,16 @@ class KandidatTest {
         val etternavn = "Parodisk"
         wireMock.register(
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""", true, false))
-                .willReturn(WireMock.ok("""
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""",
+                        true,
+                        false
+                    )
+                )
+                .willReturn(
+                    WireMock.ok(
+                        """
                     {
                     	"took": 1,
                     	"timed_out": false,
@@ -148,19 +170,27 @@ class KandidatTest {
                     		"hits": []
                     	}
                     }
-                """.trimIndent()))
+                """.trimIndent()
+                    )
+                )
         )
         wireMock.register(
             WireMock.post("/pdl")
-                .withRequestBody(WireMock.equalToJson("""
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """
                     {
                         "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
                         "variables": {
                             "ident":"$fødselsnummer"
                         }
                     }
-                """.trimIndent(),false,false))
-                .willReturn(WireMock.ok("""
+                """.trimIndent(), false, false
+                    )
+                )
+                .willReturn(
+                    WireMock.ok(
+                        """
                     {
                       "data": {
                         "hentPerson": {
@@ -174,7 +204,9 @@ class KandidatTest {
                         }
                       }
                     }
-                """.trimIndent()))
+                """.trimIndent()
+                    )
+                )
         )
         val (_, response, result) = Fuel.post("$endepunkt/navn")
             .body("""{"fodselsnummer":"$fødselsnummer"}""")
@@ -182,7 +214,11 @@ class KandidatTest {
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), """{"fornavn": "$fornavn $mellomnavn","etternavn": "$etternavn", "kilde":"PDL"}""", true)
+        JSONAssert.assertEquals(
+            result.get().toPrettyString(),
+            """{"fornavn": "$fornavn $mellomnavn","etternavn": "$etternavn", "kilde":"PDL"}""",
+            true
+        )
     }
 
     @Test
@@ -194,8 +230,16 @@ class KandidatTest {
         val etternavn = "Parodisk"
         wireMock.register(
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""", true, false))
-                .willReturn(WireMock.ok("""
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""",
+                        true,
+                        false
+                    )
+                )
+                .willReturn(
+                    WireMock.ok(
+                        """
                     {
                     	"took": 1,
                     	"timed_out": false,
@@ -214,18 +258,24 @@ class KandidatTest {
                     		"hits": []
                     	}
                     }
-                """.trimIndent()))
+                """.trimIndent()
+                    )
+                )
         )
         wireMock.register(
             WireMock.post("/pdl")
-                .withRequestBody(WireMock.equalToJson("""
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """
                     {
                         "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
                         "variables": {
                             "ident":"$fødselsnummer"
                         }
                     }
-                """.trimIndent(),false,false))
+                """.trimIndent(), false, false
+                    )
+                )
                 .willReturn(WireMock.notFound())
         )
         val (_, response, result) = Fuel.post("$endepunkt/navn")
@@ -239,7 +289,7 @@ class KandidatTest {
     @Test
     fun `modia generell skal ikke ha tilgang til navn`() {
         val token = lagToken(groups = listOf(modiaGenerell))
-        val (_, response) = gjørKall("123",token)
+        val (_, response) = gjørKallNavn("123", token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(403)
     }
@@ -249,8 +299,8 @@ class KandidatTest {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
-        val token = lagToken(groups = listOf(arbeidsgiverrettet))
-        val (_, response) = gjørKall(fødselsnummer,token)
+        val token = lagToken(groups = listOf(jobbsøkerrettet))
+        val (_, response) = gjørKallNavn(fødselsnummer, token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
@@ -261,7 +311,7 @@ class KandidatTest {
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(arbeidsgiverrettet))
-        val (_, response) = gjørKall(fødselsnummer,token)
+        val (_, response) = gjørKallNavn(fødselsnummer, token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
@@ -272,7 +322,7 @@ class KandidatTest {
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(utvikler))
-        val (_, response) = gjørKall(fødselsnummer,token)
+        val (_, response) = gjørKallNavn(fødselsnummer, token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
@@ -280,7 +330,54 @@ class KandidatTest {
     @Test
     fun `om man ikke har gruppetilhørighet skal man ikke få navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = lagToken(groups = emptyList())
-        val (_, response) = gjørKall("123",token)
+        val (_, response) = gjørKallNavn("123", token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
+    fun `modia generell skal ikke ha tilgang til kandidatnummer`() {
+        val token = lagToken(groups = listOf(modiaGenerell))
+        val (_, response) = gjørKallKandidatnummer("123", token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
+    fun `jobbsøkerrettet skal ikke ha tilgang til kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val token = lagToken(groups = listOf(jobbsøkerrettet))
+        val fødselsnummer = "12345678910"
+        val (_, response) = gjørKallKandidatnummer(fødselsnummer, token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
+    fun `arbeidsgiverrettet skal ha tilgang til kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val fødselsnummer = "12345678910"
+        mockHentKandidatnummer(wireMock, fødselsnummer, "123")
+        val token = lagToken(groups = listOf(arbeidsgiverrettet))
+        val (_, response) = gjørKallKandidatnummer(fødselsnummer, token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `utvikler skal ha tilgang til kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val fødselsnummer = "12345678910"
+        mockHentKandidatnummer(wireMock, fødselsnummer, "123")
+        val token = lagToken(groups = listOf(utvikler))
+        val (_, response) = gjørKallKandidatnummer(fødselsnummer, token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `om man ikke har gruppetilhørighet skal man ikke få kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val token = lagToken(groups = emptyList())
+        val (_, response) = gjørKallKandidatnummer("123", token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(403)
     }
@@ -382,8 +479,63 @@ class KandidatTest {
         )
     }
 
-    fun gjørKall(fødselsnummer: String, token: SignedJWT) = Fuel.post("$endepunkt/navn")
+    fun gjørKallNavn(fødselsnummer: String, token: SignedJWT) = Fuel.post("$endepunkt/navn")
         .body("""{"fodselsnummer":"$fødselsnummer"}""")
         .header("Authorization", "Bearer ${token.serialize()}")
         .responseObject<com.fasterxml.jackson.databind.JsonNode>()
+
+    fun gjørKallKandidatnummer(fødselsnummer: String, token: SignedJWT) = Fuel.post("$endepunkt/arena-kandidatnr")
+        .body("""{"fodselsnummer":"$fødselsnummer"}""")
+        .header("Authorization", "Bearer ${token.serialize()}")
+        .responseObject<JsonNode>()
+
+    fun mockHentKandidatnummer(
+        wireMock: WireMock,
+        fødselsnummer: String,
+        kandidatnummer: String
+    ) =
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["arenaKandidatnr"]}}""",
+                        true,
+                        false
+                    )
+                )
+                .willReturn(
+                    WireMock.ok(
+                        """
+                    {
+                    	"took": 1,
+                    	"timed_out": false,
+                    	"_shards": {
+                    		"total": 3,
+                    		"successful": 3,
+                    		"skipped": 0,
+                    		"failed": 0
+                    	},
+                    	"hits": {
+                    		"total": {
+                    			"value": 1,
+                    			"relation": "eq"
+                    		},
+                    		"max_score": 3.2580965,
+                    		"hits": [
+                    			{
+                    				"_index": "veilederkandidat_os4",
+                    				"_type": "_doc",
+                    				"_id": "$kandidatnummer",
+                    				"_score": 3.2580965,
+                    				"_source": {
+                    					"arenaKandidatnr": "$kandidatnummer"
+                    				}
+                    			}
+                    		]
+                    	}
+                    }
+                """.trimIndent()
+                    )
+                )
+        )
 }
