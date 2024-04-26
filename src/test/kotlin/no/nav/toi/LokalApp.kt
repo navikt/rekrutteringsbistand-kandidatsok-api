@@ -5,9 +5,9 @@ import java.util.*
 
 
 const val modiaGenerell = "67a06857-0028-4a90-bf4c-9c9a92c7d733"
-private const val jobbsøkerrettetConst = "67a06857-0028-4a90-bf4c-9c9a92c7d733" // TODO: Må oppdateres med rette dev-verdier
-private const val arbeidsgiverrettetConst = "67a06857-0028-4a90-bf4c-9c9a92c7d733" // TODO: Må oppdateres med rette dev-verdier
-private const val utviklerConst = "67a06857-0028-4a90-bf4c-9c9a92c7d733" // TODO: Må oppdateres med rette dev-verdier
+private const val jobbsøkerrettetConst = "0dba8374-bf36-4d89-bbba-662447d57b94"
+private const val arbeidsgiverrettetConst = "52bc2af7-38d1-468b-b68d-0f3a4de45af2"
+private const val utviklerConst = "a1749d9a-52e0-4116-bb9f-935c38f6c74a"
 
 private const val authPort = 18306
 
