@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.toi.LokalApp
-import no.nav.toi.modiaGenerell
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -49,7 +48,7 @@ class SikkerhetTest {
     @Test
     fun `autentisering feiler om man ikke har navident i token`() {
         val token = app.lagToken(
-            claims = mapOf("groups" to listOf(modiaGenerell))
+            claims = mapOf("groups" to listOf(LokalApp.modiaGenerell))
         )
         println(token.serialize())
         val (_, response) = Fuel.get("http://localhost:8080/api/me")
@@ -117,7 +116,7 @@ class SikkerhetTest {
                     WireMock.ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
                 )
         )
-        val token = app.lagToken()
+        val token = app.lagToken(groups = listOf(LokalApp.arbeidsgiverrettet))
         val (_, response) = Fuel.post("http://localhost:8080/api/lookup-cv")
             .body("""{"kandidatnr": "\",!xz"}""")
             .header("Authorization", "Bearer ${token.serialize()}")

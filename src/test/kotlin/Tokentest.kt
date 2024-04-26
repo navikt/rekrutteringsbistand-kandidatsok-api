@@ -41,6 +41,7 @@ class Tokentest {
     private fun urler(): Stream<Arguments> = Stream.of(
         "http://localhost:8080/api/kandidatsok",
         "http://localhost:8080/api/kandidatsok/navigering",
+        "http://localhost:8080/api/lookup-cv"
     ).map { Arguments.of(it) }
 
     @ParameterizedTest

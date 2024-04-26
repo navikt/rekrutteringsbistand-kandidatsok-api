@@ -25,6 +25,7 @@ private data class RequestDto(
 )
 fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
+        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
         val request = ctx.bodyAsClass<RequestDto>()
         val result = openSearchClient.lookupCv(request)
         val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
