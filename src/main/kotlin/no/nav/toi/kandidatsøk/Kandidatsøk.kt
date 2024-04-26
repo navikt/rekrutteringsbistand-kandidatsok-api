@@ -48,6 +48,8 @@ data class FilterParametre(
 )
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
+        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
+
         val request = ctx.bodyAsClass<FilterParametre>()
         val sorterting = ctx.queryParam("sortering").tilSortering()
         try {

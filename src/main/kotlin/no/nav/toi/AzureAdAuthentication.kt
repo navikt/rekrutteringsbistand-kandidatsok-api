@@ -31,6 +31,13 @@ class AuthenticatedUser(
     val roller: Set<Rolle>,
     val jwt: String
 ) {
+    fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle): Unit {
+        val ingenGyldigRolle: Boolean = this.roller.none { it in gyldigeRoller }
+        if(ingenGyldigRolle) {
+            throw UnauthorizedResponse()
+        }
+    }
+
     companion object {
         fun fromJwt(jwt: DecodedJWT, rolleUuidSpesifikasjon: RolleUuidSpesifikasjon) =
             AuthenticatedUser(
