@@ -28,9 +28,8 @@ class AuthenticatedUser(
     val roller: Set<Rolle>,
     val jwt: String
 ) {
-    fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle): Unit {
-        val ingenGyldigRolle: Boolean = this.roller.none { it in gyldigeRoller }
-        if(ingenGyldigRolle) {
+    fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle) {
+        if(roller.none { it in gyldigeRoller }) {
             throw ForbiddenResponse()
         }
     }
