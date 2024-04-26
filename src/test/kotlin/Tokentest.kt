@@ -44,6 +44,7 @@ class Tokentest {
         "http://localhost:8080/api/lookup-cv",
         "http://localhost:8080/api/kandidatsammendrag",
         "http://localhost:8080/api/kandidat-stillingssok",
+        "http://localhost:8080/api/navn",
     ).map { Arguments.of(it) }
 
     @ParameterizedTest

@@ -5,6 +5,7 @@ import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
+import com.nimbusds.jwt.SignedJWT
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
@@ -25,6 +26,9 @@ class KandidatTest {
     private val authPort = 18306
 
     private val modiaGenerell = UUID.randomUUID().toString()
+    private val jobbsøkerrettet = UUID.randomUUID().toString()
+    private val arbeidsgiverrettet = UUID.randomUUID().toString()
+    private val utvikler = UUID.randomUUID().toString()
 
     private val app: App = lagLokalApp()
     private val authServer = MockOAuth2Server()
@@ -100,56 +104,12 @@ class KandidatTest {
     }
 
     @Test
-    fun `trenger token for å spørre endepunkt om navn`() {
-        val fødselsnummer = "12312312312"
-        val (_, response, result) = Fuel.post("$endepunkt/navn")
-            .body("""{"fodselsnummer":"$fødselsnummer"}""")
-            .responseObject<JsonNode>()
-
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
-    }
-
-    @Test
     fun `map fødselsnummer til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12312312312"
         val fornavn = "Kjæreste"
         val etternavn = "Parodisk"
-        wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""", true, false))
-                .willReturn(WireMock.ok("""
-                    {
-                    	"took": 1,
-                    	"timed_out": false,
-                    	"_shards": {
-                    		"total": 3,
-                    		"successful": 3,
-                    		"skipped": 0,
-                    		"failed": 0
-                    	},
-                    	"hits": {
-                    		"total": {
-                    			"value": 1,
-                    			"relation": "eq"
-                    		},
-                    		"max_score": 3.2580965,
-                    		"hits": [
-                    			{
-                    				"_index": "veilederkandidat_os4",
-                    				"_type": "_doc",
-                    				"_id": "PAM123456789",
-                    				"_score": 3.2580965,
-                    				"_source": {
-                    					"fornavn": "$fornavn",
-                                        "etternavn": "$etternavn"
-                    				}
-                    			}
-                    		]
-                    	}
-                    }
-                """.trimIndent()))
-        )
+        mockNavnSøk(wireMock, fødselsnummer, fornavn, etternavn)
         val (_, response, result) = Fuel.post("$endepunkt/navn")
             .body("""{"fodselsnummer":"$fødselsnummer"}""")
             .leggPåAutensiering()
@@ -276,6 +236,55 @@ class KandidatTest {
         Assertions.assertThat(response.statusCode).isEqualTo(404)
     }
 
+    @Test
+    fun `modia generell skal ikke ha tilgang til navn`() {
+        val token = lagToken(groups = listOf(modiaGenerell))
+        val (_, response) = gjørKall("123",token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
+    fun `jobbsøkerrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val fødselsnummer = "12345678910"
+        mockNavnSøk(wireMock, fødselsnummer, "N", "A")
+        val token = lagToken(groups = listOf(arbeidsgiverrettet))
+        val (_, response) = gjørKall(fødselsnummer,token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `arbeidsgiverrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val fødselsnummer = "12345678910"
+        mockNavnSøk(wireMock, fødselsnummer, "N", "A")
+        val token = lagToken(groups = listOf(arbeidsgiverrettet))
+        val (_, response) = gjørKall(fødselsnummer,token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `utvikler skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val fødselsnummer = "12345678910"
+        mockNavnSøk(wireMock, fødselsnummer, "N", "A")
+        val token = lagToken(groups = listOf(utvikler))
+        val (_, response) = gjørKall(fødselsnummer,token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `om man ikke har gruppetilhørighet skal man ikke få navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val token = lagToken(groups = emptyList())
+        val (_, response) = gjørKall("123",token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
     private fun lagLokalApp() = App(
         port = 8080,
         authenticationConfigurations = listOf(
@@ -287,9 +296,9 @@ class KandidatTest {
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
             modiaGenerell = UUID.fromString(modiaGenerell),
-            jobbsøkerrettet = UUID.randomUUID(),
-            arbeidsgiverrettet = UUID.randomUUID(),
-            utvikler = UUID.randomUUID(),
+            jobbsøkerrettet = UUID.fromString(jobbsøkerrettet),
+            arbeidsgiverrettet = UUID.fromString(arbeidsgiverrettet),
+            utvikler = UUID.fromString(utvikler),
         ),
         openSearchUsername = "user",
         openSearchPassword = "pass",
@@ -305,15 +314,76 @@ class KandidatTest {
         issuerId: String = "http://localhost:$authPort/default",
         aud: String = "1",
         navIdent: String = "A000001",
-        claims: Map<String, Any> = mapOf("NAVident" to navIdent, "groups" to listOf(modiaGenerell))
+        groups: List<String> = listOf(arbeidsgiverrettet),
+        claims: Map<String, Any> = mapOf("NAVident" to navIdent, "groups" to groups),
+        expiry: Long = 3600
     ) = authServer.issueToken(
         issuerId = issuerId,
         subject = "subject",
         audience = aud,
-        claims = claims
+        claims = claims,
+        expiry = expiry
     )
 
     private fun Request.leggPåAutensiering() =
         header("Authorization", "Bearer ${lagToken(navIdent = "A123456").serialize()}")
 
+
+    private fun mockNavnSøk(
+        wireMock: WireMock,
+        fødselsnummer: String,
+        fornavn: String,
+        etternavn: String,
+    ) {
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""",
+                        true,
+                        false
+                    )
+                )
+                .willReturn(
+                    WireMock.ok(
+                        """
+                        {
+                            "took": 1,
+                            "timed_out": false,
+                            "_shards": {
+                                "total": 3,
+                                "successful": 3,
+                                "skipped": 0,
+                                "failed": 0
+                            },
+                            "hits": {
+                                "total": {
+                                    "value": 1,
+                                    "relation": "eq"
+                                },
+                                "max_score": 3.2580965,
+                                "hits": [
+                                    {
+                                        "_index": "veilederkandidat_os4",
+                                        "_type": "_doc",
+                                        "_id": "PAM123456789",
+                                        "_score": 3.2580965,
+                                        "_source": {
+                                            "fornavn": "$fornavn",
+                                            "etternavn": "$etternavn"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    """.trimIndent()
+                    )
+                )
+        )
+    }
+
+    fun gjørKall(fødselsnummer: String, token: SignedJWT) = Fuel.post("$endepunkt/navn")
+        .body("""{"fodselsnummer":"$fødselsnummer"}""")
+        .header("Authorization", "Bearer ${token.serialize()}")
+        .responseObject<com.fasterxml.jackson.databind.JsonNode>()
 }
