@@ -23,8 +23,8 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WireMockTest(httpPort = 10000)
-class SuggestTest {
-    private val endepunkt = "http://localhost:8080/api/suggest"
+class SuggestStedTest {
+    private val endepunkt = "http://localhost:8080/api/suggest/sted"
     private val authPort = 18306
 
     private val modiaGenerell = UUID.randomUUID().toString()
@@ -45,103 +45,29 @@ class SuggestTest {
     }
 
     @Test
-    fun `Svar på ønsket yrke`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Svar på sted`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    WireMock.equalToJson(
-                        esRequest("kok", "yrkeJobbonskerObj.styrkBeskrivelse.completion"),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    WireMock.ok(esSvar)
-                )
+                .withRequestBody(WireMock.equalToJson(esStedRequest, true, false))
+                .willReturn(WireMock.ok(esStedSvar))
         )
-        val (_, response, result) = Fuel.post(endepunkt)
-            .body("""{"query":"kok","type":"ØnsketYrke"}""")
+        val (_, response, result) = Fuel.post("$endepunkt")
+            .body("""{"query":"Bod"}""")
             .leggPåAutensiering()
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), suggestSvar, true)
-    }
-
-    @Test
-    fun `Svar på kompetanse`(wmRuntimeInfo: WireMockRuntimeInfo) {
-        val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    WireMock.equalToJson(
-                        esRequest("prog", "samletKompetanseObj.samletKompetanseTekst.completion"),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    WireMock.ok(esSvar)
-                )
-        )
-        val (_, response, result) = Fuel.post(endepunkt)
-            .body("""{"query":"prog","type":"Kompetanse"}""")
-            .leggPåAutensiering()
-            .responseObject<JsonNode>()
-
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), suggestSvar, true)
-    }
-
-    @Test
-    fun `Svar på arbeidserfaring`(wmRuntimeInfo: WireMockRuntimeInfo) {
-        val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    WireMock.equalToJson(
-                        esRequest("keln", "yrkeserfaring.stillingstitlerForTypeahead"),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    WireMock.ok(esSvar)
-                )
-        )
-        val (_, response, result) = Fuel.post(endepunkt)
-            .body("""{"query":"keln","type":"Arbeidserfaring"}""")
-            .leggPåAutensiering()
-            .responseObject<JsonNode>()
-
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), suggestSvar, true)
-    }
-
-    @Test
-    fun `Svar på språk`(wmRuntimeInfo: WireMockRuntimeInfo) {
-        val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    WireMock.equalToJson(
-                        esRequest("nor", "sprak.sprakKodeTekst.completion"),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    WireMock.ok(esSvar)
-                )
-        )
-        val (_, response, result) = Fuel.post(endepunkt)
-            .body("""{"query":"nor","type":"Språk"}""")
-            .leggPåAutensiering()
-            .responseObject<JsonNode>()
-
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), suggestSvar, true)
+        JSONAssert.assertEquals(result.get().toPrettyString(), """
+            [{
+                "geografiKodeTekst":"Bodø",
+                "geografiKode":"123"
+            },
+            {
+                "geografiKodeTekst":"Boden",
+                "geografiKode":"abc"
+            }]
+        """.trimMargin(), true)
     }
 
     private fun lagLokalApp() = App(
@@ -184,25 +110,178 @@ class SuggestTest {
     private fun Request.leggPåAutensiering() =
         header("Authorization", "Bearer ${lagToken(navIdent = "A123456").serialize()}")
 
-    private fun esRequest(prefix: String, field: String) = """
+    private val esKontorRequest = """
+    {
+      "query": {
+        "match_phrase": {
+          "navkontor.text": {
+            "query": "nav",
+            "slop": 5
+          }
+        }
+      },
+      "aggregations": {
+        "suggestions": {
+          "terms": {
+            "field": "navkontor"
+          }
+        }
+      },
+      "size": 0,
+      "_source": false
+    }
+""".trimIndent()
+
+    private val esKontorSvar = """
+    {
+    "took": 6,
+    "timed_out": false,
+    "_shards": {
+        "total": 3,
+        "successful": 3,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 113,
+            "relation": "eq"
+        },
+        "max_score": null,
+        "hits": []
+    },
+    "aggregations": {
+        "sterms#suggestions": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 23,
+            "buckets": [
+                {
+                    "key": "NAV Hamar",
+                    "doc_count": 21
+                },
+                {
+                    "key": "NAV Drammen",
+                    "doc_count": 14
+                },
+                {
+                    "key": "NAV Råde",
+                    "doc_count": 14
+                },
+                {
+                    "key": "NAV Lofoten",
+                    "doc_count": 13
+                },
+                {
+                    "key": "NAV Østensjø",
+                    "doc_count": 11
+                },
+                {
+                    "key": "NAV Asker",
+                    "doc_count": 7
+                },
+                {
+                    "key": "NAV Lillehammer-Gausdal",
+                    "doc_count": 4
+                },
+                {
+                    "key": "NAV Fredrikstad",
+                    "doc_count": 2
+                },
+                {
+                    "key": "NAV Grimstad",
+                    "doc_count": 2
+                },
+                {
+                    "key": "NAV Molde",
+                    "doc_count": 2
+                }
+            ]
+        }
+    }
+}
+""".trimIndent()
+
+    private val esStedRequest = """
     {
       "suggest": {
         "forslag": {
-          "prefix": "$prefix",
+          "prefix": "Bod",
           "completion": {
-            "field": "$field",
+            "field": "geografiJobbonsker.geografiKodeTekst.completion",
             "size": 15,
             "skip_duplicates": true
           }
         }
       },
       "_source": {
-        "includes": ["doed"]
+        "includes": [
+          "geografiJobbonsker"
+        ]
       }
     }
 """.trimIndent()
 
-    private val suggestSvar = JSONArray(listOf("Kokk","Kokk (skip)","Kokkeassistent","Kokkelærling"))
+    private val esStedSvar = """
+    {
+    	"took": 1,
+    	"timed_out": false,
+    	"_shards": {
+    		"total": 3,
+    		"successful": 3,
+    		"skipped": 0,
+    		"failed": 0
+    	},
+    	"hits": {
+    		"total": {
+    			"value": 0,
+    			"relation": "eq"
+    		},
+    		"max_score": null,
+    		"hits": []
+    	},
+    	"suggest": {
+    		"completion#forslag": [
+    			{
+    				"text": "Bod",
+    				"offset": 0,
+    				"length": 3,
+    				"options": [
+    					{
+    						"text": "Bodø",
+    						"_index": "veilederkandidat_os4",
+    						"_type": "_doc",
+    						"_id": "PAM013tc53ryp",
+    						"_nested": {
+    							"field": "geografiJobbonsker",
+    							"offset": 2
+    						},
+    						"_score": 1.0,
+    						"_source": {
+    							"geografiKodeTekst": "Bodø",
+    							"geografiKode": "123"
+    						}
+    					},
+                        {
+    						"text": "Boden",
+    						"_index": "veilederkandidat_os4",
+    						"_type": "_doc",
+    						"_id": "PAM0123456789",
+    						"_nested": {
+    							"field": "geografiJobbonsker",
+    							"offset": 2
+    						},
+    						"_score": 1.0,
+    						"_source": {
+    							"geografiKodeTekst": "Boden",
+    							"geografiKode": "abc"
+    						}
+    					}
+    				]
+    			}
+    		]
+    	}
+    }
+""".trimIndent()
 
     // TODO: source burde vært false, og ingen source i svar.. unødvendig hack for å få det til å funke
     private val source = """
