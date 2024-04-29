@@ -28,6 +28,8 @@ private data class StedRequest(
 )
 fun Javalin.handleStedSuggest(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
+        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
+
         val request = ctx.bodyAsClass<StedRequest>()
         val result = openSearchClient.suggest(request.query)
         ctx.json(result.tilResponsJson())
