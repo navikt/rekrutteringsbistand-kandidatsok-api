@@ -1,3 +1,5 @@
+package suggest
+
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
@@ -18,11 +20,11 @@ import org.junit.jupiter.api.TestInstance
 import org.skyscreamer.jsonassert.JSONAssert
 import java.util.*
 
-private const val endepunkt = "http://localhost:8080/api/suggest"
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WireMockTest(httpPort = 10000)
 class SuggestTest {
+    private val endepunkt = "http://localhost:8080/api/suggest"
     private val authPort = 18306
 
     private val modiaGenerell = UUID.randomUUID().toString()
@@ -237,9 +239,8 @@ class SuggestTest {
 
     private fun Request.leggPåAutensiering() =
         header("Authorization", "Bearer ${lagToken(navIdent = "A123456").serialize()}")
-}
 
-private val esKontorRequest = """
+    private val esKontorRequest = """
     {
       "query": {
         "match_phrase": {
@@ -261,7 +262,7 @@ private val esKontorRequest = """
     }
 """.trimIndent()
 
-private val esKontorSvar = """
+    private val esKontorSvar = """
     {
     "took": 6,
     "timed_out": false,
@@ -330,7 +331,7 @@ private val esKontorSvar = """
 }
 """.trimIndent()
 
-private val esStedRequest = """
+    private val esStedRequest = """
     {
       "suggest": {
         "forslag": {
@@ -350,7 +351,7 @@ private val esStedRequest = """
     }
 """.trimIndent()
 
-private val esStedSvar = """
+    private val esStedSvar = """
     {
     	"took": 1,
     	"timed_out": false,
@@ -412,7 +413,7 @@ private val esStedSvar = """
     }
 """.trimIndent()
 
-private fun esRequest(prefix: String, field: String) = """
+    private fun esRequest(prefix: String, field: String) = """
     {
       "suggest": {
         "forslag": {
@@ -430,10 +431,10 @@ private fun esRequest(prefix: String, field: String) = """
     }
 """.trimIndent()
 
-private val suggestSvar = JSONArray(listOf("Kokk","Kokk (skip)","Kokkeassistent","Kokkelærling"))
+    private val suggestSvar = JSONArray(listOf("Kokk","Kokk (skip)","Kokkeassistent","Kokkelærling"))
 
-// TODO: source burde vært false, og ingen source i svar.. unødvendig hack for å få det til å funke
-private val source = """
+    // TODO: source burde vært false, og ingen source i svar.. unødvendig hack for å få det til å funke
+    private val source = """
     {
       "aktorId": "2740905813038",
       "fodselsnummer": "01825999058",
@@ -669,7 +670,7 @@ private val source = """
     }
 """.trimIndent()
 
-private val esSvar = """
+    private val esSvar = """
     {
     	"took": 2,
     	"timed_out": false,
@@ -732,3 +733,4 @@ private val esSvar = """
     	}
     }
 """.trimIndent()
+}
