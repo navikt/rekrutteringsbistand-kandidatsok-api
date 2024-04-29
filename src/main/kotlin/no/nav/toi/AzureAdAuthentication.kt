@@ -157,4 +157,5 @@ private fun algorithm(azureOpenidConfigJwksUri: String): Algorithm {
 private fun jwkProvider(azureOpenidConfigJwksUri: String) =
     JwkProviderBuilder(URI(azureOpenidConfigJwksUri).toURL())
         .cached(10, 1, TimeUnit.HOURS)
+        .rateLimited(false)
         .build()
