@@ -17,6 +17,7 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
         val (_, response, result) = Fuel.post(pdlUrl)
             .header(Headers.CONTENT_TYPE, "application/json")
             .header("Tema", "GEN")
+            .header("Behandlingsnummer", "B346")
             .authentication().bearer(accessToken)
             .jsonBody(graphql)
             .responseObject<Respons>()
