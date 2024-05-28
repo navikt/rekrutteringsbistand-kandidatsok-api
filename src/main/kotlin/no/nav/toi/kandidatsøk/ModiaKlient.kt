@@ -10,7 +10,7 @@ import no.nav.toi.accesstoken.AccessTokenClient
 class ModiaKlient(private val modiaUrl: String, private val accessTokenClient: AccessTokenClient) {
     fun hentModiaEnheter(innkommendeToken: String): List<String> {
         val accessToken = accessTokenClient.hentAccessToken(innkommendeToken)
-        val (_, response, result) = Fuel.get(modiaUrl)
+        val (_, response, result) = Fuel.get(modiaUrl + "/api/decorator")
             .header(Headers.CONTENT_TYPE, "application/json")
             .authentication().bearer(accessToken)
             .responseObject<ModiaPerson>()

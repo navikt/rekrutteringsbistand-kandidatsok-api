@@ -733,7 +733,7 @@ class KandidatsøkTest {
         )
 
         wireMock.register(
-            WireMock.get("/modia")
+            WireMock.get("/modia/api/decorator")
                 .willReturn(
                     okJson(
                         """
