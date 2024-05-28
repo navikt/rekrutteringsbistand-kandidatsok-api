@@ -8,7 +8,7 @@ import com.github.kittinunf.result.Result
 import no.nav.toi.accesstoken.AccessTokenClient
 
 class ModiaKlient(private val modiaUrl: String, private val accessTokenClient: AccessTokenClient) {
-    fun hentModiaInformasjon(innkommendeToken: String): List<String> {
+    fun hentModiaEnheter(innkommendeToken: String): List<String> {
         val accessToken = accessTokenClient.hentAccessToken(innkommendeToken)
         val (_, response, result) = Fuel.get(modiaUrl)
             .header(Headers.CONTENT_TYPE, "application/json")
@@ -18,7 +18,7 @@ class ModiaKlient(private val modiaUrl: String, private val accessTokenClient: A
         if(response.statusCode == 404) return emptyList()
 
         when (result) {
-            is Result.Success -> return result.get().enheter.map { it.enhetId }
+            is Result.Success -> return result.get().enheter.map { it.navn }
 
             is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av brukere: ", result.getException())
         }

@@ -58,5 +58,5 @@ private fun lagLokalApp() = App(
     azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
     pdlScope = "http://localhost/.default",
     modiaContextHolderScope = "http://localhost/.default",
-    modiaContextHolderUrl = "http://localhost/modia"
+    modiaContextHolderUrl = "http://localhost:10000/modia"
 )

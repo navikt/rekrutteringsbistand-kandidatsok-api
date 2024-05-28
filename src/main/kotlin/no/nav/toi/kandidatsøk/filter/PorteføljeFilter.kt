@@ -48,7 +48,7 @@ private class MineKontorer : Type {
         must_ {
             bool_ {
                 apply {
-                    val mineKontorer = modiaKlient.hentModiaInformasjon(authenticatedUser?.jwt ?: throw UnauthorizedResponse())
+                    val mineKontorer = modiaKlient.hentModiaEnheter(authenticatedUser?.jwt ?: throw UnauthorizedResponse())
                     mineKontorer.forEach { kontor ->
                         should_ {
                             term_ {
