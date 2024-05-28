@@ -645,6 +645,26 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
     }
     @Test
+    fun `Kan søke på mine kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.mineKontorTerm), true, false))
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
+                )
+        )
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{"portefølje":"mineKontorer"}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(result.get().toPrettyString(), KandidatsøkRespons.kandidatsøkRespons, false)
+    }
+    @Test
     fun `Søk på kontor uten valgt kontor satt fører til spørring med tom streng`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
@@ -845,8 +865,10 @@ class KandidatsøkTest {
         pdlUrl = "http://localhost:10000/pdl",
         azureSecret = "secret",
         azureClientId = "1",
-        azureUrl = "http://localhost:$authPort",
-        pdlScope = "http://localhost/.default"
+        azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
+        pdlScope = "http://localhost/.default",
+        modiaContextHolderScope = "http://localhost/.default",
+        modiaContextHolderUrl = "http://localhost/modia"
     )
 
     private fun lagToken(

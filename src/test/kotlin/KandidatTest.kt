@@ -297,7 +297,9 @@ class KandidatTest {
         azureSecret = "secret",
         azureClientId = "1",
         azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
-        pdlScope = "http://localhost/.default"
+        pdlScope = "http://localhost/.default",
+        modiaContextHolderScope = "http://localhost/.default",
+        modiaContextHolderUrl = "http://localhost/modia"
     )
 
     private fun lagToken(
