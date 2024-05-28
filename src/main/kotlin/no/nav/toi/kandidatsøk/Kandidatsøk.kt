@@ -46,7 +46,7 @@ data class FilterParametre(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
+fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
         val request = ctx.bodyAsClass<FilterParametre>()
         val sorterting = ctx.queryParam("sortering").tilSortering()
@@ -54,6 +54,7 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient) {
             val filter = søkeFilter()
                 .onEach { it.berikMedParameter(request) }
                 .onEach { it.berikMedAuthenticatedUser(ctx.authenticatedUser()) }
+                .onEach { it.berikMedModiaKlient(modiaKlient) }
                 .filter(Filter::erAktiv)
             val side = ctx.queryParam("side")?.toInt() ?: 1
             val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side, sorterting).toResponseJson()

@@ -2,6 +2,7 @@ package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.AuthenticatedUser
 import no.nav.toi.kandidatsøk.FilterParametre
+import no.nav.toi.kandidatsøk.ModiaKlient
 import no.nav.toi.kandidatsøk.filter.fritekstfilter.medFritekstFilter
 import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
 import org.opensearch.client.util.ObjectBuilder
@@ -20,6 +21,7 @@ interface Filter {
     fun lagESFilterFunksjon(): FilterFunksjon
     fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {}
     fun berikMedAuthenticatedUser(authenticatedUser: AuthenticatedUser) {}
+    fun berikMedModiaKlient(modiaKlient: ModiaKlient) {}
 }
 
 fun søkeFilter() = listOf<Filter>()
