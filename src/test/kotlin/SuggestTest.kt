@@ -218,8 +218,10 @@ class SuggestTest {
         pdlUrl = "http://localhost:10000/pdl",
         azureSecret = "secret",
         azureClientId = "1",
-        azureUrl = "http://localhost:$authPort",
-        pdlScope = "http://localhost/.default"
+        azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
+        pdlScope = "http://localhost/.default",
+        modiaContextHolderScope = "http://localhost/.default",
+        modiaContextHolderUrl = "http://localhost/modia"
     )
 
     private fun lagToken(

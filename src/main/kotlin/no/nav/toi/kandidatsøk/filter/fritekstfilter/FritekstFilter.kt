@@ -3,13 +3,10 @@ package no.nav.toi.kandidatsøk.filter.fritekstfilter
 import no.nav.toi.kandidatsøk.FilterParametre
 import no.nav.toi.kandidatsøk.filter.Filter
 
-fun List<Filter>.medFritekstFilter() = this + FritekstFilter()
+fun List<Filter>.medFritekstFilter(filterParametre: FilterParametre) = this + FritekstFilter(filterParametre)
 
-private class FritekstFilter: Filter {
-    private var søk: Søk = Søk(null)
-    override fun berikMedParameter(filterParametre: FilterParametre) {
-        søk = Søk(filterParametre.fritekst)
-    }
+private class FritekstFilter(parametre: FilterParametre): Filter {
+    private val søk: Søk = Søk(parametre.fritekst)
 
     override fun erAktiv() = true
 
