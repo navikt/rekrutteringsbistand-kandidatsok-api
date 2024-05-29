@@ -5,7 +5,8 @@ import no.nav.toi.*
 import no.nav.toi.kandidatsøk.FilterParametre
 import no.nav.toi.kandidatsøk.ModiaKlient
 
-fun List<Filter>.medPorteføljeFilter() = this + PorteføljeFilter()
+fun List<Filter>.medPorteføljeFilter(authenticatedUser: AuthenticatedUser, modiaKlient: ModiaKlient) =
+    this + PorteføljeFilter(authenticatedUser, modiaKlient)
 
 private interface Type {
     fun erAktiv(): Boolean = true
@@ -95,11 +96,9 @@ private fun String.typePorteføljeSpørring(
     else -> throw Valideringsfeil("$this er ikke en gyldig porteføljetype-spørring")
 }
 
-private class PorteføljeFilter : Filter {
+private class PorteføljeFilter(private val authenticatedUser: AuthenticatedUser, private val modiaKlient: ModiaKlient) : Filter {
 
     private var portefølje: Type = Alle
-    private var authenticatedUser: AuthenticatedUser? = null
-    private var modiaKlient: ModiaKlient? = null
 
     override fun berikMedParameter(filterParametre: FilterParametre) {
         portefølje = filterParametre.portefølje?.typePorteføljeSpørring({
@@ -108,12 +107,5 @@ private class PorteføljeFilter : Filter {
     }
 
     override fun erAktiv() = portefølje.erAktiv()
-    override fun lagESFilterFunksjon() = portefølje.lagESFilterFunksjon(authenticatedUser, modiaKlient!!)
-    override fun berikMedAuthenticatedUser(authenticatedUser: AuthenticatedUser) {
-        this.authenticatedUser = authenticatedUser
-    }
-
-    override fun berikMedModiaKlient(modiaKlient: ModiaKlient) {
-        this.modiaKlient = modiaKlient
-    }
+    override fun lagESFilterFunksjon() = portefølje.lagESFilterFunksjon(authenticatedUser, modiaKlient)
 }

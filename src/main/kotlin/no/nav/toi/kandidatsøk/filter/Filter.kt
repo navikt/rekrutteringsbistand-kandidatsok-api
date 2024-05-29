@@ -20,11 +20,9 @@ interface Filter {
     fun erAktiv(): Boolean
     fun lagESFilterFunksjon(): FilterFunksjon
     fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {}
-    fun berikMedAuthenticatedUser(authenticatedUser: AuthenticatedUser) {}
-    fun berikMedModiaKlient(modiaKlient: ModiaKlient) {}
 }
 
-fun søkeFilter() = listOf<Filter>()
+fun søkeFilter(authenticatedUser: AuthenticatedUser, modiaKlient: ModiaKlient) = listOf<Filter>()
     .medArbeidsønskefilter()
     .medInnsatsgruppeFilter()
     .medSpråkFilter()
@@ -36,6 +34,6 @@ fun søkeFilter() = listOf<Filter>()
     .medUtdanningFilter()
     .medPrioritertMålgruppeFilter()
     .medFritekstFilter()
-    .medPorteføljeFilter()
+    .medPorteføljeFilter(authenticatedUser, modiaKlient)
 
 class Valideringsfeil(msg: String): Exception(msg)
