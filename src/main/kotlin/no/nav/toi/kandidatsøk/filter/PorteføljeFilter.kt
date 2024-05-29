@@ -53,8 +53,7 @@ private class MineKontorer : Type {
         must_ {
             bool_ {
                 apply {
-                    val mineKontorer = kontorer
-                    mineKontorer.forEach { kontor ->
+                    kontorer.forEach { kontor ->
                         should_ {
                             term_ {
                                 field("navkontor")
