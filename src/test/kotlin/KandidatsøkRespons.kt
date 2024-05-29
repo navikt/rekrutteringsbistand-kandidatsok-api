@@ -32,7 +32,7 @@ object KandidatsøkRespons {
     val valgtKontorTerm = """{"bool":{"should":[{"term":{"navkontor":{"value":"NAV Hamar"}}},{"term":{"navkontor":{"value":"NAV Lofoten"}}}]}}"""
     val mittKontorTerm = """{"term": {"orgenhet": {"value":"1234"}}}"""
     val mittKontorUtenValgtTerm = """{"term": {"orgenhet": {"value":""}}}"""
-    val mineKontorTerm = """{"bool":{"should":[{"term":{"navkontor":{"value":"NAV Hamar"}}},{"term":{"navkontor":{"value":"NAV Kristiansand"}}}]}}"""
+    val mineKontorerTerm = """{"bool":{"should":[{"term":{"navkontor":{"value":"NAV Hamar"}}},{"term":{"navkontor":{"value":"NAV Kristiansand"}}}]}}"""
     val kandidatsøkHits = """[
                     {
                         "_index": "veilederkandidat_os4",

@@ -91,7 +91,7 @@ class App(
         javalin.handleKompetanseforslag(openSearchClient)
         javalin.handleLookupKandidatStillingssøk(openSearchClient)
         javalin.handleKandidatSøk(openSearchClient, modiaClient)
-        javalin.handleKandidatSøkForNavigering(openSearchClient)
+        javalin.handleKandidatSøkForNavigering(openSearchClient, modiaClient)
         javalin.handleSuggest(openSearchClient)
         javalin.handleStedSuggest(openSearchClient)
         javalin.handleKontorSuggest(openSearchClient)
