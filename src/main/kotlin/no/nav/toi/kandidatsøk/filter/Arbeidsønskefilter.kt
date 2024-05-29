@@ -4,13 +4,10 @@ import no.nav.toi.*
 import no.nav.toi.kandidatsøk.FilterParametre
 import org.opensearch.client.opensearch._types.query_dsl.Operator
 
-fun List<Filter>.medArbeidsønskefilter() = this + Arbeidsønskefilter()
+fun List<Filter>.medArbeidsønskefilter(filterParametre: FilterParametre) = this + Arbeidsønskefilter(filterParametre)
 
-private class Arbeidsønskefilter: Filter {
-    private var arbeidsønske = emptyList<String>()
-    override fun berikMedParameter(filterParametre: FilterParametre) {
-        arbeidsønske = filterParametre.ønsketYrke ?: emptyList()
-    }
+private class Arbeidsønskefilter(parametre: FilterParametre): Filter {
+    private val arbeidsønske = parametre.ønsketYrke ?: emptyList()
 
     override fun erAktiv() = arbeidsønske.isNotEmpty()
 

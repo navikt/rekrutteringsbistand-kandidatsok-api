@@ -4,7 +4,7 @@ import no.nav.toi.*
 import no.nav.toi.kandidatsøk.FilterParametre
 import java.time.LocalDate
 
-fun List<Filter>.medPrioritertMålgruppeFilter() = this + PrioritertMålgruppeFilter()
+fun List<Filter>.medPrioritertMålgruppeFilter(filterParametre: FilterParametre) = this + PrioritertMålgruppeFilter(filterParametre)
 
 private interface Målgruppe {
     fun harKode(kode: String): Boolean
@@ -155,11 +155,8 @@ private object HullICv: Målgruppe {
 
 private fun String.tilMålgruppe() = listOf(Unge, Senior, HullICv).firstOrNull { it.harKode(this) } ?: throw Valideringsfeil("$this er en ukjent målgruppe")
 
-private class PrioritertMålgruppeFilter: Filter {
-    private var prioriterteMålgrupper = emptyList<Målgruppe>()
-    override fun berikMedParameter(filterParametre: FilterParametre) {
-        prioriterteMålgrupper = filterParametre.prioritertMålgruppe?.map(String::tilMålgruppe)  ?: emptyList()
-    }
+private class PrioritertMålgruppeFilter(parametre: FilterParametre): Filter {
+    private val prioriterteMålgrupper = parametre.prioritertMålgruppe?.map(String::tilMålgruppe)  ?: emptyList()
 
     override fun erAktiv() = prioriterteMålgrupper.isNotEmpty()
 

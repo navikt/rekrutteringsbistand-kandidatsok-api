@@ -48,8 +48,7 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: 
         val request = ctx.bodyAsClass<FilterParametre>()
         val sorterting = ctx.queryParam("sortering").tilSortering()
         try {
-            val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient)
-                .onEach { it.berikMedParameter(request) }
+            val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient, request)
                 .filter(Filter::erAktiv)
             val side = ctx.queryParam("side")?.toInt() ?: 1
             val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side, sorterting).toResponseJson()

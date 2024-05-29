@@ -3,7 +3,7 @@ package no.nav.toi.kandidatsøk.filter
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.FilterParametre
 
-fun List<Filter>.medStedFilter() = this + StedFilter()
+fun List<Filter>.medStedFilter(filterParametre: FilterParametre) = this + StedFilter(filterParametre)
 
 private class Sted(ønsketStedKode: String) {
     private val ønsketSted = ønsketStedKode.substring(ønsketStedKode.indexOf('.')+1)
@@ -15,14 +15,9 @@ private class Sted(ønsketStedKode: String) {
     fun kommunenr() = if (ønsketSted.contains(".")) ønsketSted.split('.').last() else "${ønsketSted.substring(2)}.*"
 }
 
-private class StedFilter: Filter {
-    private lateinit var steder: List<Sted>
-    private var måBoPåSted: Boolean = false
-
-    override fun berikMedParameter(filterParametre: FilterParametre) {
-        steder = filterParametre.ønsketSted?.map(::Sted) ?: emptyList()
-        måBoPåSted = filterParametre.borPåØnsketSted ?: false
-    }
+private class StedFilter(parametre: FilterParametre): Filter {
+    private val steder = parametre.ønsketSted?.map(::Sted) ?: emptyList()
+    private val måBoPåSted = parametre.borPåØnsketSted ?: false
 
     override fun erAktiv() = steder.isNotEmpty()
 
