@@ -5,5 +5,8 @@
     ],
     "pdlUrl": "https://pdl-api.prod-fss-pub.nais.io/graphql",
     "pdlScope": "api://prod-fss.pdl.pdl-api/.default",
-    "pdlHost": "pdl-api.prod-fss-pub.nais.io"
+    "pdlHost": "pdl-api.prod-fss-pub.nais.io",
+    "modiaContextHolderUrl": "https://modiacontextholder.prod-fss-pub.nais.io/modiacontextholder",
+    "modiaContextHolderHost": "modiacontextholder.prod-fss-pub.nais.io",
+    "modiaContextHolderScope": "api://prod-fss.personoversikt.modiacontextholder/.default"
 }
