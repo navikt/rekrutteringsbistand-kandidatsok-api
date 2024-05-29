@@ -771,6 +771,39 @@ class KandidatsøkTest {
     }
 
     @Test
+    fun `Får 401 dersom man søker på mine kontorer uten å ha kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+
+        wireMock.register(
+            WireMock.get("/modia/api/decorator")
+                .willReturn(
+                    okJson(
+                        """
+                    {
+                        "ident": "Z000000",
+                        "navn": "Tull Tullersen",
+                        "fornavn": "Tull",
+                        "etternavn": "Tullersen",
+                        "enheter": [
+                        ]
+                    }
+                """.trimIndent()
+                    )
+                )
+        )
+
+
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{"portefølje":"mineKontorer"}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
     fun `Søk på kontor uten valgt kontor satt fører til spørring med tom streng`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(

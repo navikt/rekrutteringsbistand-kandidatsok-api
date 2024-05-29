@@ -6,12 +6,9 @@ import io.javalin.Javalin
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
-import io.javalin.validation.ValidationError
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.filter.*
 import org.opensearch.client.opensearch.OpenSearchClient
-import org.opensearch.client.opensearch._types.SortOrder
-import org.opensearch.client.opensearch.core.SearchRequest
 import org.opensearch.client.opensearch.core.SearchResponse
 
 private const val endepunkt = "/api/kandidatsok"

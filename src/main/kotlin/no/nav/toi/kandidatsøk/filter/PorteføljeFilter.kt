@@ -45,10 +45,15 @@ private class ValgtKontor(private val valgteKontor: List<String>) : Type {
 
 private class MineKontorer : Type {
     override fun lagESFilterFunksjon(authenticatedUser: AuthenticatedUser?, modiaKlient: ModiaKlient): FilterFunksjon = {
+        val jwt = authenticatedUser?.jwt ?: throw UnauthorizedResponse()
+        val kontorer = modiaKlient.hentModiaEnheter(jwt)
+
+        if (kontorer.isEmpty()) throw UnauthorizedResponse()
+
         must_ {
             bool_ {
                 apply {
-                    val mineKontorer = modiaKlient.hentModiaEnheter(authenticatedUser?.jwt ?: throw UnauthorizedResponse())
+                    val mineKontorer = kontorer
                     mineKontorer.forEach { kontor ->
                         should_ {
                             term_ {
