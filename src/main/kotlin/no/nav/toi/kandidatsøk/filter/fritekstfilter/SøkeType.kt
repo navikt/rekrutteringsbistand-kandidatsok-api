@@ -38,7 +38,6 @@ private class IdentSøk(søkeord: String?): SøkeType {
     }
 
     override fun auditLog(navIdent: String, returnerteFødselsnummer: String?) {
-        requireNotNull(søkeord)
         AuditLogg.loggSpesifiktKandidatsøk(søkeord, navIdent, søkeord == returnerteFødselsnummer)
     }
 }
@@ -80,7 +79,7 @@ private class MultiMatchSøk(søkeord: String?): SøkeType {
         AuditLogg.loggGenereltKandidatsøk(søkeord, navIdent)
     }
 }
-private object NullSøk: SøkeType {
+private data object NullSøk: SøkeType {
     override fun erAktiv() = false
     override fun passendeSøketype(): Boolean {
         throw IllegalStateException()
