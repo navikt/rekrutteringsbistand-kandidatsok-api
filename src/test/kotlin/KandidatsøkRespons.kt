@@ -1745,6 +1745,12 @@ object KandidatsøkRespons {
               "kandidatnumre": ["PAM01adk3st0t", "PAM01bboynq3y", "PAM014lhcwy96", "PAM010nudgb5v"]
             }
         """.trimIndent()
+
+    val navigeringResponsUtenAntall = """
+            {
+              "kandidatnumre": ["PAM01adk3st0t", "PAM01bboynq3y", "PAM014lhcwy96", "PAM010nudgb5v"]
+            }
+        """.trimIndent()
     val kandidatsøkRespons = """
         {
             "hits": {
@@ -1754,7 +1760,7 @@ object KandidatsøkRespons {
                 "hits": $kandidatsøkHitsUtenMetadata
             },
             "kandidater": $kandidatsøkKandidater,
-            "navigering": $navigeringRespons,
+            "navigering": $navigeringResponsUtenAntall,
             "antallTotalt": 108
         }
     """.trimIndent()

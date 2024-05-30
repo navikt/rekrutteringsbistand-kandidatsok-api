@@ -67,7 +67,7 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: 
             }
 
             val kandidater: List<JsonNode> = hits.hits.map { it._source }
-            ctx.json(KandidatSøkOpensearchResponseMedNavigering(hits, kandidater, navigeringResult, hits.total.value))
+            ctx.json(KandidatSøkOpensearchResponseMedNavigering(hits, kandidater, NavigeringResponsUtenAntall(navigeringResult.kandidatnumre), hits.total.value))
         } catch (e: Valideringsfeil) {
             ctx.status(HttpStatus.BAD_REQUEST)
         }
@@ -104,7 +104,7 @@ private data class KandidatSøkOpensearchResponse(
 private data class KandidatSøkOpensearchResponseMedNavigering(
     val hits: KandidatSøkHits,
     val kandidater: List<JsonNode>,
-    val navigering: NavigeringRespons,
+    val navigering: NavigeringResponsUtenAntall,
     val antallTotalt: Long
 )
 
@@ -129,6 +129,10 @@ private fun SearchResponse<JsonNode>.toResponseJson(): KandidatSøkOpensearchRes
 
 private data class NavigeringRespons(
     val antall: Long,
+    val kandidatnumre: List<String>
+)
+
+private data class NavigeringResponsUtenAntall(
     val kandidatnumre: List<String>
 )
 
