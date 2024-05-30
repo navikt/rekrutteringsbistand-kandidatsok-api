@@ -1727,6 +1727,12 @@ object KandidatsøkRespons {
 
             return nodeUtenMetadata.toPrettyString()
         }
+    val navigeringRespons = """
+            {
+              "antall": 4,
+              "kandidatnumre": ["PAM01adk3st0t", "PAM01bboynq3y", "PAM014lhcwy96", "PAM010nudgb5v"]
+            }
+        """.trimIndent()
     val kandidatsøkRespons = """
         {
             "hits": {
@@ -1734,7 +1740,8 @@ object KandidatsøkRespons {
                     "value": 108
                 },
                 "hits": $kandidatsøkHitsUtenMetadata
-            }
+            },
+            "navigering": $navigeringRespons
         }
     """.trimIndent()
     val esKandidatsøkRespons = """
@@ -1815,10 +1822,4 @@ object KandidatsøkRespons {
     }
 }
     """.trimIndent()
-    val navigeringRespons = """
-            {
-              "antall": 4,
-              "kandidatnumre": ["PAM01adk3st0t", "PAM01bboynq3y", "PAM014lhcwy96", "PAM010nudgb5v"]
-            }
-        """.trimIndent()
 }

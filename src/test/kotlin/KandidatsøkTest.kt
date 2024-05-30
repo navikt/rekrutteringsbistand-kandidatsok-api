@@ -43,13 +43,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -64,13 +58,7 @@ class KandidatsøkTest {
     @Test
     fun `Skal bare ignorere ekstra data`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -85,13 +73,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med paginering`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(from = 75), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, from = 75)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok?side=4")
@@ -106,14 +88,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med mange sider paginering`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        println(KandidatsøkRespons.query(from = 10000))
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(from = 10000), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, from = 10000)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok?side=401")
@@ -128,13 +103,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater sortert på flest kriterier`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(sortering = false), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,sortering = false)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok?sortering=score")
@@ -211,13 +180,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med stedsfilter`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.stedTerm), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,KandidatsøkRespons.stedTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -232,19 +195,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater som bor på sted`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(KandidatsøkRespons.stedMedMåBoPåTerm),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,KandidatsøkRespons.stedMedMåBoPåTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -265,19 +216,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med arbeidsønskefilter`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(KandidatsøkRespons.arbeidsønskeTerm),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,KandidatsøkRespons.arbeidsønskeTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -292,19 +231,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med innsatsgruppe`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -319,19 +246,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med ANDRE innsatsgrupper`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedANDRE),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedANDRE)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -346,19 +261,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med alle innsatsgrupper`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedAlle),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedAlle)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -373,13 +276,7 @@ class KandidatsøkTest {
     @Test
     fun `Søk med innsatsgruppe satt til tom liste skal defaulte til default innsatsgrupper`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -394,13 +291,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med målform`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.språkTerm), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,KandidatsøkRespons.språkTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -415,19 +306,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med arbeidserfaring`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(KandidatsøkRespons.arbeidsErfaringTerm),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, KandidatsøkRespons.arbeidsErfaringTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -442,19 +321,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med nylig arbeidserfaring`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(KandidatsøkRespons.nyligArbeidsErfaringTerm),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, KandidatsøkRespons.nyligArbeidsErfaringTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -469,13 +336,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med hovedmål`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.hovedmålTerm), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,KandidatsøkRespons.hovedmålTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -490,13 +351,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med kompetanse`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.kompetanseTerm), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, KandidatsøkRespons.kompetanseTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -511,13 +366,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med førerkort`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.førerkortTerm), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, KandidatsøkRespons.førerkortTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -532,13 +381,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med utdanning`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.utdanningTerm), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,KandidatsøkRespons.utdanningTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -553,19 +396,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidater med prioriterte målgrupper`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(KandidatsøkRespons.prioriterteMålgrupperTerm),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, KandidatsøkRespons.prioriterteMålgrupperTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -580,19 +411,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidat med ident`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(KandidatsøkRespons.queryMedIdentTerm),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, KandidatsøkRespons.queryMedIdentTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -607,19 +426,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidat med PAMkandidatnr`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(KandidatsøkRespons.queryMedPAMKandidatnrTerm),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,KandidatsøkRespons.queryMedPAMKandidatnrTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -634,19 +441,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidat med arenakandidatnr`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(KandidatsøkRespons.queryMedArenaKandidatnrTerm),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, KandidatsøkRespons.queryMedArenaKandidatnrTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -661,13 +456,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke mine kandidater`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.mineBrukereTerm), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, KandidatsøkRespons.mineBrukereTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -682,13 +471,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke på kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.valgtKontorTerm), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, KandidatsøkRespons.valgtKontorTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -703,13 +486,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke på mitt kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.mittKontorTerm), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,KandidatsøkRespons.mittKontorTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -724,13 +501,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke på mine kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson(KandidatsøkRespons.query(KandidatsøkRespons.mineKontorerTerm), true, false))
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, KandidatsøkRespons.mineKontorerTerm)
 
         wireMock.register(
             WireMock.get("/modia/api/decorator")
@@ -806,19 +577,7 @@ class KandidatsøkTest {
     @Test
     fun `Søk på kontor uten valgt kontor satt fører til spørring med tom streng`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(KandidatsøkRespons.mittKontorUtenValgtTerm),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock, KandidatsøkRespons.mittKontorUtenValgtTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -833,19 +592,7 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidat med fritekstsøk`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(KandidatsøkRespons.queryMedKMultiMatchTerm),
-                        true,
-                        false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
-        )
+        mockES(wireMock,KandidatsøkRespons.queryMedKMultiMatchTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
@@ -860,29 +607,18 @@ class KandidatsøkTest {
     @Test
     fun `Kan søke kandidat med alle filtre på en gang`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(
-                    equalToJson(
-                        KandidatsøkRespons.query(
-                            KandidatsøkRespons.stedTerm,
-                            KandidatsøkRespons.arbeidsønskeTerm,
-                            KandidatsøkRespons.queryMedKMultiMatchTerm,
-                            KandidatsøkRespons.utdanningTerm,
-                            KandidatsøkRespons.prioriterteMålgrupperTerm,
-                            KandidatsøkRespons.nyligArbeidsErfaringTerm,
-                            KandidatsøkRespons.hovedmålTerm,
-                            KandidatsøkRespons.kompetanseTerm,
-                            KandidatsøkRespons.førerkortTerm,
-                            KandidatsøkRespons.språkTerm,
-                            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM
-                        ),
-                        true, false
-                    )
-                )
-                .willReturn(
-                    ok(KandidatsøkRespons.esKandidatsøkRespons)
-                )
+        mockES(wireMock,
+            KandidatsøkRespons.stedTerm,
+            KandidatsøkRespons.arbeidsønskeTerm,
+            KandidatsøkRespons.queryMedKMultiMatchTerm,
+            KandidatsøkRespons.utdanningTerm,
+            KandidatsøkRespons.prioriterteMålgrupperTerm,
+            KandidatsøkRespons.nyligArbeidsErfaringTerm,
+            KandidatsøkRespons.hovedmålTerm,
+            KandidatsøkRespons.kompetanseTerm,
+            KandidatsøkRespons.førerkortTerm,
+            KandidatsøkRespons.språkTerm,
+            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
@@ -1147,6 +883,34 @@ class KandidatsøkTest {
         modiaContextHolderScope = "http://localhost/.default",
         modiaContextHolderUrl = "http://localhost:10000/modia"
     )
+
+    private fun mockES(wireMock: WireMock, vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM","IKVAL","VARIG"]}}""", from: Int = 0) {
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(
+                    equalToJson(
+                        KandidatsøkRespons.query(extraTerms = extraTerms, sortering, innsatsgruppeTerm, from),
+                        true,
+                        false
+                    )
+                )
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
+                )
+        )
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(
+                    equalToJson(
+                        KandidatsøkRespons.navigeringQuery(extraTerms = extraTerms, sortering, innsatsgruppeTerm, kotlin.math.max(from - 225, 0)),
+                        true, false
+                    )
+                )
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkNavigeringRespons)
+                )
+        )
+    }
 
     private fun lagToken(
         issuerId: String = "http://localhost:$authPort/default",

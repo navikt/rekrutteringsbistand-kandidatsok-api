@@ -10,6 +10,7 @@ import no.nav.toi.*
 import no.nav.toi.kandidatsøk.filter.*
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
+import kotlin.math.max
 
 private const val endepunkt = "/api/kandidatsok"
 
@@ -50,15 +51,18 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: 
         try {
             val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient, request)
                 .filter(Filter::erAktiv)
+            val filterFunksjoner = filter
+                .map(Filter::lagESFilterFunksjon)
             val side = ctx.queryParam("side")?.toInt() ?: 1
-            val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon), side, sorterting).toResponseJson()
+            val result = openSearchClient.kandidatSøk(filterFunksjoner, side, sorterting).toResponseJson()
+            val navigeringResult = openSearchClient.kandidatSøkNavigering(filterFunksjoner, side, sorterting).hentUtKandidatnumre()
             filter.forEach {
                 it.auditLog(
                     ctx.authenticatedUser().navIdent,
                     result.hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
                 )
             }
-            ctx.json(result)
+            ctx.json(KandidatSøkOpensearchResponseMedNavigering(result.hits, navigeringResult))
         } catch (e: Valideringsfeil) {
             ctx.status(HttpStatus.BAD_REQUEST)
         }
@@ -91,6 +95,11 @@ private data class KandidatSøkOpensearchResponse(
     val hits: KandidatSøkHits,
 )
 
+private data class KandidatSøkOpensearchResponseMedNavigering(
+    val hits: KandidatSøkHits,
+    val navigering: NavigeringRespons
+)
+
 private data class KandidatSøkHits(
     val hits: List<Hit>,
     val total: Total
@@ -109,3 +118,29 @@ private fun SearchResponse<JsonNode>.toResponseJson(): KandidatSøkOpensearchRes
             }
         )
     )
+
+private data class NavigeringRespons(
+    val antall: Long,
+    val kandidatnumre: List<String>
+)
+
+private fun  SearchResponse<JsonNode>.hentUtKandidatnumre() = NavigeringRespons(
+    hits().total().value(),
+    hits().hits().map(org.opensearch.client.opensearch.core.search.Hit<JsonNode>::id)
+)
+
+private fun OpenSearchClient.kandidatSøkNavigering(filter: List<FilterFunksjon>, side: Int, sorterting: Sortering): SearchResponse<JsonNode> {
+    return search<JsonNode> {
+        index(DEFAULT_INDEX)
+        query_ {
+            bool_ {
+                apply { filter.forEach{it()} }
+            }
+        }
+        source(false)
+        trackTotalHits(true)
+        sorterting.lagSorteringES()()
+        size(500)
+        from(max(0, side * 25 - 500 / 2))
+    }
+}
