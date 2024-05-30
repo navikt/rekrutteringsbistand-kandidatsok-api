@@ -1,3 +1,6 @@
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.google.gson.Gson
 import java.time.LocalDate
 
 object KandidatsøkRespons {
@@ -1712,13 +1715,25 @@ object KandidatsøkRespons {
                         ]
                     }
                 ]"""
+    val kandidatsøkHitsUtenMetadata: String
+        get() {
+            val objectMapper = jacksonObjectMapper()
+            val nodeMedMetadata = objectMapper.readTree(kandidatsøkHits)
+            val nodeUtenMetadata = objectMapper.createArrayNode()
+            nodeMedMetadata
+                .map { it.get("_source") }
+                .map { objectMapper.createObjectNode().putPOJO("_source", it) }
+                .forEach<ObjectNode>(nodeUtenMetadata::add)
+
+            return nodeUtenMetadata.toPrettyString()
+        }
     val kandidatsøkRespons = """
         {
             "hits": {
                 "total": {
                     "value": 108
                 },
-                "hits": $kandidatsøkHits
+                "hits": $kandidatsøkHitsUtenMetadata
             }
         }
     """.trimIndent()
