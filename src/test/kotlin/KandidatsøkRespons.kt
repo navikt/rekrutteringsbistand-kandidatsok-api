@@ -1741,7 +1741,8 @@ object KandidatsøkRespons {
                 },
                 "hits": $kandidatsøkHitsUtenMetadata
             },
-            "navigering": $navigeringRespons
+            "navigering": $navigeringRespons,
+            "antall": 108
         }
     """.trimIndent()
     val esKandidatsøkRespons = """

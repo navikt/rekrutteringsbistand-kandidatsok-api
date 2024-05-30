@@ -56,13 +56,14 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: 
             val side = ctx.queryParam("side")?.toInt() ?: 1
             val result = openSearchClient.kandidatSøk(filterFunksjoner, side, sorterting).toResponseJson()
             val navigeringResult = openSearchClient.kandidatSøkNavigering(filterFunksjoner, side, sorterting).hentUtKandidatnumre()
+            val hits = result.hits
             filter.forEach {
                 it.auditLog(
                     ctx.authenticatedUser().navIdent,
-                    result.hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
+                    hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
                 )
             }
-            ctx.json(KandidatSøkOpensearchResponseMedNavigering(result.hits, navigeringResult))
+            ctx.json(KandidatSøkOpensearchResponseMedNavigering(hits, navigeringResult, hits.total.value))
         } catch (e: Valideringsfeil) {
             ctx.status(HttpStatus.BAD_REQUEST)
         }
@@ -97,7 +98,8 @@ private data class KandidatSøkOpensearchResponse(
 
 private data class KandidatSøkOpensearchResponseMedNavigering(
     val hits: KandidatSøkHits,
-    val navigering: NavigeringRespons
+    val navigering: NavigeringRespons,
+    val antall: Long
 )
 
 private data class KandidatSøkHits(

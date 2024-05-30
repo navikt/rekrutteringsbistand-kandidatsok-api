@@ -53,6 +53,7 @@ class KandidatsøkTest {
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+
     }
 
     @Test
