@@ -1741,26 +1741,14 @@ object KandidatsøkRespons {
 
     val navigeringRespons = """
             {
-              "antall": 4,
               "kandidatnumre": ["PAM01adk3st0t", "PAM01bboynq3y", "PAM014lhcwy96", "PAM010nudgb5v"]
             }
         """.trimIndent()
 
-    val navigeringResponsUtenAntall = """
-            {
-              "kandidatnumre": ["PAM01adk3st0t", "PAM01bboynq3y", "PAM014lhcwy96", "PAM010nudgb5v"]
-            }
-        """.trimIndent()
     val kandidatsøkRespons = """
         {
-            "hits": {
-                "total": {
-                    "value": 108
-                },
-                "hits": $kandidatsøkHitsUtenMetadata
-            },
             "kandidater": $kandidatsøkKandidater,
-            "navigering": $navigeringResponsUtenAntall,
+            "navigering": $navigeringRespons,
             "antallTotalt": 108
         }
     """.trimIndent()

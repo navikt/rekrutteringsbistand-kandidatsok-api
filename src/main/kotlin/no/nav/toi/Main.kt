@@ -17,7 +17,6 @@ import no.nav.toi.kandidatsammendrag.handleKandidatSammendrag
 import no.nav.toi.kandidatstillingsøk.handleLookupKandidatStillingssøk
 import no.nav.toi.kandidatsøk.ModiaKlient
 import no.nav.toi.kandidatsøk.handleKandidatSøk
-import no.nav.toi.kandidatsøk.handleKandidatSøkForNavigering
 import no.nav.toi.kompetanseforslag.handleKompetanseforslag
 import no.nav.toi.kuberneteshealth.handleHealth
 import no.nav.toi.lookupcv.handleLookupCv
@@ -91,7 +90,6 @@ class App(
         javalin.handleKompetanseforslag(openSearchClient)
         javalin.handleLookupKandidatStillingssøk(openSearchClient)
         javalin.handleKandidatSøk(openSearchClient, modiaClient)
-        javalin.handleKandidatSøkForNavigering(openSearchClient, modiaClient)
         javalin.handleSuggest(openSearchClient)
         javalin.handleStedSuggest(openSearchClient)
         javalin.handleKontorSuggest(openSearchClient)

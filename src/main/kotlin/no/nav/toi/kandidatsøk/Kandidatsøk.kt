@@ -2,8 +2,6 @@ package no.nav.toi.kandidatsøk
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.javalin.Javalin
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
@@ -67,7 +65,7 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: 
             }
 
             val kandidater: List<JsonNode> = hits.hits.map { it._source }
-            ctx.json(KandidatSøkOpensearchResponseMedNavigering(hits, kandidater, NavigeringResponsUtenAntall(navigeringResult.kandidatnumre), hits.total.value))
+            ctx.json(KandidatSøkOpensearchResponseMedNavigering(kandidater, NavigeringRespons(navigeringResult.kandidatnumre), hits.total.value))
         } catch (e: Valideringsfeil) {
             ctx.status(HttpStatus.BAD_REQUEST)
         }
@@ -102,9 +100,8 @@ private data class KandidatSøkOpensearchResponse(
 )
 
 private data class KandidatSøkOpensearchResponseMedNavigering(
-    val hits: KandidatSøkHits,
     val kandidater: List<JsonNode>,
-    val navigering: NavigeringResponsUtenAntall,
+    val navigering: NavigeringRespons,
     val antallTotalt: Long
 )
 
@@ -128,16 +125,10 @@ private fun SearchResponse<JsonNode>.toResponseJson(): KandidatSøkOpensearchRes
     )
 
 private data class NavigeringRespons(
-    val antall: Long,
-    val kandidatnumre: List<String>
-)
-
-private data class NavigeringResponsUtenAntall(
     val kandidatnumre: List<String>
 )
 
 private fun  SearchResponse<JsonNode>.hentUtKandidatnumre() = NavigeringRespons(
-    hits().total().value(),
     hits().hits().map(org.opensearch.client.opensearch.core.search.Hit<JsonNode>::id)
 )
 
