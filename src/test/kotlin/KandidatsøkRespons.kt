@@ -1727,6 +1727,18 @@ object KandidatsøkRespons {
 
             return nodeUtenMetadata.toPrettyString()
         }
+
+    val kandidatsøkKandidater: String
+        get() {
+            val objectMapper = jacksonObjectMapper()
+            val nodeMedMetadata = objectMapper.readTree(kandidatsøkHits)
+            val nodeUtenMetadata = objectMapper.createArrayNode()
+            nodeMedMetadata
+                .map { it.get("_source") }
+                .forEach(nodeUtenMetadata::add)
+            return nodeUtenMetadata.toPrettyString()
+        }
+
     val navigeringRespons = """
             {
               "antall": 4,
@@ -1741,8 +1753,9 @@ object KandidatsøkRespons {
                 },
                 "hits": $kandidatsøkHitsUtenMetadata
             },
+            "kandidater": $kandidatsøkKandidater,
             "navigering": $navigeringRespons,
-            "antall": 108
+            "antallTotalt": 108
         }
     """.trimIndent()
     val esKandidatsøkRespons = """

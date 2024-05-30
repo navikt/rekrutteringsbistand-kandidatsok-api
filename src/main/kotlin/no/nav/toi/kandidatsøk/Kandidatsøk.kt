@@ -2,6 +2,8 @@ package no.nav.toi.kandidatsøk
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.javalin.Javalin
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
@@ -63,12 +65,15 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: 
                     hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
                 )
             }
-            ctx.json(KandidatSøkOpensearchResponseMedNavigering(hits, navigeringResult, hits.total.value))
+
+            val kandidater: List<JsonNode> = hits.hits.map { it._source }
+            ctx.json(KandidatSøkOpensearchResponseMedNavigering(hits, kandidater, navigeringResult, hits.total.value))
         } catch (e: Valideringsfeil) {
             ctx.status(HttpStatus.BAD_REQUEST)
         }
     }
 }
+
 
 private fun OpenSearchClient.kandidatSøk(filter: List<FilterFunksjon>, side: Int, sorterting: Sortering): SearchResponse<JsonNode> {
     return search<JsonNode> {
@@ -98,8 +103,9 @@ private data class KandidatSøkOpensearchResponse(
 
 private data class KandidatSøkOpensearchResponseMedNavigering(
     val hits: KandidatSøkHits,
+    val kandidater: List<JsonNode>,
     val navigering: NavigeringRespons,
-    val antall: Long
+    val antallTotalt: Long
 )
 
 private data class KandidatSøkHits(
