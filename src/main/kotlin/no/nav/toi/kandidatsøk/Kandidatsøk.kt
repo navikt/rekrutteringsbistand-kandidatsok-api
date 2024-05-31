@@ -9,6 +9,7 @@ import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.filter.*
+import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMineBrukereFilter
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
 import kotlin.math.max
@@ -47,17 +48,19 @@ data class FilterParametre(
 )
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt, håndterEndepunkt(modiaKlient, openSearchClient))
-    post("$endepunkt/minebrukere", håndterEndepunkt(modiaKlient, openSearchClient))
+    post("$endepunkt/minebrukere", håndterEndepunkt(modiaKlient, openSearchClient) {medMineBrukereFilter(it)})
 }
 
 private fun håndterEndepunkt(
     modiaKlient: ModiaKlient,
     openSearchClient: OpenSearchClient,
+    filterPopuleringsFunksjon: List<Filter>.(AuthenticatedUser?) -> List<Filter> = {this}
 ) = Handler { ctx ->
     val request = ctx.bodyAsClass<FilterParametre>()
     val sorterting = ctx.queryParam("sortering").tilSortering()
     try {
         val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient, request)
+            .filterPopuleringsFunksjon(ctx.authenticatedUser())
             .filter(Filter::erAktiv)
         val filterFunksjoner = filter
             .map(Filter::lagESFilterFunksjon)

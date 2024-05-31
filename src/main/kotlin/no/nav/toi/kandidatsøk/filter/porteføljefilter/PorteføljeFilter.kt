@@ -11,7 +11,7 @@ import no.nav.toi.kandidatsøk.filter.Valideringsfeil
 fun List<Filter>.medPorteføljeFilter(filterParametre: FilterParametre, authenticatedUser: AuthenticatedUser, modiaKlient: ModiaKlient) =
     this + PorteføljeFilter(filterParametre, authenticatedUser, modiaKlient)
 
-private interface Porteføljetype: Filter {
+internal interface Porteføljetype: Filter {
     override fun erAktiv(): Boolean = true
 }
 
