@@ -530,7 +530,7 @@ class KandidatsøkTest {
     }
 
     @Test
-    fun `Kan søke på mine kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Kan søke på mine kontor gammelt endepunkt SKAL SLETTES`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockES(wireMock, KandidatsøkRespons.mineKontorerTerm)
 
@@ -573,7 +573,7 @@ class KandidatsøkTest {
     }
 
     @Test
-    fun `Får 401 dersom man søker på mine kontorer uten å ha kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Får 401 dersom man søker på mine kontorer uten å ha kontor gammelt endepunkt SKAL SLETTES`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
 
         wireMock.register(
@@ -599,6 +599,82 @@ class KandidatsøkTest {
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
             .body("""{"portefølje":"mineKontorer"}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun `Kan søke på mine kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockES(wireMock, KandidatsøkRespons.mineKontorerTerm)
+
+        wireMock.register(
+            WireMock.get("/modia/api/decorator")
+                .willReturn(
+                    okJson(
+                        """
+                    {
+                        "ident": "Z000000",
+                        "navn": "Tull Tullersen",
+                        "fornavn": "Tull",
+                        "etternavn": "Tullersen",
+                        "enheter": [
+                            {
+                                "enhetId": "0403",
+                                "navn": "NAV Hamar"
+                            },
+                            {
+                                "enhetId": "1001",
+                                "navn": "NAV Kristiansand"
+                            }
+                        ]
+                    }
+                """.trimIndent()
+                    )
+                )
+        )
+
+
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/minekontorer")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+    }
+
+    @Test
+    fun `Får 401 dersom man søker på mine kontorer uten å ha kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+
+        wireMock.register(
+            WireMock.get("/modia/api/decorator")
+                .willReturn(
+                    okJson(
+                        """
+                    {
+                        "ident": "Z000000",
+                        "navn": "Tull Tullersen",
+                        "fornavn": "Tull",
+                        "etternavn": "Tullersen",
+                        "enheter": [
+                        ]
+                    }
+                """.trimIndent()
+                    )
+                )
+        )
+
+
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/minekontorer")
+            .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 

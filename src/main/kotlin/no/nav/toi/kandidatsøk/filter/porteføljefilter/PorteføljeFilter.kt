@@ -1,6 +1,5 @@
 package no.nav.toi.kandidatsøk.filter.porteføljefilter
 
-import io.javalin.http.UnauthorizedResponse
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.FilterParametre
 import no.nav.toi.kandidatsøk.ModiaKlient
@@ -13,31 +12,6 @@ fun List<Filter>.medPorteføljeFilter(filterParametre: FilterParametre, authenti
 
 internal interface Porteføljetype: Filter {
     override fun erAktiv(): Boolean = true
-}
-
-private class MineKontorer(private val authenticatedUser: AuthenticatedUser?, private val modiaKlient: ModiaKlient) :
-    Porteføljetype {
-    override fun lagESFilterFunksjon(): FilterFunksjon = {
-        val jwt = authenticatedUser?.jwt ?: throw UnauthorizedResponse()
-        val kontorer = modiaKlient.hentModiaEnheter(jwt)
-
-        if (kontorer.isEmpty()) throw UnauthorizedResponse()
-
-        must_ {
-            bool_ {
-                apply {
-                    kontorer.forEach { kontor ->
-                        should_ {
-                            term_ {
-                                field("navkontor")
-                                value(kontor)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 private class MittKontor(private val orgenhet: String) : Porteføljetype {
@@ -66,7 +40,7 @@ private fun String.typePorteføljeSpørring(
     "mine" -> MineBrukereFilter(authenticatedUser)
     "kontor" -> MittKontor(orgenhet() ?: "")
     "valgte" -> ValgtKontorFilter(filterParametre)
-    "mineKontorer" -> MineKontorer(authenticatedUser, modiaKlient)
+    "mineKontorer" -> MineKontorerFilter(authenticatedUser, modiaKlient)
     else -> throw Valideringsfeil("$this er ikke en gyldig porteføljetype-spørring")
 }
 

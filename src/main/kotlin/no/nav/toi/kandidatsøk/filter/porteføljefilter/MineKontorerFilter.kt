@@ -1,22 +1,27 @@
 package no.nav.toi.kandidatsøk.filter.porteføljefilter
 
+import io.javalin.http.UnauthorizedResponse
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.FilterParametre
+import no.nav.toi.kandidatsøk.ModiaKlient
 import no.nav.toi.kandidatsøk.filter.Filter
 import no.nav.toi.kandidatsøk.filter.FilterFunksjon
-import no.nav.toi.kandidatsøk.filter.Valideringsfeil
 
-fun List<Filter>.medValgtKontorerFilter(filterParametre: FilterParametre) = this + ValgtKontorFilter(filterParametre)
+fun List<Filter>.medMineKontorerFilter(authenticatedUser: AuthenticatedUser?, modiaKlient: ModiaKlient) = this + MineKontorerFilter(authenticatedUser, modiaKlient)
 
 // TODO: Gjør private etter refaktorering
-internal class ValgtKontorFilter(filterParametre: FilterParametre) : Porteføljetype {
-    private val valgteKontor = filterParametre.valgtKontor ?: throw Valideringsfeil("Må sende med valgtKontor-variabel også")
-
+internal class MineKontorerFilter(private val authenticatedUser: AuthenticatedUser?, private val modiaKlient: ModiaKlient) :
+    Porteføljetype {
     override fun lagESFilterFunksjon(): FilterFunksjon = {
+        val jwt = authenticatedUser?.jwt ?: throw UnauthorizedResponse()
+        val kontorer = modiaKlient.hentModiaEnheter(jwt)
+
+        if (kontorer.isEmpty()) throw UnauthorizedResponse()
+
         must_ {
             bool_ {
                 apply {
-                    valgteKontor.forEach { kontor ->
+                    kontorer.forEach { kontor ->
                         should_ {
                             term_ {
                                 field("navkontor")
