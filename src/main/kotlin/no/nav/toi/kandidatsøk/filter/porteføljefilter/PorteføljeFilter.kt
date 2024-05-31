@@ -15,18 +15,6 @@ internal interface Porteføljetype: Filter {
     override fun erAktiv(): Boolean = true
 }
 
-private class MineBrukere(private val authenticatedUser: AuthenticatedUser?) : Porteføljetype {
-    override fun lagESFilterFunksjon(): FilterFunksjon = {
-        must_ {
-            term_ {
-                field("veileder")
-                value(authenticatedUser!!.navIdent)
-                caseInsensitive(true)
-            }
-        }
-    }
-}
-
 private class ValgtKontor(private val valgteKontor: List<String>) : Porteføljetype {
     override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
@@ -94,7 +82,7 @@ private fun String.typePorteføljeSpørring(
     modiaKlient: ModiaKlient
 ): Porteføljetype = when (this) {
     "alle" -> Alle
-    "mine" -> MineBrukere(authenticatedUser)
+    "mine" -> MineBrukereFilter(authenticatedUser)
     "kontor" -> MittKontor(orgenhet() ?: "")
     "valgte" -> ValgtKontor(valgteKontor())
     "mineKontorer" -> MineKontorer(authenticatedUser, modiaKlient)
