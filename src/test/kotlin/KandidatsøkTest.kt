@@ -515,13 +515,58 @@ class KandidatsøkTest {
     }
 
     @Test
-    fun `Kan søke på mitt kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Kan søke på mitt kontor gammelt endepunkt SKAL SLETTES`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockES(wireMock,KandidatsøkRespons.mittKontorTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
             .body("""{"portefølje":"kontor","orgenhet":"1234"}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+    }
+
+    @Test
+    fun `Søk på kontor uten valgt kontor satt fører til spørring med tom streng gammelt endepunkt SKAL SLETTES`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockES(wireMock, KandidatsøkRespons.mittKontorUtenValgtTerm)
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{"portefølje":"kontor"}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+    }
+
+    @Test
+    fun `Kan søke på mitt kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockES(wireMock,KandidatsøkRespons.mittKontorTerm)
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/mittkontor")
+            .body("""{"orgenhet":"1234"}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+    }
+
+    @Test
+    fun `Søk på kontor uten valgt kontor satt fører til spørring med tom streng`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockES(wireMock, KandidatsøkRespons.mittKontorUtenValgtTerm)
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/mittkontor")
+            .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -679,21 +724,6 @@ class KandidatsøkTest {
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(401)
-    }
-
-    @Test
-    fun `Søk på kontor uten valgt kontor satt fører til spørring med tom streng`(wmRuntimeInfo: WireMockRuntimeInfo) {
-        val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock, KandidatsøkRespons.mittKontorUtenValgtTerm)
-        val navIdent = "A123456"
-        val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
-            .body("""{"portefølje":"kontor"}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
-
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
     @Test

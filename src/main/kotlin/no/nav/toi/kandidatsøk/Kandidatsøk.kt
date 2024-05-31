@@ -11,6 +11,7 @@ import no.nav.toi.*
 import no.nav.toi.kandidatsøk.filter.*
 import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMineBrukereFilter
 import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMineKontorerFilter
+import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMittKontor
 import no.nav.toi.kandidatsøk.filter.porteføljefilter.medValgtKontorerFilter
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
@@ -52,7 +53,8 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: 
     post(endepunkt, håndterEndepunkt(modiaKlient, openSearchClient))
     post("$endepunkt/minebrukere", håndterEndepunkt(modiaKlient, openSearchClient) { authenticatedUser, _ ->  medMineBrukereFilter(authenticatedUser)})
     post("$endepunkt/valgtekontorer", håndterEndepunkt(modiaKlient, openSearchClient) { _, filterParametre ->  medValgtKontorerFilter(filterParametre)})
-    post("$endepunkt/minekontorer", håndterEndepunkt(modiaKlient, openSearchClient) { authenticatedUser, filterParametre ->  medMineKontorerFilter(authenticatedUser, modiaKlient)})
+    post("$endepunkt/minekontorer", håndterEndepunkt(modiaKlient, openSearchClient) { authenticatedUser, _ ->  medMineKontorerFilter(authenticatedUser, modiaKlient)})
+    post("$endepunkt/mittkontor", håndterEndepunkt(modiaKlient, openSearchClient) { _, filterParametre ->  medMittKontor(filterParametre)})
 }
 
 private fun håndterEndepunkt(

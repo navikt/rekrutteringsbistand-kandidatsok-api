@@ -14,17 +14,6 @@ internal interface Porteføljetype: Filter {
     override fun erAktiv(): Boolean = true
 }
 
-private class MittKontor(private val orgenhet: String) : Porteføljetype {
-    override fun lagESFilterFunksjon(): FilterFunksjon = {
-        must_ {
-            term_ {
-                field("orgenhet")
-                value(orgenhet)
-            }
-        }
-    }
-}
-
 private object Alle : Porteføljetype {
     override fun erAktiv() = false
     override fun lagESFilterFunksjon(): FilterFunksjon = { this }
@@ -32,13 +21,12 @@ private object Alle : Porteføljetype {
 
 private fun String.typePorteføljeSpørring(
     filterParametre: FilterParametre,
-    orgenhet: () -> String?,
     authenticatedUser: AuthenticatedUser?,
     modiaKlient: ModiaKlient
 ): Porteføljetype = when (this) {
     "alle" -> Alle
     "mine" -> MineBrukereFilter(authenticatedUser)
-    "kontor" -> MittKontor(orgenhet() ?: "")
+    "kontor" -> MittKontorFilter(filterParametre)
     "valgte" -> ValgtKontorFilter(filterParametre)
     "mineKontorer" -> MineKontorerFilter(authenticatedUser, modiaKlient)
     else -> throw Valideringsfeil("$this er ikke en gyldig porteføljetype-spørring")
@@ -50,7 +38,7 @@ private class PorteføljeFilter(
     modiaKlient: ModiaKlient,
 ) : Filter {
 
-    private val portefølje = parametre.portefølje?.typePorteføljeSpørring(parametre, { parametre.orgenhet },authenticatedUser, modiaKlient) ?: Alle
+    private val portefølje = parametre.portefølje?.typePorteføljeSpørring(parametre, authenticatedUser, modiaKlient) ?: Alle
 
     override fun erAktiv() = portefølje.erAktiv()
     override fun lagESFilterFunksjon() = portefølje.lagESFilterFunksjon()
