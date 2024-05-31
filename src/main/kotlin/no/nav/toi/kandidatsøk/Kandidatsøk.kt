@@ -10,6 +10,7 @@ import io.javalin.openapi.*
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.filter.*
 import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMineBrukereFilter
+import no.nav.toi.kandidatsøk.filter.porteføljefilter.medValgtKontorerFilter
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
 import kotlin.math.max
@@ -48,19 +49,20 @@ data class FilterParametre(
 )
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt, håndterEndepunkt(modiaKlient, openSearchClient))
-    post("$endepunkt/minebrukere", håndterEndepunkt(modiaKlient, openSearchClient) {medMineBrukereFilter(it)})
+    post("$endepunkt/minebrukere", håndterEndepunkt(modiaKlient, openSearchClient) { authenticatedUser, _ ->  medMineBrukereFilter(authenticatedUser)})
+    post("$endepunkt/valgtekontorer", håndterEndepunkt(modiaKlient, openSearchClient) { _, filterParametre ->  medValgtKontorerFilter(filterParametre)})
 }
 
 private fun håndterEndepunkt(
     modiaKlient: ModiaKlient,
     openSearchClient: OpenSearchClient,
-    filterPopuleringsFunksjon: List<Filter>.(AuthenticatedUser?) -> List<Filter> = {this}
+    filterPopuleringsFunksjon: List<Filter>.(AuthenticatedUser?, FilterParametre) -> List<Filter> = { _, _-> this }
 ) = Handler { ctx ->
     val request = ctx.bodyAsClass<FilterParametre>()
     val sorterting = ctx.queryParam("sortering").tilSortering()
     try {
         val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient, request)
-            .filterPopuleringsFunksjon(ctx.authenticatedUser())
+            .filterPopuleringsFunksjon(ctx.authenticatedUser(),request)
             .filter(Filter::erAktiv)
         val filterFunksjoner = filter
             .map(Filter::lagESFilterFunksjon)
