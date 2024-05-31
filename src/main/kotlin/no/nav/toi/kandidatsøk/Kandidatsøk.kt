@@ -3,6 +3,7 @@ package no.nav.toi.kandidatsøk
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
+import io.javalin.http.Handler
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
@@ -45,30 +46,43 @@ data class FilterParametre(
     methods = [HttpMethod.POST]
 )
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
-    post(endepunkt) { ctx ->
-        val request = ctx.bodyAsClass<FilterParametre>()
-        val sorterting = ctx.queryParam("sortering").tilSortering()
-        try {
-            val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient, request)
-                .filter(Filter::erAktiv)
-            val filterFunksjoner = filter
-                .map(Filter::lagESFilterFunksjon)
-            val side = ctx.queryParam("side")?.toInt() ?: 1
-            val result = openSearchClient.kandidatSøk(filterFunksjoner, side, sorterting).toResponseJson()
-            val navigeringResult = openSearchClient.kandidatSøkNavigering(filterFunksjoner, side, sorterting).hentUtKandidatnumre()
-            val hits = result.hits
-            filter.forEach {
-                it.auditLog(
-                    ctx.authenticatedUser().navIdent,
-                    hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
-                )
-            }
+    post(endepunkt, håndterEndepunkt(modiaKlient, openSearchClient))
+    post("$endepunkt/minebrukere", håndterEndepunkt(modiaKlient, openSearchClient))
+}
 
-            val kandidater: List<JsonNode> = hits.hits.map { it._source }
-            ctx.json(KandidatSøkOpensearchResponseMedNavigering(kandidater, NavigeringRespons(navigeringResult.kandidatnumre), hits.total.value))
-        } catch (e: Valideringsfeil) {
-            ctx.status(HttpStatus.BAD_REQUEST)
+private fun håndterEndepunkt(
+    modiaKlient: ModiaKlient,
+    openSearchClient: OpenSearchClient,
+) = Handler { ctx ->
+    val request = ctx.bodyAsClass<FilterParametre>()
+    val sorterting = ctx.queryParam("sortering").tilSortering()
+    try {
+        val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient, request)
+            .filter(Filter::erAktiv)
+        val filterFunksjoner = filter
+            .map(Filter::lagESFilterFunksjon)
+        val side = ctx.queryParam("side")?.toInt() ?: 1
+        val result = openSearchClient.kandidatSøk(filterFunksjoner, side, sorterting).toResponseJson()
+        val navigeringResult =
+            openSearchClient.kandidatSøkNavigering(filterFunksjoner, side, sorterting).hentUtKandidatnumre()
+        val hits = result.hits
+        filter.forEach {
+            it.auditLog(
+                ctx.authenticatedUser().navIdent,
+                hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
+            )
         }
+
+        val kandidater: List<JsonNode> = hits.hits.map { it._source }
+        ctx.json(
+            KandidatSøkOpensearchResponseMedNavigering(
+                kandidater,
+                NavigeringRespons(navigeringResult.kandidatnumre),
+                hits.total.value
+            )
+        )
+    } catch (e: Valideringsfeil) {
+        ctx.status(HttpStatus.BAD_REQUEST)
     }
 }
 

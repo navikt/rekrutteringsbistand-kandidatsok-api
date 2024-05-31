@@ -8,13 +8,12 @@ import no.nav.toi.kandidatsøk.ModiaKlient
 fun List<Filter>.medPorteføljeFilter(filterParametre: FilterParametre, authenticatedUser: AuthenticatedUser, modiaKlient: ModiaKlient) =
     this + PorteføljeFilter(filterParametre, authenticatedUser, modiaKlient)
 
-private interface Type {
-    fun erAktiv(): Boolean = true
-    fun lagESFilterFunksjon(authenticatedUser: AuthenticatedUser?, modiaKlient: ModiaKlient): FilterFunksjon
+private interface Porteføljetype: Filter {
+    override fun erAktiv(): Boolean = true
 }
 
-private object MineBrukere : Type {
-    override fun lagESFilterFunksjon(authenticatedUser: AuthenticatedUser?, modiaKlient: ModiaKlient): FilterFunksjon = {
+private class MineBrukere(private val authenticatedUser: AuthenticatedUser?) : Porteføljetype {
+    override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
             term_ {
                 field("veileder")
@@ -25,8 +24,8 @@ private object MineBrukere : Type {
     }
 }
 
-private class ValgtKontor(private val valgteKontor: List<String>) : Type {
-    override fun lagESFilterFunksjon(authenticatedUser: AuthenticatedUser?, modiaKlient: ModiaKlient): FilterFunksjon = {
+private class ValgtKontor(private val valgteKontor: List<String>) : Porteføljetype {
+    override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
             bool_ {
                 apply {
@@ -44,8 +43,8 @@ private class ValgtKontor(private val valgteKontor: List<String>) : Type {
     }
 }
 
-private class MineKontorer : Type {
-    override fun lagESFilterFunksjon(authenticatedUser: AuthenticatedUser?, modiaKlient: ModiaKlient): FilterFunksjon = {
+private class MineKontorer(private val authenticatedUser: AuthenticatedUser?, private val modiaKlient: ModiaKlient) : Porteføljetype {
+    override fun lagESFilterFunksjon(): FilterFunksjon = {
         val jwt = authenticatedUser?.jwt ?: throw UnauthorizedResponse()
         val kontorer = modiaKlient.hentModiaEnheter(jwt)
 
@@ -68,8 +67,8 @@ private class MineKontorer : Type {
     }
 }
 
-private class MittKontor(private val orgenhet: String) : Type {
-    override fun lagESFilterFunksjon(authenticatedUser: AuthenticatedUser?, modiaKlient: ModiaKlient): FilterFunksjon = {
+private class MittKontor(private val orgenhet: String) : Porteføljetype {
+    override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
             term_ {
                 field("orgenhet")
@@ -79,33 +78,35 @@ private class MittKontor(private val orgenhet: String) : Type {
     }
 }
 
-private object Alle : Type {
+private object Alle : Porteføljetype {
     override fun erAktiv() = false
-    override fun lagESFilterFunksjon(authenticatedUser: AuthenticatedUser?, modiaKlient: ModiaKlient): FilterFunksjon = { this }
+    override fun lagESFilterFunksjon(): FilterFunksjon = { this }
 }
 
 private fun String.typePorteføljeSpørring(
     valgteKontor: () -> List<String>,
-    orgenhet: () -> String?
-): Type = when (this) {
+    orgenhet: () -> String?,
+    authenticatedUser: AuthenticatedUser?,
+    modiaKlient: ModiaKlient
+): Porteføljetype = when (this) {
     "alle" -> Alle
-    "mine" -> MineBrukere
+    "mine" -> MineBrukere(authenticatedUser)
     "kontor" -> MittKontor(orgenhet() ?: "")
     "valgte" -> ValgtKontor(valgteKontor())
-    "mineKontorer" -> MineKontorer()
+    "mineKontorer" -> MineKontorer(authenticatedUser, modiaKlient)
     else -> throw Valideringsfeil("$this er ikke en gyldig porteføljetype-spørring")
 }
 
 private class PorteføljeFilter(
     parametre: FilterParametre,
-    private val authenticatedUser: AuthenticatedUser,
-    private val modiaKlient: ModiaKlient,
+    authenticatedUser: AuthenticatedUser,
+    modiaKlient: ModiaKlient,
 ) : Filter {
 
     private val portefølje = parametre.portefølje?.typePorteføljeSpørring({
         parametre.valgtKontor ?: throw Valideringsfeil("Må sende med valgtKontor-variabel også")
-    }, { parametre.orgenhet }) ?: Alle
+    }, { parametre.orgenhet },authenticatedUser, modiaKlient) ?: Alle
 
     override fun erAktiv() = portefølje.erAktiv()
-    override fun lagESFilterFunksjon() = portefølje.lagESFilterFunksjon(authenticatedUser, modiaKlient)
+    override fun lagESFilterFunksjon() = portefølje.lagESFilterFunksjon()
 }
