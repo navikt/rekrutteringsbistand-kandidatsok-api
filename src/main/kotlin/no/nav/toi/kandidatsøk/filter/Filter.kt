@@ -4,6 +4,7 @@ import no.nav.toi.AuthenticatedUser
 import no.nav.toi.kandidatsøk.FilterParametre
 import no.nav.toi.kandidatsøk.ModiaKlient
 import no.nav.toi.kandidatsøk.filter.fritekstfilter.medFritekstFilter
+import no.nav.toi.kandidatsøk.filter.porteføljefilter.medPorteføljeFilter
 import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
 import org.opensearch.client.util.ObjectBuilder
 

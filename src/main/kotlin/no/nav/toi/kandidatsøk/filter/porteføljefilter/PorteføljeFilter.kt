@@ -1,9 +1,12 @@
-package no.nav.toi.kandidatsøk.filter
+package no.nav.toi.kandidatsøk.filter.porteføljefilter
 
 import io.javalin.http.UnauthorizedResponse
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.FilterParametre
 import no.nav.toi.kandidatsøk.ModiaKlient
+import no.nav.toi.kandidatsøk.filter.Filter
+import no.nav.toi.kandidatsøk.filter.FilterFunksjon
+import no.nav.toi.kandidatsøk.filter.Valideringsfeil
 
 fun List<Filter>.medPorteføljeFilter(filterParametre: FilterParametre, authenticatedUser: AuthenticatedUser, modiaKlient: ModiaKlient) =
     this + PorteføljeFilter(filterParametre, authenticatedUser, modiaKlient)
@@ -43,7 +46,8 @@ private class ValgtKontor(private val valgteKontor: List<String>) : Porteføljet
     }
 }
 
-private class MineKontorer(private val authenticatedUser: AuthenticatedUser?, private val modiaKlient: ModiaKlient) : Porteføljetype {
+private class MineKontorer(private val authenticatedUser: AuthenticatedUser?, private val modiaKlient: ModiaKlient) :
+    Porteføljetype {
     override fun lagESFilterFunksjon(): FilterFunksjon = {
         val jwt = authenticatedUser?.jwt ?: throw UnauthorizedResponse()
         val kontorer = modiaKlient.hentModiaEnheter(jwt)
