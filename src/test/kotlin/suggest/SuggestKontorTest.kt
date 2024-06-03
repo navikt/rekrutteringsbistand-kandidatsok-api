@@ -12,10 +12,7 @@ import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
 import no.nav.toi.RolleUuidSpesifikasjon
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.skyscreamer.jsonassert.JSONAssert
 import java.util.*
 
@@ -97,6 +94,7 @@ class SuggestKontorTest {
     }
 
     @Test
+    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
     fun `modia generell skal ikke ha tilgang`() {
         val token = lagToken(groups = listOf(modiaGenerell))
         val (_, response, _) = gjørKall(token)

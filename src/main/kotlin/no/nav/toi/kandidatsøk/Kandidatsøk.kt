@@ -47,19 +47,22 @@ data class FilterParametre(
     methods = [HttpMethod.POST]
 )
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
-    post(endepunkt, håndterEndepunkt(modiaKlient, openSearchClient) { authenticatedUser, filterParametre -> medPorteføljeFilter(filterParametre, authenticatedUser, modiaKlient) })
-    post("$endepunkt/minebrukere", håndterEndepunkt(modiaKlient, openSearchClient) { authenticatedUser, _ ->  medMineBrukereFilter(authenticatedUser)})
-    post("$endepunkt/valgtekontorer", håndterEndepunkt(modiaKlient, openSearchClient) { _, filterParametre ->  medValgtKontorerFilter(filterParametre)})
-    post("$endepunkt/minekontorer", håndterEndepunkt(modiaKlient, openSearchClient) { authenticatedUser, _ ->  medMineKontorerFilter(authenticatedUser, modiaKlient)})
-    post("$endepunkt/mittkontor", håndterEndepunkt(modiaKlient, openSearchClient) { _, filterParametre ->  medMittKontorFilter(filterParametre)})
-    post("$endepunkt/alle", håndterEndepunkt(modiaKlient, openSearchClient) { _, _ ->  this })
+    post(endepunkt, håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { authenticatedUser, filterParametre -> medPorteføljeFilter(filterParametre, authenticatedUser, modiaKlient) })
+    post("$endepunkt/minebrukere", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { authenticatedUser, _ ->  medMineBrukereFilter(authenticatedUser)})
+    post("$endepunkt/valgtekontorer", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { _, filterParametre ->  medValgtKontorerFilter(filterParametre)})
+    post("$endepunkt/minekontorer", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { authenticatedUser, _ ->  medMineKontorerFilter(authenticatedUser, modiaKlient)})
+    post("$endepunkt/mittkontor", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { _, filterParametre ->  medMittKontorFilter(filterParametre)})
+    post("$endepunkt/alle", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { _, _ ->  this })
 }
 
 private fun håndterEndepunkt(
     modiaKlient: ModiaKlient,
     openSearchClient: OpenSearchClient,
+    vararg gyldigeRoller: Rolle,
     filterPopuleringsFunksjon: List<Filter>.(AuthenticatedUser, FilterParametre) -> List<Filter>
 ) = Handler { ctx ->
+    ctx.authenticatedUser().verifiserAutorisasjon(*gyldigeRoller)
+
     val request = ctx.bodyAsClass<FilterParametre>()
     val sorterting = ctx.queryParam("sortering").tilSortering()
     try {

@@ -11,10 +11,7 @@ import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
 import no.nav.toi.RolleUuidSpesifikasjon
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.skyscreamer.jsonassert.JSONAssert
 import java.util.*
 
@@ -297,6 +294,7 @@ class KandidatTest {
     }
 
     @Test
+    @Disabled
     fun `modia generell skal ikke ha tilgang til navn`() {
         val token = lagToken(groups = listOf(modiaGenerell))
         val (_, response) = gjørKallNavn("123", token)
@@ -346,6 +344,7 @@ class KandidatTest {
     }
 
     @Test
+    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
     fun `modia generell skal ikke ha tilgang til kandidatnummer`() {
         val token = lagToken(groups = listOf(modiaGenerell))
         val (_, response) = gjørKallKandidatnummer("123", token)

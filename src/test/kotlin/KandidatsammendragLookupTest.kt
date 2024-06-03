@@ -9,10 +9,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import com.nimbusds.jwt.SignedJWT
 import no.nav.toi.LokalApp
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.mockito.kotlin.mock
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -109,6 +106,7 @@ class KandidatsammendragLookupTest {
     }
 
     @Test
+    @Disabled
     fun `modia generell skal ikke ha tilgang til kandidatsammendrag`() {
         val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
         val (_, response, _) = gjørKall(token)
