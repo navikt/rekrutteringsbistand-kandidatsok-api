@@ -7,7 +7,7 @@ import no.nav.toi.must_
 import no.nav.toi.term_
 import no.nav.toi.value
 
-fun List<Filter>.medMittKontor(filterParametre: FilterParametre) = this + MittKontorFilter(filterParametre)
+fun List<Filter>.medMittKontorFilter(filterParametre: FilterParametre) = this + MittKontorFilter(filterParametre)
 
 // TODO: Gjør private etter refaktorering
 internal class MittKontorFilter(parametre: FilterParametre) : Porteføljetype {

@@ -41,7 +41,7 @@ class KandidatsøkTest {
     }
 
     @Test
-    fun `Kan søke kandidater`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Kan søke kandidater gammelt endepunkt SKAL SLETTES`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockES(wireMock)
         val navIdent = "A123456"
@@ -57,12 +57,28 @@ class KandidatsøkTest {
     }
 
     @Test
+    fun `Kan søke kandidater`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockES(wireMock)
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+
+    }
+
+    @Test
     fun `Skal bare ignorere ekstra data`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockES(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"ukjentFelt":"skal ignoreres"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -118,7 +134,7 @@ class KandidatsøkTest {
 
     @Test
     fun `Må ha token`() {
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{}""")
             .responseObject<JsonNode>()
 
@@ -128,7 +144,7 @@ class KandidatsøkTest {
     @Test
     fun `Må ha gyldig token`() {
         val token = lagToken(issuerId = "falskissuer")
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -139,7 +155,7 @@ class KandidatsøkTest {
     @Test
     fun `Må ha navIdent`() {
         val token = lagToken(claims = mapOf("groups" to listOf(modiaGenerell)))
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -150,7 +166,7 @@ class KandidatsøkTest {
     @Test
     fun `Må ha gruppe-tilhørighet`() {
         val token = lagToken(claims = mapOf("NAVident" to "A123456"))
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -170,7 +186,7 @@ class KandidatsøkTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -184,7 +200,7 @@ class KandidatsøkTest {
         mockES(wireMock,KandidatsøkRespons.stedTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"ønsketSted":["Bodø.NO18.1804","Kristiansund.NO50.5001","Akershus.NO02","Norge.NO"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -199,7 +215,7 @@ class KandidatsøkTest {
         mockES(wireMock,KandidatsøkRespons.stedMedMåBoPåTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body(
                 """
                 {
@@ -220,7 +236,7 @@ class KandidatsøkTest {
         mockES(wireMock,KandidatsøkRespons.arbeidsønskeTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"ønsketYrke":["Sauegjeter","Saueklipper"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -235,7 +251,7 @@ class KandidatsøkTest {
         mockES(wireMock,innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"innsatsgruppe":["BATT","BFORM"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -250,7 +266,7 @@ class KandidatsøkTest {
         mockES(wireMock, innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedANDRE)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"innsatsgruppe":["ANDRE"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -265,7 +281,7 @@ class KandidatsøkTest {
         mockES(wireMock,innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedAlle)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"innsatsgruppe":["BATT","BFORM","IKVAL","VARIG","ANDRE"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -280,7 +296,7 @@ class KandidatsøkTest {
         mockES(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"innsatsgruppe":[]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -295,7 +311,7 @@ class KandidatsøkTest {
         mockES(wireMock,KandidatsøkRespons.språkTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"språk":["Nynorsk","Norsk"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -310,7 +326,7 @@ class KandidatsøkTest {
         mockES(wireMock, KandidatsøkRespons.arbeidsErfaringTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"arbeidserfaring":["Barnehageassistent","Butikkansvarlig"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -325,7 +341,7 @@ class KandidatsøkTest {
         mockES(wireMock, KandidatsøkRespons.nyligArbeidsErfaringTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"arbeidserfaring":["Hvalfanger","Kokk"],"ferskhet":2}""".trimMargin())
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -340,7 +356,7 @@ class KandidatsøkTest {
         mockES(wireMock,KandidatsøkRespons.hovedmålTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"hovedmål":["SKAFFEA","OKEDELT"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -355,7 +371,7 @@ class KandidatsøkTest {
         mockES(wireMock, KandidatsøkRespons.kompetanseTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"kompetanse":["Fagbrev FU-operatør","Kotlin"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -370,7 +386,7 @@ class KandidatsøkTest {
         mockES(wireMock, KandidatsøkRespons.førerkortTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"førerkort":["D - Buss","BE - Personbil med tilhenger"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -385,7 +401,7 @@ class KandidatsøkTest {
         mockES(wireMock,KandidatsøkRespons.utdanningTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"utdanningsnivå":["videregaende","bachelor","doktorgrad"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -400,7 +416,7 @@ class KandidatsøkTest {
         mockES(wireMock, KandidatsøkRespons.prioriterteMålgrupperTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"prioritertMålgruppe":["senior","unge","hullICv"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -415,7 +431,7 @@ class KandidatsøkTest {
         mockES(wireMock, KandidatsøkRespons.queryMedIdentTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"fritekst":"12345678910"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -430,7 +446,7 @@ class KandidatsøkTest {
         mockES(wireMock,KandidatsøkRespons.queryMedPAMKandidatnrTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"fritekst":"PAM01Z"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -445,7 +461,7 @@ class KandidatsøkTest {
         mockES(wireMock, KandidatsøkRespons.queryMedArenaKandidatnrTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"fritekst":"ab123"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -732,7 +748,7 @@ class KandidatsøkTest {
         mockES(wireMock,KandidatsøkRespons.queryMedKMultiMatchTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body("""{"fritekst":"søkeord"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -759,7 +775,7 @@ class KandidatsøkTest {
         )
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
             .body(
                 """
                 {
