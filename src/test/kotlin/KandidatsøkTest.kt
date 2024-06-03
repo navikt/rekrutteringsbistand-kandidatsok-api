@@ -27,6 +27,8 @@ class KandidatsøkTest {
     private val arbeidsgiverrettet = UUID.randomUUID().toString()
     private val utvikler = UUID.randomUUID().toString()
 
+    private val audience = "iden til applikasjonen"
+
     private val app: App = lagLokalApp()
     private val authServer = MockOAuth2Server()
 
@@ -165,10 +167,71 @@ class KandidatsøkTest {
         Assertions.assertThat(response.statusCode).isEqualTo(401)
     }
 
+
     @Test
-    fun `Må ha gruppe-tilhørighet`() {
-        val token = lagToken(claims = mapOf("NAVident" to "A123456"))
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
+    fun `modia generell skal ikke ha tilgang`() {
+        val token = lagToken(groups = listOf(modiaGenerell))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
+    fun `jobbsøkerrettet skal ikke ha tilgang`() {
+        val token = lagToken(groups = listOf(jobbsøkerrettet))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
+    fun `arbeidsgiverrettet skal ha tilgang`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson(KandidatsøkRespons.query(), true, false))
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
+                )
+        )
+        val token = lagToken(groups = listOf(arbeidsgiverrettet))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `utvikler skal ha tilgang`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson(KandidatsøkRespons.query(), true, false))
+                .willReturn(
+                    ok(KandidatsøkRespons.esKandidatsøkRespons)
+                )
+        )
+        val token = lagToken(groups = listOf(utvikler))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `om man ikke har gruppetilhørighet skal man ikke få gjort kandidatsøk`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val token = lagToken(groups = emptyList())
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -827,7 +890,7 @@ class KandidatsøkTest {
         port = 8080,
         authenticationConfigurations = listOf(
             AuthenticationConfiguration(
-                audience = "1",
+                audience = audience,
                 issuer = "http://localhost:$authPort/default",
                 jwksUri = "http://localhost:$authPort/default/jwks",
             )
@@ -843,7 +906,7 @@ class KandidatsøkTest {
         openSearchUri = "http://localhost:10000",
         pdlUrl = "http://localhost:10000/pdl",
         azureSecret = "secret",
-        azureClientId = "1",
+        azureClientId = audience,
         azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
         pdlScope = "http://localhost/.default",
         modiaContextHolderScope = "http://localhost/.default",
@@ -880,13 +943,16 @@ class KandidatsøkTest {
 
     private fun lagToken(
         issuerId: String = "http://localhost:$authPort/default",
-        aud: String = "1",
+        aud: String = audience,
         navIdent: String = "A000001",
-        claims: Map<String, Any> = mapOf("NAVident" to navIdent, "groups" to listOf(modiaGenerell))
+        groups: List<String> = listOf(arbeidsgiverrettet),
+        claims: Map<String, Any> = mapOf("NAVident" to navIdent, "groups" to groups),
+        expiry: Long = 3600
     ) = authServer.issueToken(
         issuerId = issuerId,
         subject = "subject",
         audience = aud,
-        claims = claims
+        claims = claims,
+        expiry = expiry
     )
 }
