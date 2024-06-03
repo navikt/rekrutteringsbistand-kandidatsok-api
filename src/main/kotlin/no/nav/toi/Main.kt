@@ -15,8 +15,8 @@ import no.nav.toi.kandidatsammendrag.handleKandidatKandidatnr
 import no.nav.toi.kandidatsammendrag.handleKandidatNavn
 import no.nav.toi.kandidatsammendrag.handleKandidatSammendrag
 import no.nav.toi.kandidatstillingsøk.handleLookupKandidatStillingssøk
+import no.nav.toi.kandidatsøk.ModiaKlient
 import no.nav.toi.kandidatsøk.handleKandidatSøk
-import no.nav.toi.kandidatsøk.handleKandidatSøkForNavigering
 import no.nav.toi.kompetanseforslag.handleKompetanseforslag
 import no.nav.toi.kuberneteshealth.handleHealth
 import no.nav.toi.lookupcv.handleLookupCv
@@ -44,7 +44,9 @@ class App(
     azureSecret: String,
     azureClientId: String,
     pdlScope: String,
-    azureUrl: String
+    azureUrl: String,
+    modiaContextHolderUrl: String,
+    modiaContextHolderScope: String
 ) : Closeable {
 
     lateinit var javalin: Javalin
@@ -55,6 +57,8 @@ class App(
         openSearchUri = openSearchUri,
     )
     private val pdlKlient = PdlKlient(pdlUrl, AccessTokenClient(azureSecret,azureClientId,pdlScope,azureUrl))
+
+    private val modiaClient = ModiaKlient(modiaContextHolderUrl, AccessTokenClient(azureSecret,azureClientId,modiaContextHolderScope, azureUrl))
 
     fun configureOpenApi(config: JavalinConfig) {
         val openApiConfiguration = OpenApiPluginConfiguration().apply {
@@ -85,8 +89,7 @@ class App(
         javalin.handleKandidatSammendrag(openSearchClient)
         javalin.handleKompetanseforslag(openSearchClient)
         javalin.handleLookupKandidatStillingssøk(openSearchClient)
-        javalin.handleKandidatSøk(openSearchClient)
-        javalin.handleKandidatSøkForNavigering(openSearchClient)
+        javalin.handleKandidatSøk(openSearchClient, modiaClient)
         javalin.handleSuggest(openSearchClient)
         javalin.handleStedSuggest(openSearchClient)
         javalin.handleKontorSuggest(openSearchClient)
@@ -149,6 +152,8 @@ fun main() {
         azureClientId = getenv("AZURE_APP_CLIENT_ID"),
         pdlScope = getenv("PDL_SCOPE"),
         azureUrl = getenv("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+        modiaContextHolderUrl = getenv("MODIA_CONTEXT_HOLDER_URL"),
+        modiaContextHolderScope = getenv("MODIA_CONTEXT_HOLDER_SCOPE"),
     ).start()
 }
 

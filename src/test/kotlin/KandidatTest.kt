@@ -114,6 +114,16 @@ class KandidatTest {
     }
 
     @Test
+    fun `trenger token for å spørre endepunkt om navn`() {
+        val fødselsnummer = "12312312312"
+        val (_, response, result) = Fuel.post("$endepunkt/navn")
+            .body("""{"fodselsnummer":"$fødselsnummer"}""")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
     fun `map fødselsnummer til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12312312312"
@@ -404,7 +414,9 @@ class KandidatTest {
         azureSecret = "secret",
         azureClientId = "1",
         azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
-        pdlScope = "http://localhost/.default"
+        pdlScope = "http://localhost/.default",
+        modiaContextHolderScope = "http://localhost/.default",
+        modiaContextHolderUrl = "http://localhost/modia"
     )
 
     private fun lagToken(

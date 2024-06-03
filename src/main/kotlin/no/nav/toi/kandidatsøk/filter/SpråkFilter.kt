@@ -5,13 +5,10 @@ import no.nav.toi.kandidatsøk.FilterParametre
 import org.opensearch.client.opensearch._types.query_dsl.ChildScoreMode
 import org.opensearch.client.opensearch._types.query_dsl.Operator
 
-fun List<Filter>.medSpråkFilter() = this + SpråkFilter()
+fun List<Filter>.medSpråkFilter(filterParametre: FilterParametre) = this + SpråkFilter(filterParametre)
 
-private class SpråkFilter: Filter {
-    private var språk = emptyList<String>()
-    override fun berikMedParameter(filterParametre: FilterParametre) {
-        språk = filterParametre.språk ?: emptyList()
-    }
+private class SpråkFilter(parametre: FilterParametre): Filter {
+    private val språk = parametre.språk ?: emptyList()
 
     override fun erAktiv() = språk.isNotEmpty()
 

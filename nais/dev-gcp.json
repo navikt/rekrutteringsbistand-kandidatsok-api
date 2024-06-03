@@ -11,5 +11,8 @@
     ],
     "pdlUrl": "https://pdl-api.dev-fss-pub.nais.io/graphql",
     "pdlScope": "api://dev-fss.pdl.pdl-api/.default",
-    "pdlHost": "pdl-api.dev-fss-pub.nais.io"
+    "pdlHost": "pdl-api.dev-fss-pub.nais.io",
+    "modiaContextHolderUrl": "https://modiacontextholder-q1.dev-fss-pub.nais.io/modiacontextholder",
+    "modiaContextHolderHost": "modiacontextholder-q1.dev-fss-pub.nais.io",
+    "modiaContextHolderScope": "api://dev-fss.personoversikt.modiacontextholder-q1/.default"
 }

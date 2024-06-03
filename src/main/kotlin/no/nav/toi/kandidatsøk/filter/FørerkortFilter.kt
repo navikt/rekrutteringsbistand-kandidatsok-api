@@ -4,7 +4,7 @@ import no.nav.toi.*
 import no.nav.toi.kandidatsøk.FilterParametre
 import org.opensearch.client.opensearch._types.query_dsl.ChildScoreMode
 
-fun List<Filter>.medFørerkortFilter() = this + FørerkortFilter()
+fun List<Filter>.medFørerkortFilter(filterParametre: FilterParametre) = this + FørerkortFilter(filterParametre)
 
 private interface Førerkort {
     val kode: String
@@ -93,15 +93,12 @@ private val alleFørerkort = listOf(
 private fun String.somFørerkort() =
     alleFørerkort.firstOrNull { it.kode == this } ?: throw Valideringsfeil("Ukjent førerkort: $this")
 
-private class FørerkortFilter: Filter {
-    private var førerkort = emptySet<Førerkort>()
-    override fun berikMedParameter(filterParametre: FilterParametre) {
-        førerkort = filterParametre.førerkort
-            ?.map(String::somFørerkort)
-            ?.flatMap(Førerkort::alleSomKanKjøreDetteKortet)
-            ?.toSet()
-            ?: emptySet()
-    }
+private class FørerkortFilter(parametre: FilterParametre): Filter {
+    private val førerkort = parametre.førerkort
+        ?.map(String::somFørerkort)
+        ?.flatMap(Førerkort::alleSomKanKjøreDetteKortet)
+        ?.toSet()
+        ?: emptySet()
 
     override fun erAktiv() = førerkort.isNotEmpty()
 

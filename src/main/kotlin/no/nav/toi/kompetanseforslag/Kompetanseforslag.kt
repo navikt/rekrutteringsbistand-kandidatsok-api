@@ -83,7 +83,7 @@ private fun OpenSearchClient.lookupKompetanseforslag(params: RequestDto): Search
     }
 }
 
-fun SearchResponse<JsonNode>.toAggregationResponseJson(): KompetanseAggregationResponse? {
+fun SearchResponse<JsonNode>.toAggregationResponseJson(): KompetanseAggregationResponse {
     val buckets = this.aggregations()["kompetanse"]?.sterms()?.buckets()?.array()
 
    return KompetanseAggregationResponse(

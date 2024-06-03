@@ -5,7 +5,7 @@ import no.nav.toi.kandidatsøk.FilterParametre
 import org.opensearch.client.opensearch._types.query_dsl.BoolQuery
 import org.opensearch.client.util.ObjectBuilder
 
-fun List<Filter>.medUtdanningFilter() = this + UtdanningFilter()
+fun List<Filter>.medUtdanningFilter(filterParametre: FilterParametre) = this + UtdanningFilter(filterParametre)
 
 private interface UtdanningsNivå {
     fun harStringKode(kode: String): Boolean
@@ -63,11 +63,8 @@ private fun ekskluderUtdanning(regex: String): BoolQuery.Builder.() -> ObjectBui
 private fun String.tilUtdanningsNivå() = listOf(Videregående, Fagskole, Bachelor, Master, Doktorgrad)
     .firstOrNull { it.harStringKode(this) } ?: throw Valideringsfeil("$this er ikke en gyldig utdanningsnivå")
 
-private class UtdanningFilter: Filter {
-    private var utdanningsnivå = emptyList<UtdanningsNivå>()
-    override fun berikMedParameter(filterParametre: FilterParametre) {
-        utdanningsnivå = filterParametre.utdanningsnivå?.map(String::tilUtdanningsNivå) ?: emptyList()
-    }
+private class UtdanningFilter(parametre: FilterParametre): Filter {
+    private val utdanningsnivå = parametre.utdanningsnivå?.map(String::tilUtdanningsNivå) ?: emptyList()
 
     override fun erAktiv() = utdanningsnivå.isNotEmpty()
 

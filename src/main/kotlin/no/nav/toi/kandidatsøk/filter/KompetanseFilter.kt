@@ -6,13 +6,10 @@ import no.nav.toi.matchPhrase_
 import no.nav.toi.must_
 import no.nav.toi.should_
 
-fun List<Filter>.medKompetanseFilter() = this + KompetanseFilter()
+fun List<Filter>.medKompetanseFilter(filterParametre: FilterParametre) = this + KompetanseFilter(filterParametre)
 
-private class KompetanseFilter: Filter {
-    private var kompetanser = emptyList<String>()
-    override fun berikMedParameter(filterParametre: FilterParametre) {
-        kompetanser = filterParametre.kompetanse ?: emptyList()
-    }
+private class KompetanseFilter(parametre: FilterParametre): Filter {
+    private val kompetanser = parametre.kompetanse ?: emptyList()
 
     override fun erAktiv() = kompetanser.isNotEmpty()
 

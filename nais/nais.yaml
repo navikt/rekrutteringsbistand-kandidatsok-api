@@ -39,6 +39,7 @@ spec:
     outbound:
       external:
         - host: {{ pdlHost }}
+        - host: {{ modiaContextHolderHost }}
   env:
     - name: MODIA_GENERELL_GRUPPE
       value: {{adGruppeModiaGenerellTilgang}}
@@ -52,3 +53,7 @@ spec:
       value: {{pdlUrl}}
     - name: PDL_SCOPE
       value: {{pdlScope}}
+    - name: MODIA_CONTEXT_HOLDER_URL
+      value: {{modiaContextHolderUrl}}
+    - name: MODIA_CONTEXT_HOLDER_SCOPE
+      value: {{modiaContextHolderScope}}
