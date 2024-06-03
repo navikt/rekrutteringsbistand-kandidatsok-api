@@ -160,6 +160,8 @@ class Tokentest {
         azureSecret = "secret",
         azureClientId = audience,
         azureUrl = "http://localhost:$authPort",
-        pdlScope = "http://localhost/.default"
+        pdlScope = "http://localhost/.default",
+        modiaContextHolderScope = "http://localhost/.default",
+        modiaContextHolderUrl = "http://localhost:10000/modia"
     )
 }
