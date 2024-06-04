@@ -14,16 +14,26 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.skyscreamer.jsonassert.JSONAssert
 import java.util.*
+import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WireMockTest(httpPort = 10000)
 class KandidatsøkTest {
     private val authPort = 18306
 
-    private val modiaGenerell = UUID.randomUUID().toString()
-    private val modiaOppfølging = UUID.randomUUID().toString()
+    companion object {
+        private val modiaGenerell = UUID.randomUUID().toString()
+        private val jobbsøkerrettet = UUID.randomUUID().toString()
+        private val arbeidsgiverrettet = UUID.randomUUID().toString()
+        private val utvikler = UUID.randomUUID().toString()
+
+        private val audience = "iden til applikasjonen"
+    }
 
     private val app: App = lagLokalApp()
     private val authServer = MockOAuth2Server()
@@ -163,10 +173,59 @@ class KandidatsøkTest {
         Assertions.assertThat(response.statusCode).isEqualTo(401)
     }
 
+    enum class Tilgang(val uuid: String) {
+        ModiaGenerell(modiaGenerell), Jobbsøkerrettet(jobbsøkerrettet), Arbeidsgiverrettet(arbeidsgiverrettet), Utvikler(utvikler);
+    }
+    enum class Endepunkt(val path: String, val extraTerms: Array<String> = emptyArray(), val body: String = "{}") {
+        Alle("alle"),
+        MineBrukere("minebrukere", arrayOf(KandidatsøkRespons.mineBrukereTerm)),
+        ValgteKontorer("valgtekontorer", arrayOf(KandidatsøkRespons.valgtKontorTerm), """{"valgtKontor":["NAV Hamar","NAV Lofoten"]}"""),
+        MineKontorer("minekontorer", arrayOf(KandidatsøkRespons.mineKontorerTerm)),
+        MittKontor("mittkontor", arrayOf(KandidatsøkRespons.mittKontorTerm), """{"orgenhet":"1234"}""");
+    }
+
+    fun tilgangParametre()= Stream.of(
+        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.Alle, 200),  // TODO: Har midlertidig tilgang
+        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.MineBrukere, 200),  // TODO: Har midlertidig tilgang
+        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.ValgteKontorer, 200),  // TODO: Har midlertidig tilgang
+        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.MineKontorer, 200),  // TODO: Har midlertidig tilgang
+        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.MittKontor, 200),  // TODO: Har midlertidig tilgang
+        Arguments.of(Tilgang.Jobbsøkerrettet, Endepunkt.Alle, 403),
+        Arguments.of(Tilgang.Jobbsøkerrettet, Endepunkt.MineBrukere, 200),
+        Arguments.of(Tilgang.Jobbsøkerrettet, Endepunkt.ValgteKontorer, 403),
+        Arguments.of(Tilgang.Jobbsøkerrettet, Endepunkt.MineKontorer, 200),
+        Arguments.of(Tilgang.Jobbsøkerrettet, Endepunkt.MittKontor, 200),
+        Arguments.of(Tilgang.Arbeidsgiverrettet, Endepunkt.Alle, 200),
+        Arguments.of(Tilgang.Arbeidsgiverrettet, Endepunkt.MineBrukere, 200),
+        Arguments.of(Tilgang.Arbeidsgiverrettet, Endepunkt.ValgteKontorer, 200),
+        Arguments.of(Tilgang.Arbeidsgiverrettet, Endepunkt.MineKontorer, 200),
+        Arguments.of(Tilgang.Arbeidsgiverrettet, Endepunkt.MittKontor, 200),
+        Arguments.of(Tilgang.Utvikler, Endepunkt.Alle, 200),
+        Arguments.of(Tilgang.Utvikler, Endepunkt.MineBrukere, 200),
+        Arguments.of(Tilgang.Utvikler, Endepunkt.ValgteKontorer, 200),
+        Arguments.of(Tilgang.Utvikler, Endepunkt.MineKontorer, 200),
+        Arguments.of(Tilgang.Utvikler, Endepunkt.MittKontor, 200),
+    )
+
+    @ParameterizedTest
+    @MethodSource("tilgangParametre")
+    fun `tilgang på endepunkt`(tilgang: Tilgang, endepunkt: Endepunkt, statusCode: Int, wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockES(wireMock, extraTerms = endepunkt.extraTerms)
+        mockDecorator(wireMock)
+        val token = lagToken(navIdent = "A123456", groups = listOf(tilgang.uuid))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body(endepunkt.body)
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(statusCode)
+    }
+
     @Test
-    fun `Må ha gruppe-tilhørighet`() {
-        val token = lagToken(claims = mapOf("NAVident" to "A123456"))
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
+    fun `om man ikke har gruppetilhørighet skal man ikke få gjort kandidatsøk`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val token = lagToken(groups = emptyList())
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -595,31 +654,7 @@ class KandidatsøkTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockES(wireMock, KandidatsøkRespons.mineKontorerTerm)
 
-        wireMock.register(
-            WireMock.get("/modia/api/decorator")
-                .willReturn(
-                    okJson(
-                        """
-                    {
-                        "ident": "Z000000",
-                        "navn": "Tull Tullersen",
-                        "fornavn": "Tull",
-                        "etternavn": "Tullersen",
-                        "enheter": [
-                            {
-                                "enhetId": "0403",
-                                "navn": "NAV Hamar"
-                            },
-                            {
-                                "enhetId": "1001",
-                                "navn": "NAV Kristiansand"
-                            }
-                        ]
-                    }
-                """.trimIndent()
-                    )
-                )
-        )
+        mockDecorator(wireMock)
 
 
         val navIdent = "A123456"
@@ -671,32 +706,7 @@ class KandidatsøkTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockES(wireMock, KandidatsøkRespons.mineKontorerTerm)
 
-        wireMock.register(
-            WireMock.get("/modia/api/decorator")
-                .willReturn(
-                    okJson(
-                        """
-                    {
-                        "ident": "Z000000",
-                        "navn": "Tull Tullersen",
-                        "fornavn": "Tull",
-                        "etternavn": "Tullersen",
-                        "enheter": [
-                            {
-                                "enhetId": "0403",
-                                "navn": "NAV Hamar"
-                            },
-                            {
-                                "enhetId": "1001",
-                                "navn": "NAV Kristiansand"
-                            }
-                        ]
-                    }
-                """.trimIndent()
-                    )
-                )
-        )
-
+        mockDecorator(wireMock)
 
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
@@ -707,6 +717,34 @@ class KandidatsøkTest {
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+    }
+
+    private fun mockDecorator(wireMock: WireMock) {
+        wireMock.register(
+            get("/modia/api/decorator")
+                .willReturn(
+                    okJson(
+                        """
+                        {
+                            "ident": "Z000000",
+                            "navn": "Tull Tullersen",
+                            "fornavn": "Tull",
+                            "etternavn": "Tullersen",
+                            "enheter": [
+                                {
+                                    "enhetId": "0403",
+                                    "navn": "NAV Hamar"
+                                },
+                                {
+                                    "enhetId": "1001",
+                                    "navn": "NAV Kristiansand"
+                                }
+                            ]
+                        }
+                    """.trimIndent()
+                    )
+                )
+        )
     }
 
     @Test
@@ -825,21 +863,23 @@ class KandidatsøkTest {
         port = 8080,
         authenticationConfigurations = listOf(
             AuthenticationConfiguration(
-                audience = "1",
+                audience = audience,
                 issuer = "http://localhost:$authPort/default",
                 jwksUri = "http://localhost:$authPort/default/jwks",
             )
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
             modiaGenerell = UUID.fromString(modiaGenerell),
-            modiaOppfølging = UUID.fromString(modiaOppfølging),
+            jobbsøkerrettet = UUID.fromString(jobbsøkerrettet),
+            arbeidsgiverrettet = UUID.fromString(arbeidsgiverrettet),
+            utvikler = UUID.fromString(utvikler)
         ),
         openSearchUsername = "user",
         openSearchPassword = "pass",
         openSearchUri = "http://localhost:10000",
         pdlUrl = "http://localhost:10000/pdl",
         azureSecret = "secret",
-        azureClientId = "1",
+        azureClientId = audience,
         azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
         pdlScope = "http://localhost/.default",
         modiaContextHolderScope = "http://localhost/.default",
@@ -876,13 +916,16 @@ class KandidatsøkTest {
 
     private fun lagToken(
         issuerId: String = "http://localhost:$authPort/default",
-        aud: String = "1",
+        aud: String = audience,
         navIdent: String = "A000001",
-        claims: Map<String, Any> = mapOf("NAVident" to navIdent, "groups" to listOf(modiaGenerell))
+        groups: List<String> = listOf(arbeidsgiverrettet),
+        claims: Map<String, Any> = mapOf("NAVident" to navIdent, "groups" to groups),
+        expiry: Long = 3600
     ) = authServer.issueToken(
         issuerId = issuerId,
         subject = "subject",
         audience = aud,
-        claims = claims
+        claims = claims,
+        expiry = expiry
     )
 }

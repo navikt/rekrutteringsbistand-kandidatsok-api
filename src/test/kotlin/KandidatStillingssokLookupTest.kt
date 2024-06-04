@@ -2,15 +2,14 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.jackson.responseObject
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
+import com.nimbusds.jwt.SignedJWT
 import no.nav.toi.LokalApp
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WireMockTest(httpPort = 10000)
@@ -32,7 +31,9 @@ class KandidatStillingssokLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""
+                .withRequestBody(
+                    equalToJson(
+                        """
                     {
                       "_source": {
                         "includes": [
@@ -52,20 +53,23 @@ class KandidatStillingssokLookupTest {
                       },
                       "size": 1
                     }
-                """.trimIndent()))
+                """.trimIndent()
+                    )
+                )
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceKandidatStillingssøkLookup))
                 )
         )
         val navIdent = "A123456"
-        val token = app.lagToken(navIdent = navIdent)
+        val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
-                .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
+            .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseKandidatStillingssøkLookup))
+        Assertions.assertThat(result.get())
+            .isEqualTo(ObjectMapper().readTree(CvTestRespons.responseKandidatStillingssøkLookup))
     }
 
     @Test
@@ -73,7 +77,9 @@ class KandidatStillingssokLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""
+                .withRequestBody(
+                    equalToJson(
+                        """
                     {
                       "_source": {
                         "includes": [
@@ -93,13 +99,15 @@ class KandidatStillingssokLookupTest {
                       },
                       "size": 1
                     }
-                """.trimIndent()))
+                """.trimIndent()
+                    )
+                )
                 .willReturn(
                     ok(CvTestRespons.responseOpensearchIngenTreff)
                 )
         )
         val navIdent = "A123456"
-        val token = app.lagToken(navIdent = navIdent)
+        val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
             .body("""{"kandidatnr": "PAM000000001"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
@@ -120,7 +128,7 @@ class KandidatStillingssokLookupTest {
                 )
         )
         val navIdent = "A123456"
-        val token = app.lagToken(navIdent = navIdent)
+        val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
             .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
             .header("Authorization", "Bearer ${token.serialize()}")
@@ -130,11 +138,85 @@ class KandidatStillingssokLookupTest {
     }
 
     @Test
-    fun feil_dersom_ikke_autentisert() {
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
-            .body("""{"yrker": [{"yrke": "yrke"}]}""")
-            .responseObject<JsonNode>()
+    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
+    fun `modia generell skal ikke ha tilgang til kandidatsammendrag`() {
+        val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
+        val (_, response, _) = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
     }
+
+    @Test
+    fun `jobbsøkerrettet skal ikke ha tilgang til kandidatsammendrag`() {
+        val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
+    fun `arbeidsgiverrettet skal ha tilgang til kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockKandidatStillingssøk(wireMock)
+        val token = app.lagToken(groups = listOf(LokalApp.arbeidsgiverrettet))
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `utvikler skal ha tilgang til kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockKandidatStillingssøk(wireMock)
+        val token = app.lagToken(groups = listOf(LokalApp.utvikler))
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `om man ikke har gruppetilhørighet skal man ikke få kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val token = app.lagToken(groups = emptyList())
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    private fun gjørKall(token: SignedJWT) = Fuel.post("http://localhost:8080/api/kandidat-stillingssok")
+        .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
+        .header("Authorization", "Bearer ${token.serialize()}")
+        .responseObject<JsonNode>()
+
+    private fun mockKandidatStillingssøk(wireMock: WireMock) =
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(
+                    equalToJson(
+                        """
+                    {
+                      "_source": {
+                        "includes": [
+                          "geografiJobbonsker",
+                          "yrkeJobbonskerObj",
+                          "kommunenummerstring",
+                          "kommuneNavn",
+                          "fodselsnummer"
+                        ]
+                      },
+                      "query": {
+                        "term": {
+                          "kandidatnr": {
+                            "value": "PAM0xtfrwli5"
+                          }
+                        }
+                      },
+                      "size": 1
+                    }
+                """.trimIndent()
+                    )
+                )
+                .willReturn(
+                    ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceKandidatStillingssøkLookup))
+                )
+        )
 }

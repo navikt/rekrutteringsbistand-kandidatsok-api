@@ -11,10 +11,7 @@ import com.auth0.jwt.exceptions.TokenExpiredException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.RSAKeyProvider
 import io.javalin.Javalin
-import io.javalin.http.Context
-import io.javalin.http.HttpStatus
-import io.javalin.http.InternalServerErrorResponse
-import io.javalin.http.UnauthorizedResponse
+import io.javalin.http.*
 import org.eclipse.jetty.http.HttpHeader
 import java.net.URI
 import java.security.interfaces.RSAPublicKey
@@ -31,6 +28,13 @@ class AuthenticatedUser(
     val roller: Set<Rolle>,
     val jwt: String
 ) {
+    fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle) {
+        if (Rolle.MODIA_GENERELL in roller) return  // TODO Midlertidig tilgang
+        if(roller.none { it in gyldigeRoller }) {
+            throw ForbiddenResponse()
+        }
+    }
+
     companion object {
         fun fromJwt(jwt: DecodedJWT, rolleUuidSpesifikasjon: RolleUuidSpesifikasjon) =
             AuthenticatedUser(
@@ -154,4 +158,5 @@ private fun algorithm(azureOpenidConfigJwksUri: String): Algorithm {
 private fun jwkProvider(azureOpenidConfigJwksUri: String) =
     JwkProviderBuilder(URI(azureOpenidConfigJwksUri).toURL())
         .cached(10, 1, TimeUnit.HOURS)
+        .rateLimited(false)
         .build()
