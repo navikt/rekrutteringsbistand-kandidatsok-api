@@ -140,9 +140,9 @@ fun main() {
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
             modiaGenerell = UUID.fromString(getenv("MODIA_GENERELL_GRUPPE")),
-            jobbsøkerrettet = UUID.fromString(getenv("MODIA_GENERELL_GRUPPE")),
-            arbeidsgiverrettet = UUID.fromString(getenv("MODIA_GENERELL_GRUPPE")),
-            utvikler = UUID.fromString(getenv("MODIA_GENERELL_GRUPPE"))
+            jobbsøkerrettet = UUID.fromString(getenv("REKRUTTERINGSBISTAND_JOBBSOKERRETTET")),
+            arbeidsgiverrettet = UUID.fromString(getenv("REKRUTTERINGSBISTAND_ARBEIDSGIVERRETTET")),
+            utvikler = UUID.fromString(getenv("REKRUTTERINGSBISTAND_UTVIKLER"))
         ),
         openSearchUsername = getenv("OPEN_SEARCH_USERNAME"),
         openSearchPassword = getenv("OPEN_SEARCH_PASSWORD"),
