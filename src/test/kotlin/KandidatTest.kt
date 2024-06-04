@@ -294,7 +294,7 @@ class KandidatTest {
     }
 
     @Test
-    @Disabled
+    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
     fun `modia generell skal ikke ha tilgang til navn`() {
         val token = lagToken(groups = listOf(modiaGenerell))
         val (_, response) = gjørKallNavn("123", token)
