@@ -36,23 +36,103 @@ data class FilterParametre(
     val orgenhet: String?
 )
 
+fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+    handleKandidatsøkBasertPåSøketermer(openSearchClient, modiaKlient)
+    handleMineBrukere(openSearchClient, modiaKlient)
+    handleValgteKontorer(openSearchClient, modiaKlient)
+    handleMineKontorer(openSearchClient, modiaKlient)
+    handleMittKontor(openSearchClient, modiaKlient)
+    handleAlleKandidater(openSearchClient, modiaKlient)
+}
 
 @OpenApi(
     summary = "Søk på kandidater basert på søketermer",
-    operationId = endepunkt,
+    operationId = "${endepunkt}",
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
     responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
-    post(endepunkt, håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { authenticatedUser, filterParametre -> medPorteføljeFilter(filterParametre, authenticatedUser, modiaKlient) })
-    post("$endepunkt/minebrukere", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { authenticatedUser, _ ->  medMineBrukereFilter(authenticatedUser)})
-    post("$endepunkt/valgtekontorer", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { _, filterParametre ->  medValgtKontorerFilter(filterParametre)})
-    post("$endepunkt/minekontorer", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { authenticatedUser, _ ->  medMineKontorerFilter(authenticatedUser, modiaKlient)})
-    post("$endepunkt/mittkontor", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { _, filterParametre ->  medMittKontorFilter(filterParametre)})
-    post("$endepunkt/alle", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { _, _ ->  this })
+fun Javalin.handleKandidatsøkBasertPåSøketermer(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+    post(endepunkt, håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { authenticatedUser, filterParametre ->
+        medPorteføljeFilter(filterParametre, authenticatedUser, modiaKlient)
+    })
+}
+
+@OpenApi(
+    summary = "Søk på mine brukere",
+    operationId = "${endepunkt}/minebrukere",
+    tags = [],
+    requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
+    responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+    path = "$endepunkt/minebrukere",
+    methods = [HttpMethod.POST]
+)
+fun Javalin.handleMineBrukere(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+    post("$endepunkt/minebrukere", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { authenticatedUser, _ ->
+        medMineBrukereFilter(authenticatedUser)
+    })
+}
+
+@OpenApi(
+    summary = "Søk på valgte kontorer",
+    operationId = "${endepunkt}/valgtekontorer",
+    tags = [],
+    requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
+    responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+    path = "$endepunkt/valgtekontorer",
+    methods = [HttpMethod.POST]
+)
+fun Javalin.handleValgteKontorer(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+    post("$endepunkt/valgtekontorer", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { _, filterParametre ->
+        medValgtKontorerFilter(filterParametre)
+    })
+}
+
+@OpenApi(
+    summary = "Søk på mine kontorer",
+    operationId = "${endepunkt}/minekontorer",
+    tags = [],
+    requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
+    responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+    path = "$endepunkt/minekontorer",
+    methods = [HttpMethod.POST]
+)
+fun Javalin.handleMineKontorer(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+    post("$endepunkt/minekontorer", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { authenticatedUser, _ ->
+        medMineKontorerFilter(authenticatedUser, modiaKlient)
+    })
+}
+
+@OpenApi(
+    summary = "Søk på mitt kontor",
+    operationId = "${endepunkt}/mittkontor",
+    tags = [],
+    requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
+    responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+    path = "$endepunkt/mittkontor",
+    methods = [HttpMethod.POST]
+)
+fun Javalin.handleMittKontor(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+    post("$endepunkt/mittkontor", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { _, filterParametre ->
+        medMittKontorFilter(filterParametre)
+    })
+}
+
+@OpenApi(
+    summary = "Søk på alle kandidater",
+    operationId = "${endepunkt}/alle",
+    tags = [],
+    requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
+    responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+    path = "$endepunkt/alle",
+    methods = [HttpMethod.POST]
+)
+fun Javalin.handleAlleKandidater(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+    post("$endepunkt/alle", håndterEndepunkt(modiaKlient, openSearchClient, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { _, _ ->
+        this
+    })
 }
 
 private fun håndterEndepunkt(
