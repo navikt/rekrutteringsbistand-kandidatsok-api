@@ -50,7 +50,7 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: 
     operationId = "${endepunkt}",
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
-    responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+    responses = [OpenApiResponse("200", [OpenApiContent(KandidatSøkOpensearchResponseMedNavigering::class)])],
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
@@ -65,7 +65,7 @@ fun Javalin.handleKandidatsøkBasertPåSøketermer(openSearchClient: OpenSearchC
     operationId = "${endepunkt}/minebrukere",
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
-    responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+    responses = [OpenApiResponse("200", [OpenApiContent(KandidatSøkOpensearchResponseMedNavigering::class)])],
     path = "$endepunkt/minebrukere",
     methods = [HttpMethod.POST]
 )
@@ -80,7 +80,7 @@ fun Javalin.handleMineBrukere(openSearchClient: OpenSearchClient, modiaKlient: M
     operationId = "${endepunkt}/valgtekontorer",
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
-    responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+    responses = [OpenApiResponse("200", [OpenApiContent(KandidatSøkOpensearchResponseMedNavigering::class)])],
     path = "$endepunkt/valgtekontorer",
     methods = [HttpMethod.POST]
 )
@@ -95,7 +95,7 @@ fun Javalin.handleValgteKontorer(openSearchClient: OpenSearchClient, modiaKlient
     operationId = "${endepunkt}/minekontorer",
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
-    responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+    responses = [OpenApiResponse("200", [OpenApiContent(KandidatSøkOpensearchResponseMedNavigering::class)])],
     path = "$endepunkt/minekontorer",
     methods = [HttpMethod.POST]
 )
@@ -110,7 +110,7 @@ fun Javalin.handleMineKontorer(openSearchClient: OpenSearchClient, modiaKlient: 
     operationId = "${endepunkt}/mittkontor",
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
-    responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+    responses = [OpenApiResponse("200", [OpenApiContent(KandidatSøkOpensearchResponseMedNavigering::class)])],
     path = "$endepunkt/mittkontor",
     methods = [HttpMethod.POST]
 )
@@ -125,7 +125,7 @@ fun Javalin.handleMittKontor(openSearchClient: OpenSearchClient, modiaKlient: Mo
     operationId = "${endepunkt}/alle",
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
-    responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+    responses = [OpenApiResponse("200", [OpenApiContent(KandidatSøkOpensearchResponseMedNavigering::class)])],
     path = "$endepunkt/alle",
     methods = [HttpMethod.POST]
 )
