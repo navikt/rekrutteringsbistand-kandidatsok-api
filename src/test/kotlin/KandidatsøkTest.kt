@@ -66,14 +66,16 @@ class KandidatsøkTest {
 
     }
 
-    @Test
-    fun `Kan søke kandidater`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{${endepunkt.bodyParameter(false)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -82,14 +84,16 @@ class KandidatsøkTest {
 
     }
 
-    @Test
-    fun `Skal bare ignorere ekstra data`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Skal bare ignorere ekstra data`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"ukjentFelt":"skal ignoreres"}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"ukjentFelt":"skal ignoreres"${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -97,14 +101,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med paginering`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med paginering`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock, from = 75)
+        mockES(wireMock, from = 75, extraTerms = endepunkt.extraTerms)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok?side=4")
-            .body("""{}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}?side=4")
+            .body("""{${endepunkt.bodyParameter(false)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -112,14 +118,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med mange sider paginering`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med mange sider paginering`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock, from = 10000)
+        mockES(wireMock, from = 10000, extraTerms = endepunkt.extraTerms)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok?side=401")
-            .body("""{}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}?side=401")
+            .body("""{${endepunkt.bodyParameter(false)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -127,14 +135,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater sortert på flest kriterier`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater sortert på flest kriterier`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,sortering = false)
+        mockES(wireMock,sortering = false, extraTerms = endepunkt.extraTerms)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok?sortering=score")
-            .body("""{}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}?sortering=score")
+            .body("""{${endepunkt.bodyParameter(false)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -142,19 +152,21 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Må ha token`() {
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Må ha token`(endepunkt: Endepunkt) {
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
             .body("""{}""")
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(401)
     }
 
-    @Test
-    fun `Må ha gyldig token`() {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Må ha gyldig token`(endepunkt: Endepunkt) {
         val token = lagToken(issuerId = "falskissuer")
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -162,10 +174,11 @@ class KandidatsøkTest {
         Assertions.assertThat(response.statusCode).isEqualTo(401)
     }
 
-    @Test
-    fun `Må ha navIdent`() {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Må ha navIdent`(endepunkt: Endepunkt) {
         val token = lagToken(claims = mapOf("groups" to listOf(modiaGenerell)))
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -176,13 +189,16 @@ class KandidatsøkTest {
     enum class Tilgang(val uuid: String) {
         ModiaGenerell(modiaGenerell), Jobbsøkerrettet(jobbsøkerrettet), Arbeidsgiverrettet(arbeidsgiverrettet), Utvikler(utvikler);
     }
-    enum class Endepunkt(val path: String, val extraTerms: Array<String> = emptyArray(), val body: String = "{}") {
+    enum class Endepunkt(val path: String, val extraTerms: Array<String> = emptyArray(), val bodyParameter: (Boolean) -> String = { "" }, val ekstraMocking: (WireMock) -> Unit = {}) {
         Alle("alle"),
         MineBrukere("minebrukere", arrayOf(KandidatsøkRespons.mineBrukereTerm)),
-        ValgteKontorer("valgtekontorer", arrayOf(KandidatsøkRespons.valgtKontorTerm), """{"valgtKontor":["NAV Hamar","NAV Lofoten"]}"""),
-        MineKontorer("minekontorer", arrayOf(KandidatsøkRespons.mineKontorerTerm)),
-        MittKontor("mittkontor", arrayOf(KandidatsøkRespons.mittKontorTerm), """{"orgenhet":"1234"}""");
+        ValgteKontorer("valgtekontorer", arrayOf(KandidatsøkRespons.valgtKontorTerm),
+            { (if(it) "," else "") + """"valgtKontor":["NAV Hamar","NAV Lofoten"]""" }),
+        MineKontorer("minekontorer", arrayOf(KandidatsøkRespons.mineKontorerTerm), ekstraMocking = ::mockDecorator),
+        MittKontor("mittkontor", arrayOf(KandidatsøkRespons.mittKontorTerm), { (if(it) "," else "") + """"orgenhet":"1234"""" });
     }
+
+    fun endepunktSomParameter() = Endepunkt.entries.stream()
 
     fun tilgangParametre()= Stream.of(
         Arguments.of(Tilgang.ModiaGenerell, Endepunkt.Alle, 200),  // TODO: Har midlertidig tilgang
@@ -212,20 +228,21 @@ class KandidatsøkTest {
     fun `tilgang på endepunkt`(tilgang: Tilgang, endepunkt: Endepunkt, statusCode: Int, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockES(wireMock, extraTerms = endepunkt.extraTerms)
-        mockDecorator(wireMock)
+        endepunkt.ekstraMocking(wireMock)
         val token = lagToken(navIdent = "A123456", groups = listOf(tilgang.uuid))
         val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body(endepunkt.body)
+            .body("""{${endepunkt.bodyParameter(false)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(statusCode)
     }
 
-    @Test
-    fun `om man ikke har gruppetilhørighet skal man ikke få gjort kandidatsøk`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `om man ikke har gruppetilhørighet skal man ikke få gjort kandidatsøk`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = lagToken(groups = emptyList())
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok")
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
@@ -233,8 +250,9 @@ class KandidatsøkTest {
         Assertions.assertThat(response.statusCode).isEqualTo(403)
     }
 
-    @Test
-    fun `Om kall feiler under henting av cv fra elasticsearch, får vi HTTP 500`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Om kall feiler under henting av cv fra elasticsearch, får vi HTTP 500`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
@@ -243,24 +261,27 @@ class KandidatsøkTest {
                     notFound()
                 )
         )
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{${endepunkt.bodyParameter(false)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(500)
     }
 
-    @Test
-    fun `Kan søke kandidater med stedsfilter`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med stedsfilter`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,KandidatsøkRespons.stedTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.stedTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"ønsketSted":["Bodø.NO18.1804","Kristiansund.NO50.5001","Akershus.NO02","Norge.NO"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"ønsketSted":["Bodø.NO18.1804","Kristiansund.NO50.5001","Akershus.NO02","Norge.NO"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -268,18 +289,21 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater som bor på sted`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater som bor på sted`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,KandidatsøkRespons.stedMedMåBoPåTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.stedMedMåBoPåTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
             .body(
                 """
                 {
                     "ønsketSted":["Oslo.NO03.0301","Bergen.NO46.4601","Norge.NO","Møre og Romsdal.NO15"],
                     "borPåØnsketSted": true
+                    ${endepunkt.bodyParameter(true)}
                 }""".trimIndent()
             )
             .header("Authorization", "Bearer ${token.serialize()}")
@@ -289,14 +313,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med arbeidsønskefilter`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med arbeidsønskefilter`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,KandidatsøkRespons.arbeidsønskeTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.arbeidsønskeTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"ønsketYrke":["Sauegjeter","Saueklipper"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"ønsketYrke":["Sauegjeter","Saueklipper"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -304,14 +330,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med innsatsgruppe`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med innsatsgruppe`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM)
+        mockES(wireMock,innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM, extraTerms = endepunkt.extraTerms)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"innsatsgruppe":["BATT","BFORM"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"innsatsgruppe":["BATT","BFORM"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -319,14 +347,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med ANDRE innsatsgrupper`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med ANDRE innsatsgrupper`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock, innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedANDRE)
+        mockES(wireMock, innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedANDRE, extraTerms = endepunkt.extraTerms)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"innsatsgruppe":["ANDRE"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"innsatsgruppe":["ANDRE"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -334,14 +364,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med alle innsatsgrupper`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med alle innsatsgrupper`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedAlle)
+        mockES(wireMock,innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedAlle, extraTerms = endepunkt.extraTerms)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"innsatsgruppe":["BATT","BFORM","IKVAL","VARIG","ANDRE"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"innsatsgruppe":["BATT","BFORM","IKVAL","VARIG","ANDRE"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -349,14 +381,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Søk med innsatsgruppe satt til tom liste skal defaulte til default innsatsgrupper`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Søk med innsatsgruppe satt til tom liste skal defaulte til default innsatsgrupper`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"innsatsgruppe":[]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"innsatsgruppe":[]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -364,14 +398,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med målform`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med målform`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,KandidatsøkRespons.språkTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.språkTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"språk":["Nynorsk","Norsk"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"språk":["Nynorsk","Norsk"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -379,14 +415,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med arbeidserfaring`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med arbeidserfaring`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock, KandidatsøkRespons.arbeidsErfaringTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.arbeidsErfaringTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"arbeidserfaring":["Barnehageassistent","Butikkansvarlig"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"arbeidserfaring":["Barnehageassistent","Butikkansvarlig"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -394,14 +432,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med nylig arbeidserfaring`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med nylig arbeidserfaring`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock, KandidatsøkRespons.nyligArbeidsErfaringTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.nyligArbeidsErfaringTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"arbeidserfaring":["Hvalfanger","Kokk"],"ferskhet":2}""".trimMargin())
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"arbeidserfaring":["Hvalfanger","Kokk"],"ferskhet":2${endepunkt.bodyParameter(true)}}""".trimMargin())
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -409,14 +449,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med hovedmål`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med hovedmål`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,KandidatsøkRespons.hovedmålTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.hovedmålTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"hovedmål":["SKAFFEA","OKEDELT"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"hovedmål":["SKAFFEA","OKEDELT"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -424,14 +466,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med kompetanse`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med kompetanse`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock, KandidatsøkRespons.kompetanseTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.kompetanseTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"kompetanse":["Fagbrev FU-operatør","Kotlin"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"kompetanse":["Fagbrev FU-operatør","Kotlin"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -439,14 +483,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med førerkort`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med førerkort`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock, KandidatsøkRespons.førerkortTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.førerkortTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"førerkort":["D - Buss","BE - Personbil med tilhenger"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"førerkort":["D - Buss","BE - Personbil med tilhenger"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -454,14 +500,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med utdanning`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med utdanning`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,KandidatsøkRespons.utdanningTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.utdanningTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"utdanningsnivå":["videregaende","bachelor","doktorgrad"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"utdanningsnivå":["videregaende","bachelor","doktorgrad"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -469,14 +517,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidater med prioriterte målgrupper`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med prioriterte målgrupper`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock, KandidatsøkRespons.prioriterteMålgrupperTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.prioriterteMålgrupperTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"prioritertMålgruppe":["senior","unge","hullICv"]}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"prioritertMålgruppe":["senior","unge","hullICv"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -484,14 +534,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidat med ident`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidat med ident`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock, KandidatsøkRespons.queryMedIdentTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.queryMedIdentTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"fritekst":"12345678910"}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"fritekst":"12345678910"${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -499,14 +551,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidat med PAMkandidatnr`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidat med PAMkandidatnr`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,KandidatsøkRespons.queryMedPAMKandidatnrTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.queryMedPAMKandidatnrTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"fritekst":"PAM01Z"}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"fritekst":"PAM01Z"${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -514,14 +568,16 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidat med arenakandidatnr`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidat med arenakandidatnr`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock, KandidatsøkRespons.queryMedArenaKandidatnrTerm)
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.queryMedArenaKandidatnrTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"fritekst":"ab123"}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"fritekst":"ab123"${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -719,34 +775,6 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    private fun mockDecorator(wireMock: WireMock) {
-        wireMock.register(
-            get("/modia/api/decorator")
-                .willReturn(
-                    okJson(
-                        """
-                        {
-                            "ident": "Z000000",
-                            "navn": "Tull Tullersen",
-                            "fornavn": "Tull",
-                            "etternavn": "Tullersen",
-                            "enheter": [
-                                {
-                                    "enhetId": "0403",
-                                    "navn": "NAV Hamar"
-                                },
-                                {
-                                    "enhetId": "1001",
-                                    "navn": "NAV Kristiansand"
-                                }
-                            ]
-                        }
-                    """.trimIndent()
-                    )
-                )
-        )
-    }
-
     @Test
     fun `Får 401 dersom man søker på mine kontorer uten å ha kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
@@ -780,14 +808,16 @@ class KandidatsøkTest {
         Assertions.assertThat(response.statusCode).isEqualTo(401)
     }
 
-    @Test
-    fun `Kan søke kandidat med fritekstsøk`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidat med fritekstsøk`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,KandidatsøkRespons.queryMedKMultiMatchTerm)
+        mockES(wireMock,extraTerms = endepunkt.extraTerms + KandidatsøkRespons.queryMedKMultiMatchTerm)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
-            .body("""{"fritekst":"søkeord"}""")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"fritekst":"søkeord"${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -795,25 +825,46 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `Kan søke kandidat med alle filtre på en gang`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Søk kandidat med fritekstsøk som er tom string skal tolkes som om fritekst ikke ble sendt`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock,
-            KandidatsøkRespons.stedTerm,
-            KandidatsøkRespons.arbeidsønskeTerm,
-            KandidatsøkRespons.queryMedKMultiMatchTerm,
-            KandidatsøkRespons.utdanningTerm,
-            KandidatsøkRespons.prioriterteMålgrupperTerm,
-            KandidatsøkRespons.nyligArbeidsErfaringTerm,
-            KandidatsøkRespons.hovedmålTerm,
-            KandidatsøkRespons.kompetanseTerm,
-            KandidatsøkRespons.førerkortTerm,
-            KandidatsøkRespons.språkTerm,
-            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM
-        )
+        mockES(wireMock, extraTerms = endepunkt.extraTerms)
+        endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/alle")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"fritekst":""${endepunkt.bodyParameter(true)}}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+    }
+
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidat med alle filtre på en gang`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockES(wireMock,
+            extraTerms = endepunkt.extraTerms + listOf(
+                KandidatsøkRespons.stedTerm,
+                KandidatsøkRespons.arbeidsønskeTerm,
+                KandidatsøkRespons.queryMedKMultiMatchTerm,
+                KandidatsøkRespons.utdanningTerm,
+                KandidatsøkRespons.prioriterteMålgrupperTerm,
+                KandidatsøkRespons.nyligArbeidsErfaringTerm,
+                KandidatsøkRespons.hovedmålTerm,
+                KandidatsøkRespons.kompetanseTerm,
+                KandidatsøkRespons.førerkortTerm,
+                KandidatsøkRespons.språkTerm
+            ),
+            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM
+        )
+        endepunkt.ekstraMocking(wireMock)
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
             .body(
                 """
                 {
@@ -829,6 +880,7 @@ class KandidatsøkTest {
                     "utdanningsnivå":["videregaende","bachelor","doktorgrad"],
                     "prioritertMålgruppe":["senior","unge","hullICv"],
                     "fritekst":"søkeord"
+                    ${endepunkt.bodyParameter(true)}
                 }""".trimIndent()
             )
             .header("Authorization", "Bearer ${token.serialize()}")
@@ -927,5 +979,33 @@ class KandidatsøkTest {
         audience = aud,
         claims = claims,
         expiry = expiry
+    )
+}
+
+private fun mockDecorator(wireMock: WireMock) {
+    wireMock.register(
+        get("/modia/api/decorator")
+            .willReturn(
+                okJson(
+                    """
+                        {
+                            "ident": "Z000000",
+                            "navn": "Tull Tullersen",
+                            "fornavn": "Tull",
+                            "etternavn": "Tullersen",
+                            "enheter": [
+                                {
+                                    "enhetId": "0403",
+                                    "navn": "NAV Hamar"
+                                },
+                                {
+                                    "enhetId": "1001",
+                                    "navn": "NAV Kristiansand"
+                                }
+                            ]
+                        }
+                    """.trimIndent()
+                )
+            )
     )
 }

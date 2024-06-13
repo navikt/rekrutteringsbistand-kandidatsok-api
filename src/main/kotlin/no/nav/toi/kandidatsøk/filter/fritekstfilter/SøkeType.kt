@@ -9,7 +9,7 @@ sealed interface SøkeType {
     fun lagESFilterFunksjon(): FilterFunksjon
     fun auditLog(navIdent: String, returnerteFødselsnummer: String?)
     companion object {
-        fun fraFritekstSøk(fritekstSøk: String?) = if(fritekstSøk == null) NullSøk else
+        fun fraFritekstSøk(fritekstSøk: String?) = if(fritekstSøk == null || fritekstSøk == "") NullSøk else
             listOf(::IdentSøk, ::KandidatnummerSøk, ::MultiMatchSøk).map { it(fritekstSøk) }.first { it.passendeSøketype() }
     }
 }
