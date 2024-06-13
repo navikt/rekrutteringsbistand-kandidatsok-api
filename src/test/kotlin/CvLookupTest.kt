@@ -1,5 +1,7 @@
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.tomakehurst.wiremock.client.WireMock.*
@@ -64,8 +66,7 @@ class CvLookupTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseIngenTreff))
+        Assertions.assertThat(response.statusCode).isEqualTo(404)
     }
 
     @Test
@@ -95,14 +96,6 @@ class CvLookupTest {
     }
 
     @Test
-    fun `jobbsøkerrettet skal ikke ha tilgang til cv`() {
-        val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
-        val (_, response) = gjørKall(token)
-
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
-    }
-
-    @Test
     fun `arbeidsgiverrettet skal ha tilgang til cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
@@ -117,6 +110,152 @@ class CvLookupTest {
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
+
+    @Test
+    fun `jobbsøkerrettet skal ha tilgang til cv dersom hen er kandidatens veileder`(wmRuntimeInfo: WireMockRuntimeInfo) {
+
+        val veiledersIdent = "A000001"
+        val veiledersOrgenhet = "1234"
+        val feilVeiledersOrgenhet = "0000"
+
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            get("/modia/api/decorator")
+                .willReturn(
+                    okJson(
+                        """
+                {
+                    "ident": "$veiledersIdent",
+                    "navn": "Tull Tullersen",
+                    "fornavn": "Tull",
+                    "etternavn": "Tullersen",
+                    "enheter": [
+                                {
+                                    "enhetId": "$veiledersOrgenhet",
+                                    "navn": "NAV Feil"
+                                }
+                            ]
+                }
+            """.trimIndent()
+                    )
+                )
+        )
+
+        val returMedRiktigVeilederFeilKontor = byttVeilederOgKontorForKandidatEsResponse(veiledersIdent, feilVeiledersOrgenhet)
+
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .willReturn(
+                    ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
+                )
+        )
+
+        val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `jobbsøkerrettet skal ha tilgang til cv dersom hen er tilknyttet kandidatens kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+
+        val veiledersIdent = "A000001"
+        val feilVeilederIdent = "X100000"
+        val veiledersOrgenhet = "0403"
+        val feilVeiledersOrgenhet = "0000"
+
+
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            get("/modia/api/decorator")
+                .willReturn(
+                    okJson(
+                        """
+                {
+                    "ident": "$veiledersIdent",
+                    "navn": "Tull Tullersen",
+                    "fornavn": "Tull",
+                    "etternavn": "Tullersen",
+                     "enheter": [
+                                {
+                                    "enhetId": "$veiledersOrgenhet",
+                                    "navn": "NAV Hamar"
+                                },
+                                      {
+                                    "enhetId": "1234",
+                                    "navn": "NAV ANNET KONTOR"
+                                }
+                            ]
+                }
+            """.trimIndent()
+                    )
+                )
+        )
+
+        val returMedRiktigVeilederFeilKontor = byttVeilederOgKontorForKandidatEsResponse(feilVeilederIdent, veiledersOrgenhet)
+
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .willReturn(
+                    ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
+                )
+        )
+
+        val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+
+    @Test
+    fun `jobbsøkerrettet skal ikke ha tilgang til cv dersom hen ikke er kandidatens veileder og ikke er tilknyttet kandidatens kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val veiledersIdent = "A000001"
+        val feilVeiledersIdent = "X100000"
+        val veiledersOrgenhet = "1234"
+        val feilVeiledersOrgenhet = "0000"
+
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            get("/modia/api/decorator")
+                .willReturn(
+                    okJson(
+                        """
+                {
+                    "ident": "$veiledersIdent",
+                    "navn": "Tull Tullersen",
+                    "fornavn": "Tull",
+                    "etternavn": "Tullersen",
+                    "enheter": [
+                                {
+                                    "enhetId": "$veiledersIdent",
+                                    "navn": "NAV HAMAR"
+                                }
+                            ]
+                }
+            """.trimIndent()
+                    )
+                )
+        )
+
+        val returMedRiktigVeilederFeilKontor = byttVeilederOgKontorForKandidatEsResponse(feilVeiledersIdent, feilVeiledersOrgenhet)
+
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .willReturn(
+                    ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
+                )
+        )
+
+        val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(401)
+    }
+
 
     @Test
     fun `utvikler skal ha tilgang til cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
@@ -140,6 +279,15 @@ class CvLookupTest {
         val (_, response) = gjørKall(token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    private fun byttVeilederOgKontorForKandidatEsResponse(veiledersIdent: String, kandidatensOrgnummer: String): String {
+        val mapper = jacksonObjectMapper()
+        val jsonNode = mapper.readTree(CvTestRespons.sourceCvLookup)
+        (jsonNode as ObjectNode).put("veileder", veiledersIdent)
+        jsonNode.put("orgenhet", kandidatensOrgnummer)
+        val returMedRiktigVeilederFeilKontor = mapper.writeValueAsString(jsonNode)
+        return returMedRiktigVeilederFeilKontor
     }
 
 

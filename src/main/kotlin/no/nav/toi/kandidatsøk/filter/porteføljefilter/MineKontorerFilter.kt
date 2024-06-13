@@ -14,7 +14,7 @@ internal class MineKontorerFilter(private val authenticatedUser: AuthenticatedUs
     Porteføljetype {
     override fun lagESFilterFunksjon(): FilterFunksjon = {
         val jwt = authenticatedUser?.jwt ?: throw UnauthorizedResponse()
-        val kontorer = modiaKlient.hentModiaEnheter(jwt)
+        val kontorer = modiaKlient.hentModiaEnheter(jwt).map { it.navn }
 
         if (kontorer.isEmpty()) throw UnauthorizedResponse()
 
