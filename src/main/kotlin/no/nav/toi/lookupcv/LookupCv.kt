@@ -36,8 +36,11 @@ fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: Modi
         val kandidat = result.hits().hits().firstOrNull()?.source()
         val fodselsnummer = kandidat?.get("fodselsnummer")?.asText() ?: throw NotFoundResponse()
 
+        val orgEnhetKandidat = kandidat.get("orgenhet")?.asText()
+        val veilederKandidat = kandidat.get("veileder")?.asText()
+
         if (Rolle.JOBBSØKER_RETTET in authenticatedUser.roller &&
-            !erEgenBrukerEllerKontorenesBruker(kandidat, modiaKlient, authenticatedUser, navIdent)) {
+            !erEgenBrukerEllerKontorenesBruker(orgEnhetKandidat, veilederKandidat, modiaKlient, authenticatedUser, navIdent)) {
             AuditLogg.loggOppslagCv(fodselsnummer, navIdent, false)
             throw UnauthorizedResponse()
         }
@@ -48,16 +51,15 @@ fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: Modi
 }
 
 private fun erEgenBrukerEllerKontorenesBruker(
-    kandidat: JsonNode,
+    orgEnhetForKandidat: String?,
+    veilederForKandidat: String?,
     modiaKlient: ModiaKlient,
     authenticatedUser: AuthenticatedUser,
     navIdent: String
 ): Boolean {
-    val orgEnhetKandidat = kandidat.get("orgenhet")?.asText()
-    val veilederKandidat = kandidat.get("veileder")?.asText()
     val kontorer = modiaKlient.hentModiaEnheter(authenticatedUser.jwt).map { it.enhetId }
 
-    return !(orgEnhetKandidat != null && veilederKandidat != null && veilederKandidat != navIdent && orgEnhetKandidat !in kontorer)
+    return !(orgEnhetForKandidat != null && veilederForKandidat != null && veilederForKandidat != navIdent && orgEnhetForKandidat !in kontorer)
 }
 
 
