@@ -39,7 +39,7 @@ fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: Modi
         val orgEnhetKandidat = kandidat.get("orgenhet")?.asText()
         val veilederKandidat = kandidat.get("veileder")?.asText()
 
-        if (Rolle.JOBBSØKER_RETTET in authenticatedUser.roller &&
+        if (Rolle.JOBBSØKER_RETTET in authenticatedUser.roller && Rolle.ARBEIDSGIVER_RETTET !in authenticatedUser.roller &&
             !erEgenBrukerEllerKontorenesBruker(orgEnhetKandidat, veilederKandidat, modiaKlient, authenticatedUser, navIdent)) {
             AuditLogg.loggOppslagCv(fodselsnummer, navIdent, false)
             throw UnauthorizedResponse()
