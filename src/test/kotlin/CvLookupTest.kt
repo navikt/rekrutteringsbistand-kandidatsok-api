@@ -256,6 +256,52 @@ class CvLookupTest {
         Assertions.assertThat(response.statusCode).isEqualTo(401)
     }
 
+    @Test
+    fun `jobbsøkerrettet skal ha tilgang til cv dersom hen ikke er kandidatens veileder og ikke er tilknyttet kandidatens kontor, men har også arbeidsgiverrettet rolle`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val veiledersIdent = "A000001"
+        val feilVeiledersIdent = "X100000"
+        val veiledersOrgenhet = "1234"
+        val feilVeiledersOrgenhet = "0000"
+
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            get("/modia/api/decorator")
+                .willReturn(
+                    okJson(
+                        """
+                {
+                    "ident": "$veiledersIdent",
+                    "navn": "Tull Tullersen",
+                    "fornavn": "Tull",
+                    "etternavn": "Tullersen",
+                    "enheter": [
+                                {
+                                    "enhetId": "$veiledersIdent",
+                                    "navn": "NAV HAMAR"
+                                }
+                            ]
+                }
+            """.trimIndent()
+                    )
+                )
+        )
+
+        val returMedRiktigVeilederFeilKontor = byttVeilederOgKontorForKandidatEsResponse(feilVeiledersIdent, feilVeiledersOrgenhet)
+
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .willReturn(
+                    ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
+                )
+        )
+
+        val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet, LokalApp.arbeidsgiverrettet))
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
 
     @Test
     fun `utvikler skal ha tilgang til cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
