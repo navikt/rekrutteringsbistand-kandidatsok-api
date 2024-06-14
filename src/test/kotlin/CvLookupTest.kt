@@ -322,6 +322,13 @@ class CvLookupTest {
     @Test
     fun `om man ikke har gruppetilhørighet skal man ikke få cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = app.lagToken(groups = emptyList())
+        wmRuntimeInfo.wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .willReturn(
+                    ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
+                )
+        )
         val (_, response) = gjørKall(token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(403)

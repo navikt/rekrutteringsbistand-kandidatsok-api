@@ -30,7 +30,6 @@ private data class RequestDto(
 fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
         val authenticatedUser = ctx.authenticatedUser()
-        authenticatedUser.verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER, Rolle.JOBBSØKER_RETTET)
 
         val navIdent = authenticatedUser.navIdent
         val result = openSearchClient.lookupCv(ctx.bodyAsClass<RequestDto>())
@@ -40,10 +39,16 @@ fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: Modi
         val orgEnhetKandidat = kandidat.get("orgenhet")?.asText()
         val veilederKandidat = kandidat.get("veileder")?.asText()
 
-        if (Rolle.JOBBSØKER_RETTET in authenticatedUser.roller && Rolle.ARBEIDSGIVER_RETTET !in authenticatedUser.roller &&
-            !erEgenBrukerEllerKontorenesBruker(orgEnhetKandidat, veilederKandidat, modiaKlient, authenticatedUser, navIdent)) {
+        try {
+            authenticatedUser.verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER, Rolle.JOBBSØKER_RETTET)
+
+            if (Rolle.JOBBSØKER_RETTET in authenticatedUser.roller && Rolle.ARBEIDSGIVER_RETTET !in authenticatedUser.roller &&
+                !erEgenBrukerEllerKontorenesBruker(orgEnhetKandidat, veilederKandidat, modiaKlient, authenticatedUser, navIdent)) {
+                throw ForbiddenResponse()
+            }
+        } catch (e: ForbiddenResponse) {
             AuditLogg.loggOppslagCv(fodselsnummer, navIdent, false)
-            throw ForbiddenResponse()
+            throw e
         }
 
         AuditLogg.loggOppslagCv(fodselsnummer, navIdent, true)
