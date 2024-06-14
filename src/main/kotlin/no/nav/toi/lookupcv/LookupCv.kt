@@ -42,7 +42,8 @@ fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: Modi
         try {
             authenticatedUser.verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER, Rolle.JOBBSØKER_RETTET)
 
-            if (Rolle.JOBBSØKER_RETTET in authenticatedUser.roller && Rolle.ARBEIDSGIVER_RETTET !in authenticatedUser.roller &&
+            if (Rolle.ARBEIDSGIVER_RETTET !in authenticatedUser.roller &&
+                Rolle.UTVIKLER !in authenticatedUser.roller &&
                 !erEgenBrukerEllerKontorenesBruker(orgEnhetKandidat, veilederKandidat, modiaKlient, authenticatedUser, navIdent)) {
                 throw ForbiddenResponse()
             }
