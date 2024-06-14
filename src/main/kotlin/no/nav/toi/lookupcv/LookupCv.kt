@@ -8,6 +8,7 @@ import io.javalin.http.UnauthorizedResponse
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.Enhet
 import no.nav.toi.kandidatsøk.ModiaKlient
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
@@ -64,7 +65,7 @@ private fun erEgenBrukerEllerKontorenesBruker(
     authenticatedUser: AuthenticatedUser,
     navIdent: String
 ): Boolean {
-    val kontorer = modiaKlient.hentModiaEnheter(authenticatedUser.jwt).map { it.enhetId }
+    val kontorer = modiaKlient.hentModiaEnheter(authenticatedUser.jwt).map(Enhet::enhetId)
 
     return !(orgEnhetForKandidat != null && veilederForKandidat != null && veilederForKandidat != navIdent && orgEnhetForKandidat !in kontorer)
 }
