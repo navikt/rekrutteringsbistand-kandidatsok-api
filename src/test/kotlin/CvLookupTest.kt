@@ -253,7 +253,7 @@ class CvLookupTest {
         val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
         val (_, response) = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
     }
 
     @Test

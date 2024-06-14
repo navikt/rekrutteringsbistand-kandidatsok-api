@@ -2,6 +2,7 @@ package no.nav.toi.lookupcv
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
+import io.javalin.http.ForbiddenResponse
 import io.javalin.http.NotFoundResponse
 import io.javalin.http.UnauthorizedResponse
 import io.javalin.http.bodyAsClass
@@ -42,7 +43,7 @@ fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: Modi
         if (Rolle.JOBBSØKER_RETTET in authenticatedUser.roller && Rolle.ARBEIDSGIVER_RETTET !in authenticatedUser.roller &&
             !erEgenBrukerEllerKontorenesBruker(orgEnhetKandidat, veilederKandidat, modiaKlient, authenticatedUser, navIdent)) {
             AuditLogg.loggOppslagCv(fodselsnummer, navIdent, false)
-            throw UnauthorizedResponse()
+            throw ForbiddenResponse()
         }
 
         AuditLogg.loggOppslagCv(fodselsnummer, navIdent, true)
