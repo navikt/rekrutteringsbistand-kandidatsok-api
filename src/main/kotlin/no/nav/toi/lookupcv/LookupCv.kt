@@ -2,9 +2,12 @@ package no.nav.toi.lookupcv
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
+import io.javalin.http.ForbiddenResponse
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.Enhet
+import no.nav.toi.kandidatsøk.ModiaKlient
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
 
@@ -23,19 +26,60 @@ private data class RequestDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient) {
+fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
-        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
+        val authenticatedUser = ctx.authenticatedUser()
 
-        val request = ctx.bodyAsClass<RequestDto>()
-        val result = openSearchClient.lookupCv(request)
-        val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
+        val navIdent = authenticatedUser.navIdent
+        val result = openSearchClient.lookupCv(ctx.bodyAsClass<RequestDto>())
+        val kandidat = result.hits().hits().firstOrNull()?.source()
+        val fodselsnummer = kandidat?.get("fodselsnummer")?.asText()
         if (fodselsnummer != null) {
-            AuditLogg.loggOppslagCv(fodselsnummer, ctx.authenticatedUser().navIdent)
+            val orgEnhetKandidat = kandidat.get("orgenhet")?.asText()
+            val veilederKandidat = kandidat.get("veileder")?.asText()
+
+            try {
+                authenticatedUser.verifiserAutorisasjon(
+                    Rolle.ARBEIDSGIVER_RETTET,
+                    Rolle.UTVIKLER,
+                    Rolle.JOBBSØKER_RETTET
+                )
+
+                if (Rolle.ARBEIDSGIVER_RETTET !in authenticatedUser.roller &&
+                    Rolle.UTVIKLER !in authenticatedUser.roller &&
+                    !erEgenBrukerEllerKontorenesBruker(
+                        orgEnhetKandidat,
+                        veilederKandidat,
+                        modiaKlient,
+                        authenticatedUser,
+                        navIdent
+                    )
+                ) {
+                    throw ForbiddenResponse()
+                }
+            } catch (e: ForbiddenResponse) {
+                AuditLogg.loggOppslagCv(fodselsnummer, navIdent, false)
+                throw e
+            }
+
+            AuditLogg.loggOppslagCv(fodselsnummer, navIdent, true)
         }
         ctx.json(result.toResponseJson())
     }
 }
+
+private fun erEgenBrukerEllerKontorenesBruker(
+    orgEnhetForKandidat: String?,
+    veilederForKandidat: String?,
+    modiaKlient: ModiaKlient,
+    authenticatedUser: AuthenticatedUser,
+    navIdent: String
+): Boolean {
+    val kontorer = modiaKlient.hentModiaEnheter(authenticatedUser.jwt).map(Enhet::enhetId)
+
+    return !(orgEnhetForKandidat != null && veilederForKandidat != null && veilederForKandidat != navIdent && orgEnhetForKandidat !in kontorer)
+}
+
 
 private fun OpenSearchClient.lookupCv(params: RequestDto): SearchResponse<JsonNode> =
     search<JsonNode> {

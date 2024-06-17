@@ -12,8 +12,13 @@ object AuditLogg {
     private val secureLog = LoggerFactory.getLogger("secureLog")!!
     private val auditLogger: AuditLogger = AuditLoggerImpl()
 
-    fun loggOppslagCv(userid: String, navIdent: String) {
-        logCefMessage(navIdent = navIdent, userid = userid, msg = "NAV-ansatt har åpnet CV'en til bruker")
+    fun loggOppslagCv(userid: String, navIdent: String, permit: Boolean) {
+        logCefMessage(
+            navIdent = navIdent,
+            userid = userid,
+            msg = "NAV-ansatt har åpnet CV'en til bruker",
+            authorizationDecision = if (permit) AuthorizationDecision.PERMIT else AuthorizationDecision.DENY
+        )
     }
 
     fun loggOppslagKandidatsammendrag(userid: String, navIdent: String) {
