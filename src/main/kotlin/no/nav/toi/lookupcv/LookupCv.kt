@@ -3,8 +3,6 @@ package no.nav.toi.lookupcv
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
 import io.javalin.http.ForbiddenResponse
-import io.javalin.http.NotFoundResponse
-import io.javalin.http.UnauthorizedResponse
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
@@ -35,25 +33,37 @@ fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: Modi
         val navIdent = authenticatedUser.navIdent
         val result = openSearchClient.lookupCv(ctx.bodyAsClass<RequestDto>())
         val kandidat = result.hits().hits().firstOrNull()?.source()
-        val fodselsnummer = kandidat?.get("fodselsnummer")?.asText() ?: throw NotFoundResponse()
+        val fodselsnummer = kandidat?.get("fodselsnummer")?.asText()
+        if (fodselsnummer != null) {
+            val orgEnhetKandidat = kandidat.get("orgenhet")?.asText()
+            val veilederKandidat = kandidat.get("veileder")?.asText()
 
-        val orgEnhetKandidat = kandidat.get("orgenhet")?.asText()
-        val veilederKandidat = kandidat.get("veileder")?.asText()
+            try {
+                authenticatedUser.verifiserAutorisasjon(
+                    Rolle.ARBEIDSGIVER_RETTET,
+                    Rolle.UTVIKLER,
+                    Rolle.JOBBSØKER_RETTET
+                )
 
-        try {
-            authenticatedUser.verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER, Rolle.JOBBSØKER_RETTET)
-
-            if (Rolle.ARBEIDSGIVER_RETTET !in authenticatedUser.roller &&
-                Rolle.UTVIKLER !in authenticatedUser.roller &&
-                !erEgenBrukerEllerKontorenesBruker(orgEnhetKandidat, veilederKandidat, modiaKlient, authenticatedUser, navIdent)) {
-                throw ForbiddenResponse()
+                if (Rolle.ARBEIDSGIVER_RETTET !in authenticatedUser.roller &&
+                    Rolle.UTVIKLER !in authenticatedUser.roller &&
+                    !erEgenBrukerEllerKontorenesBruker(
+                        orgEnhetKandidat,
+                        veilederKandidat,
+                        modiaKlient,
+                        authenticatedUser,
+                        navIdent
+                    )
+                ) {
+                    throw ForbiddenResponse()
+                }
+            } catch (e: ForbiddenResponse) {
+                AuditLogg.loggOppslagCv(fodselsnummer, navIdent, false)
+                throw e
             }
-        } catch (e: ForbiddenResponse) {
-            AuditLogg.loggOppslagCv(fodselsnummer, navIdent, false)
-            throw e
-        }
 
-        AuditLogg.loggOppslagCv(fodselsnummer, navIdent, true)
+            AuditLogg.loggOppslagCv(fodselsnummer, navIdent, true)
+        }
         ctx.json(result.toResponseJson())
     }
 }

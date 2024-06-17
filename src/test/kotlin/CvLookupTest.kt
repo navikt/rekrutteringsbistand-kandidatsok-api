@@ -66,7 +66,14 @@ class CvLookupTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(404)
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree("""
+        {
+          "hits": {
+            "hits": []
+          }
+        }
+    """.trimIndent()))
     }
 
     @Test
