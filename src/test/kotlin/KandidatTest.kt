@@ -294,7 +294,6 @@ class KandidatTest {
     }
 
     @Test
-    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
     fun `modia generell skal ikke ha tilgang til navn`() {
         val token = lagToken(groups = listOf(modiaGenerell))
         val (_, response) = gjørKallNavn("123", token)
@@ -344,7 +343,6 @@ class KandidatTest {
     }
 
     @Test
-    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
     fun `modia generell skal ikke ha tilgang til kandidatnummer`() {
         val token = lagToken(groups = listOf(modiaGenerell))
         val (_, response) = gjørKallKandidatnummer("123", token)
@@ -401,7 +399,6 @@ class KandidatTest {
             )
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
-            modiaGenerell = UUID.fromString(modiaGenerell),
             jobbsøkerrettet = UUID.fromString(jobbsøkerrettet),
             arbeidsgiverrettet = UUID.fromString(arbeidsgiverrettet),
             utvikler = UUID.fromString(utvikler),

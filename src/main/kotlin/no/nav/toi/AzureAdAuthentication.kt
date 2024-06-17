@@ -29,7 +29,6 @@ class AuthenticatedUser(
     val jwt: String
 ) {
     fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle) {
-        if (Rolle.MODIA_GENERELL in roller) return  // TODO Midlertidig tilgang
         if(roller.none { it in gyldigeRoller }) {
             throw ForbiddenResponse()
         }

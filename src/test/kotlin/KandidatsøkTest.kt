@@ -201,11 +201,11 @@ class KandidatsøkTest {
     fun endepunktSomParameter() = Endepunkt.entries.stream()
 
     fun tilgangParametre()= Stream.of(
-        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.Alle, 200),  // TODO: Har midlertidig tilgang
-        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.MineBrukere, 200),  // TODO: Har midlertidig tilgang
-        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.ValgteKontorer, 200),  // TODO: Har midlertidig tilgang
-        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.MineKontorer, 200),  // TODO: Har midlertidig tilgang
-        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.MittKontor, 200),  // TODO: Har midlertidig tilgang
+        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.Alle, 403),
+        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.MineBrukere, 403),
+        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.ValgteKontorer, 403),
+        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.MineKontorer, 403),
+        Arguments.of(Tilgang.ModiaGenerell, Endepunkt.MittKontor, 403),
         Arguments.of(Tilgang.Jobbsøkerrettet, Endepunkt.Alle, 403),
         Arguments.of(Tilgang.Jobbsøkerrettet, Endepunkt.MineBrukere, 200),
         Arguments.of(Tilgang.Jobbsøkerrettet, Endepunkt.ValgteKontorer, 403),
@@ -921,7 +921,6 @@ class KandidatsøkTest {
             )
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
-            modiaGenerell = UUID.fromString(modiaGenerell),
             jobbsøkerrettet = UUID.fromString(jobbsøkerrettet),
             arbeidsgiverrettet = UUID.fromString(arbeidsgiverrettet),
             utvikler = UUID.fromString(utvikler)

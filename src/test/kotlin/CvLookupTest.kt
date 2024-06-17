@@ -94,9 +94,15 @@ class CvLookupTest {
     }
 
     @Test
-    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
-    fun `modia generell skal ikke ha tilgang til cv`() {
+    fun `modia generell skal ikke ha tilgang til cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
+        wmRuntimeInfo.wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .willReturn(
+                    ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
+                )
+        )
         val (_, response, _) = gjørKall(token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(403)

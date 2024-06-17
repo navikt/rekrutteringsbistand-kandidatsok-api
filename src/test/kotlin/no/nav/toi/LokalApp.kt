@@ -32,7 +32,7 @@ class LokalApp {
         issuerId: String = "http://localhost:$authPort/default",
         aud: String = "1",
         navIdent: String = "A000001",
-        groups: List<String> = listOf(modiaGenerell),
+        groups: List<String> = listOf(arbeidsgiverrettet),
         claims: Map<String, Any> = mapOf("NAVident" to navIdent, "groups" to groups),
         expiry: Long = 3600
     ) = authServer.issueToken(
@@ -54,7 +54,6 @@ private fun lagLokalApp() = App(
         )
     ),
     rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
-        modiaGenerell = UUID.fromString(LokalApp.modiaGenerell),
         jobbsøkerrettet = UUID.fromString(LokalApp.jobbsøkerrettet),
         arbeidsgiverrettet = UUID.fromString(LokalApp.arbeidsgiverrettet),
         utvikler = UUID.fromString(LokalApp.utvikler)

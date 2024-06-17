@@ -150,7 +150,6 @@ class SuggestTest {
     }
 
     @Test
-    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
     fun `modia generell skal ikke ha tilgang`() {
         val token = lagToken(groups = listOf(modiaGenerell))
         val (_, response, _) = gjørKall(token)
@@ -203,7 +202,6 @@ class SuggestTest {
         )
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
-            modiaGenerell = UUID.fromString(modiaGenerell),
             jobbsøkerrettet = UUID.fromString(jobbsøkerrettet),
             arbeidsgiverrettet = UUID.fromString(arbeidsgiverrettet),
             utvikler = UUID.fromString(utvikler)
