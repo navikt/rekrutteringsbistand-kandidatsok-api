@@ -26,17 +26,18 @@ private data class RequestDto(
 )
 fun Javalin.handleKandidatSammendrag(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
+        val authenticatedUser = ctx.authenticatedUser()
 
-        val request = ctx.bodyAsClass<RequestDto>()
-        val result = openSearchClient.lookupKandidatsammendrag(request)
+        val navIdent = authenticatedUser.navIdent
+        val result = openSearchClient.lookupKandidatsammendrag(ctx.bodyAsClass<RequestDto>())
         val kandidat = result.hits().hits().firstOrNull()?.source()
         val fodselsnummer = kandidat?.get("fodselsnummer")?.asText()
         val orgEnhet = kandidat?.get("orgenhet")?.asText()
-        val veileder = kandidat?.get("veileder")?.asText()
+        val veileder = kandidat?.get("veilederIdent")?.asText()
 
-        ctx.authenticatedUser().verifiserTilgangTilBruker(orgEnhet, veileder, modiaKlient) { permit ->
+        authenticatedUser.verifiserTilgangTilBruker(orgEnhet, veileder, modiaKlient) { permit ->
             if (fodselsnummer != null) {
-                AuditLogg.loggOppslagKandidatsammendrag(fodselsnummer, ctx.authenticatedUser().navIdent, permit)
+                AuditLogg.loggOppslagKandidatsammendrag(fodselsnummer, navIdent, permit)
             }
         }
         ctx.json(result.toResponseJson())

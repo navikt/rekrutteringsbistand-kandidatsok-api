@@ -2,11 +2,9 @@ package no.nav.toi.lookupcv
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
-import io.javalin.http.ForbiddenResponse
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
-import no.nav.toi.kandidatsøk.Enhet
 import no.nav.toi.kandidatsøk.ModiaKlient
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
@@ -35,12 +33,9 @@ fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: Modi
         val kandidat = result.hits().hits().firstOrNull()?.source()
         val fodselsnummer = kandidat?.get("fodselsnummer")?.asText()
         val orgEnhet = kandidat?.get("orgenhet")?.asText()
-        val veileder = kandidat?.get("veileder")?.asText()
-        authenticatedUser.verifiserTilgangTilBruker(
-            orgEnhet,
-            veileder,
-            modiaKlient
-        ) { permit ->
+        val veileder = kandidat?.get("veilederIdent")?.asText()
+
+        authenticatedUser.verifiserTilgangTilBruker(orgEnhet, veileder, modiaKlient) { permit ->
             if (fodselsnummer != null) {
                 AuditLogg.loggOppslagCv(fodselsnummer, navIdent, permit)
             }

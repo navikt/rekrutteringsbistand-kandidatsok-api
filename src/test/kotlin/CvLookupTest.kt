@@ -395,8 +395,8 @@ class CvLookupTest {
     private fun byttVeilederOgKontorForKandidatEsResponse(veiledersIdent: String?, kandidatensOrgnummer: String?): String {
         val mapper = jacksonObjectMapper()
         val jsonNode = mapper.readTree(CvTestRespons.sourceCvLookup)
-        if(veiledersIdent == null) (jsonNode as ObjectNode).putNull("veileder")
-        else (jsonNode as ObjectNode).put("veileder",veiledersIdent)
+        if(veiledersIdent == null) (jsonNode as ObjectNode).putNull("veilederIdent")
+        else (jsonNode as ObjectNode).put("veilederIdent",veiledersIdent)
         if(kandidatensOrgnummer == null) (jsonNode as ObjectNode).putNull("orgenhet")
         else jsonNode.put("orgenhet", kandidatensOrgnummer)
         val returMedRiktigVeilederFeilKontor = mapper.writeValueAsString(jsonNode)
