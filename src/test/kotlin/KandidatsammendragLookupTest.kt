@@ -60,7 +60,8 @@ class KandidatsammendragLookupTest {
                           "telefon",
                           "veilederIdent",
                           "veilederVisningsnavn",
-                          "veilederEpost"
+                          "veilederEpost",
+                          "orgenhet"
                         ]
                       },
                       "query": {
@@ -106,21 +107,32 @@ class KandidatsammendragLookupTest {
     }
 
     @Test
-    fun `modia generell skal ikke ha tilgang til kandidatsammendrag`() {
+    fun `modia generell skal ikke ha tilgang til kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
+        mockKandidatSammendrag(wmRuntimeInfo.wireMock)
         val (_, response, _) = gjørKall(token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(403)
     }
 
     @Test
-    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) { // TODO: Skal ha kun tilgang til egne
+    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag om egen bruker`(wmRuntimeInfo: WireMockRuntimeInfo) { // TODO: Skal ha kun tilgang til egne
         val wireMock = wmRuntimeInfo.wireMock
         mockKandidatSammendrag(wireMock)
-        val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
+        val token = app.lagToken(navIdent = "A100000", groups = listOf(LokalApp.jobbsøkerrettet))
         val (_, response) = gjørKall(token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `jobbsøkerrettet skal ikke ha tilgang til kandidatsammendrag om ikke egen bruker`(wmRuntimeInfo: WireMockRuntimeInfo) { // TODO: Skal ha kun tilgang til egne
+        val wireMock = wmRuntimeInfo.wireMock
+        mockKandidatSammendrag(wireMock)
+        val token = app.lagToken(navIdent = "ikke_veileder", groups = listOf(LokalApp.jobbsøkerrettet))
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
     }
 
     @Test
@@ -146,6 +158,7 @@ class KandidatsammendragLookupTest {
     @Test
     fun `om man ikke har gruppetilhørighet skal man ikke få kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = app.lagToken(groups = emptyList())
+        mockKandidatSammendrag(wmRuntimeInfo.wireMock)
         val (_, response) = gjørKall(token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(403)
@@ -177,7 +190,8 @@ class KandidatsammendragLookupTest {
                               "telefon",
                               "veilederIdent",
                               "veilederVisningsnavn",
-                              "veilederEpost"
+                              "veilederEpost",
+                              "orgenhet"
                             ]
                           },
                           "query": {

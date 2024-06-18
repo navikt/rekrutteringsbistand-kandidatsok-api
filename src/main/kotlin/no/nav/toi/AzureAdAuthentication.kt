@@ -12,6 +12,8 @@ import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.RSAKeyProvider
 import io.javalin.Javalin
 import io.javalin.http.*
+import no.nav.toi.kandidatsøk.Enhet
+import no.nav.toi.kandidatsøk.ModiaKlient
 import org.eclipse.jetty.http.HttpHeader
 import java.net.URI
 import java.security.interfaces.RSAPublicKey
@@ -19,6 +21,8 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 private const val navIdentClaim = "NAVident"
+
+typealias AuditLogMedPermit = (Boolean) -> Unit
 
 /**
  * Representerer en autensiert bruker
@@ -32,6 +36,43 @@ class AuthenticatedUser(
         if(roller.none { it in gyldigeRoller }) {
             throw ForbiddenResponse()
         }
+    }
+
+    fun verifiserTilgangTilBruker(orgEnhetKandidat: String?, veilederKandidat: String?, modiaKlient: ModiaKlient, auditLogFunksjon: AuditLogMedPermit) {
+        try {
+            verifiserAutorisasjon(
+                Rolle.ARBEIDSGIVER_RETTET,
+                Rolle.UTVIKLER,
+                Rolle.JOBBSØKER_RETTET
+            )
+
+            if (Rolle.ARBEIDSGIVER_RETTET !in roller &&
+                Rolle.UTVIKLER !in roller &&
+                !erEgenBrukerEllerKontorenesBruker(
+                    orgEnhetKandidat,
+                    veilederKandidat,
+                    modiaKlient,
+                    navIdent
+                )
+            ) {
+                throw ForbiddenResponse()
+            }
+        } catch (e: ForbiddenResponse) {
+            auditLogFunksjon(false)
+            throw e
+        }
+        auditLogFunksjon(true)
+    }
+
+    private fun erEgenBrukerEllerKontorenesBruker(
+        orgEnhetForKandidat: String?,
+        veilederForKandidat: String?,
+        modiaKlient: ModiaKlient,
+        navIdent: String
+    ): Boolean {
+        val kontorer = modiaKlient.hentModiaEnheter(jwt).map(Enhet::enhetId)
+        return if (orgEnhetForKandidat == null || veilederForKandidat == null) false
+        else veilederForKandidat == navIdent || orgEnhetForKandidat in kontorer
     }
 
     companion object {

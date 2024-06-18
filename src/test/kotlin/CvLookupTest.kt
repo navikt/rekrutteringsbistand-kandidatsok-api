@@ -12,7 +12,6 @@ import no.nav.toi.LokalApp
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
@@ -168,6 +167,52 @@ class CvLookupTest {
         val (_, response) = gjørKall(token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `jobbsøkerrettet skal ikke ha tilgang til cv dersom kandidaten ikke har veileder`(wmRuntimeInfo: WireMockRuntimeInfo) {
+
+        val veiledersIdent = "A000001"
+        val veiledersOrgenhet = "1234"
+        val feilVeiledersOrgenhet = "0000"
+
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            get("/modia/api/decorator")
+                .willReturn(
+                    okJson(
+                        """
+                {
+                    "ident": "$veiledersIdent",
+                    "navn": "Tull Tullersen",
+                    "fornavn": "Tull",
+                    "etternavn": "Tullersen",
+                    "enheter": [
+                                {
+                                    "enhetId": "$veiledersOrgenhet",
+                                    "navn": "NAV Feil"
+                                }
+                            ]
+                }
+            """.trimIndent()
+                    )
+                )
+        )
+
+        val returUtenVeilederEllerKontor = byttVeilederOgKontorForKandidatEsResponse(null, null)
+
+        wireMock.register(
+            post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .willReturn(
+                    ok(CvTestRespons.responseOpenSearch(returUtenVeilederEllerKontor))
+                )
+        )
+
+        val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(403)
     }
 
     @Test
@@ -347,11 +392,13 @@ class CvLookupTest {
         Assertions.assertThat(response.statusCode).isEqualTo(403)
     }
 
-    private fun byttVeilederOgKontorForKandidatEsResponse(veiledersIdent: String, kandidatensOrgnummer: String): String {
+    private fun byttVeilederOgKontorForKandidatEsResponse(veiledersIdent: String?, kandidatensOrgnummer: String?): String {
         val mapper = jacksonObjectMapper()
         val jsonNode = mapper.readTree(CvTestRespons.sourceCvLookup)
-        (jsonNode as ObjectNode).put("veileder", veiledersIdent)
-        jsonNode.put("orgenhet", kandidatensOrgnummer)
+        if(veiledersIdent == null) (jsonNode as ObjectNode).putNull("veileder")
+        else (jsonNode as ObjectNode).put("veileder",veiledersIdent)
+        if(kandidatensOrgnummer == null) (jsonNode as ObjectNode).putNull("orgenhet")
+        else jsonNode.put("orgenhet", kandidatensOrgnummer)
         val returMedRiktigVeilederFeilKontor = mapper.writeValueAsString(jsonNode)
         return returMedRiktigVeilederFeilKontor
     }

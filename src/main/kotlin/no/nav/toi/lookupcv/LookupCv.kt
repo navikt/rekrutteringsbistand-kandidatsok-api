@@ -34,50 +34,19 @@ fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: Modi
         val result = openSearchClient.lookupCv(ctx.bodyAsClass<RequestDto>())
         val kandidat = result.hits().hits().firstOrNull()?.source()
         val fodselsnummer = kandidat?.get("fodselsnummer")?.asText()
-        if (fodselsnummer != null) {
-            val orgEnhetKandidat = kandidat.get("orgenhet")?.asText()
-            val veilederKandidat = kandidat.get("veileder")?.asText()
-
-            try {
-                authenticatedUser.verifiserAutorisasjon(
-                    Rolle.ARBEIDSGIVER_RETTET,
-                    Rolle.UTVIKLER,
-                    Rolle.JOBBSØKER_RETTET
-                )
-
-                if (Rolle.ARBEIDSGIVER_RETTET !in authenticatedUser.roller &&
-                    Rolle.UTVIKLER !in authenticatedUser.roller &&
-                    !erEgenBrukerEllerKontorenesBruker(
-                        orgEnhetKandidat,
-                        veilederKandidat,
-                        modiaKlient,
-                        authenticatedUser,
-                        navIdent
-                    )
-                ) {
-                    throw ForbiddenResponse()
-                }
-            } catch (e: ForbiddenResponse) {
-                AuditLogg.loggOppslagCv(fodselsnummer, navIdent, false)
-                throw e
+        val orgEnhet = kandidat?.get("orgenhet")?.asText()
+        val veileder = kandidat?.get("veileder")?.asText()
+        authenticatedUser.verifiserTilgangTilBruker(
+            orgEnhet,
+            veileder,
+            modiaKlient
+        ) { permit ->
+            if (fodselsnummer != null) {
+                AuditLogg.loggOppslagCv(fodselsnummer, navIdent, permit)
             }
-
-            AuditLogg.loggOppslagCv(fodselsnummer, navIdent, true)
         }
         ctx.json(result.toResponseJson())
     }
-}
-
-private fun erEgenBrukerEllerKontorenesBruker(
-    orgEnhetForKandidat: String?,
-    veilederForKandidat: String?,
-    modiaKlient: ModiaKlient,
-    authenticatedUser: AuthenticatedUser,
-    navIdent: String
-): Boolean {
-    val kontorer = modiaKlient.hentModiaEnheter(authenticatedUser.jwt).map(Enhet::enhetId)
-
-    return !(orgEnhetForKandidat != null && veilederForKandidat != null && veilederForKandidat != navIdent && orgEnhetForKandidat !in kontorer)
 }
 
 

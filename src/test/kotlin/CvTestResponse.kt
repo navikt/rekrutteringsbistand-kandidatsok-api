@@ -580,7 +580,8 @@ object CvTestRespons {
                     ],
                     "veilederIdent": "A100000",
                     "fodselsnummer": "04928797045",
-                    "veilederEpost": "a@a.no"
+                    "veilederEpost": "a@a.no",
+                    "orgenhet": "1234"
                 }
         """.trimIndent()
 
