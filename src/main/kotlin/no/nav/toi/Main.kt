@@ -86,7 +86,7 @@ class App(
         javalin.handleHealth()
         javalin.handleMe()
         javalin.handleLookupCv(openSearchClient, modiaClient)
-        javalin.handleKandidatSammendrag(openSearchClient)
+        javalin.handleKandidatSammendrag(openSearchClient, modiaClient)
         javalin.handleKompetanseforslag(openSearchClient)
         javalin.handleLookupKandidatStillingssøk(openSearchClient)
         javalin.handleKandidatSøk(openSearchClient, modiaClient)

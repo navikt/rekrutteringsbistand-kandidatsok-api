@@ -21,11 +21,12 @@ object AuditLogg {
         )
     }
 
-    fun loggOppslagKandidatsammendrag(userid: String, navIdent: String) {
+    fun loggOppslagKandidatsammendrag(userid: String, navIdent: String, permit: Boolean) {
         logCefMessage(
             navIdent = navIdent,
             userid = userid,
-            msg = "NAV-ansatt har sett kontaktinformasjon og informasjon om veileder fra brukers CV"
+            msg = "NAV-ansatt har sett kontaktinformasjon og informasjon om veileder fra brukers CV",
+            authorizationDecision = if (permit) AuthorizationDecision.PERMIT else AuthorizationDecision.DENY
         )
     }
 

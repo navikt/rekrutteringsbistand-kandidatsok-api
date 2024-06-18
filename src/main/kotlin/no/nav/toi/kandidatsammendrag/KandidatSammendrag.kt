@@ -5,6 +5,7 @@ import io.javalin.Javalin
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.ModiaKlient
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
 
@@ -23,15 +24,21 @@ private data class RequestDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKandidatSammendrag(openSearchClient: OpenSearchClient) {
+fun Javalin.handleKandidatSammendrag(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
-        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
+        val authenticatedUser = ctx.authenticatedUser()
 
-        val request = ctx.bodyAsClass<RequestDto>()
-        val result = openSearchClient.lookupKandidatsammendrag(request)
-        val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
-        if (fodselsnummer != null) {
-            AuditLogg.loggOppslagKandidatsammendrag(fodselsnummer, ctx.authenticatedUser().navIdent)
+        val navIdent = authenticatedUser.navIdent
+        val result = openSearchClient.lookupKandidatsammendrag(ctx.bodyAsClass<RequestDto>())
+        val kandidat = result.hits().hits().firstOrNull()?.source()
+        val fodselsnummer = kandidat?.get("fodselsnummer")?.asText()
+        val orgEnhet = kandidat?.get("orgenhet")?.asText()
+        val veileder = kandidat?.get("veilederIdent")?.asText()
+
+        authenticatedUser.verifiserTilgangTilBruker(orgEnhet, veileder, modiaKlient) { permit ->
+            if (fodselsnummer != null) {
+                AuditLogg.loggOppslagKandidatsammendrag(fodselsnummer, navIdent, permit)
+            }
         }
         ctx.json(result.toResponseJson())
     }
@@ -48,7 +55,7 @@ private fun OpenSearchClient.lookupKandidatsammendrag(params: RequestDto): Searc
                 "fornavn", "etternavn", "arenaKandidatnr", "fodselsdato",
                 "fodselsnummer", "adresselinje1", "postnummer", "poststed",
                 "epostadresse", "telefon", "veilederIdent", "veilederVisningsnavn",
-                "veilederEpost"
+                "veilederEpost", "orgenhet"
             )
         }
         size(1)
