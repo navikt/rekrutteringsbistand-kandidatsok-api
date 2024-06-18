@@ -537,7 +537,7 @@ object CvTestRespons {
         }
     """.trimIndent()
 
-    val sourceKandidatsammendragLookup =
+    fun sourceKandidatsammendragLookup(veileder: String? = "A100000") =
         """
             {
                     "yrkeJobbonskerObj": [
@@ -565,7 +565,7 @@ object CvTestRespons {
                     "fornavn": "Redd",
                     "poststed": "Sarpsborg",
                     "kommunenummerstring": "3003",
-                    "veileder": "A100000",
+                    "veileder":${if (veileder == null) null else """"$veileder""""},
                     "fodselsdato": "1987-12-04",
                     "etternavn": "Lukt",
                     "epostadresse": "b@b.no",
@@ -578,7 +578,7 @@ object CvTestRespons {
                             "geografiKode": "NO"
                         }
                     ],
-                    "veilederIdent": "A100000",
+                    "veilederIdent": ${if (veileder == null) null else """"$veileder""""},
                     "fodselsnummer": "04928797045",
                     "veilederEpost": "a@a.no",
                     "orgenhet": "1234"
@@ -622,7 +622,7 @@ object CvTestRespons {
           "hits": {
             "hits": [
               {
-                "_source": $sourceKandidatsammendragLookup
+                "_source": ${sourceKandidatsammendragLookup()}
               }
             ]
           }

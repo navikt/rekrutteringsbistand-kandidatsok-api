@@ -136,6 +136,74 @@ class KandidatsammendragLookupTest {
     }
 
     @Test
+    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag om eget kontor`(wmRuntimeInfo: WireMockRuntimeInfo) { // TODO: Skal ha kun tilgang til egne
+        val veiledersIdent = "A100000"
+        val veiledersOrgenhet = "1234"
+
+        val wireMock = wmRuntimeInfo.wireMock
+        mockKandidatSammendrag(wireMock, "A100001")
+        wireMock.register(
+            get("/modia/api/decorator")
+                .willReturn(
+                    okJson(
+                        """
+                {
+                    "ident": "$veiledersIdent",
+                    "navn": "Tull Tullersen",
+                    "fornavn": "Tull",
+                    "etternavn": "Tullersen",
+                     "enheter": [
+                                {
+                                    "enhetId": "$veiledersOrgenhet",
+                                    "navn": "NAV Hamar"
+                                }
+                            ]
+                }
+            """.trimIndent()
+                    )
+                )
+        )
+        val token = app.lagToken(navIdent = "A100001", groups = listOf(LokalApp.jobbsøkerrettet))
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag om eget kontor og om bruker ikke har veileder`(wmRuntimeInfo: WireMockRuntimeInfo) { // TODO: Skal ha kun tilgang til egne
+        val veiledersIdent = "A100000"
+        val veiledersOrgenhet = "1234"
+
+        val wireMock = wmRuntimeInfo.wireMock
+        mockKandidatSammendrag(wireMock, null)
+        wireMock.register(
+            get("/modia/api/decorator")
+                .willReturn(
+                    okJson(
+                        """
+                {
+                    "ident": "$veiledersIdent",
+                    "navn": "Tull Tullersen",
+                    "fornavn": "Tull",
+                    "etternavn": "Tullersen",
+                     "enheter": [
+                                {
+                                    "enhetId": "$veiledersOrgenhet",
+                                    "navn": "NAV Hamar"
+                                }
+                            ]
+                }
+            """.trimIndent()
+                    )
+                )
+        )
+        val token = app.lagToken(navIdent = "A100001", groups = listOf(LokalApp.jobbsøkerrettet))
+        val (_, response) = gjørKall(token)
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
     fun `arbeidsgiverrettet skal ha tilgang til kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockKandidatSammendrag(wireMock)
@@ -169,7 +237,7 @@ class KandidatsammendragLookupTest {
         .header("Authorization", "Bearer ${token.serialize()}")
         .responseObject<JsonNode>()
 
-    private fun mockKandidatSammendrag(wireMock: WireMock) {
+    private fun mockKandidatSammendrag(wireMock: WireMock, veileder: String? = "A100000") {
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(
@@ -207,7 +275,7 @@ class KandidatsammendragLookupTest {
                     )
                 )
                 .willReturn(
-                    ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceKandidatsammendragLookup))
+                    ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceKandidatsammendragLookup(veileder)))
                 )
         )
     }
