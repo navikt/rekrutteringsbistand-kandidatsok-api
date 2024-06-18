@@ -116,7 +116,7 @@ class KandidatsammendragLookupTest {
     }
 
     @Test
-    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag om egen bruker`(wmRuntimeInfo: WireMockRuntimeInfo) { // TODO: Skal ha kun tilgang til egne
+    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag om egen bruker`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockKandidatSammendrag(wireMock)
         val token = app.lagToken(navIdent = "A100000", groups = listOf(LokalApp.jobbsøkerrettet))
@@ -126,7 +126,7 @@ class KandidatsammendragLookupTest {
     }
 
     @Test
-    fun `jobbsøkerrettet skal ikke ha tilgang til kandidatsammendrag om ikke egen bruker`(wmRuntimeInfo: WireMockRuntimeInfo) { // TODO: Skal ha kun tilgang til egne
+    fun `jobbsøkerrettet skal ikke ha tilgang til kandidatsammendrag om ikke egen bruker`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockKandidatSammendrag(wireMock)
         val token = app.lagToken(navIdent = "ikke_veileder", groups = listOf(LokalApp.jobbsøkerrettet))
@@ -136,7 +136,7 @@ class KandidatsammendragLookupTest {
     }
 
     @Test
-    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag om eget kontor`(wmRuntimeInfo: WireMockRuntimeInfo) { // TODO: Skal ha kun tilgang til egne
+    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag om eget kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val veiledersIdent = "A100000"
         val veiledersOrgenhet = "1234"
 
@@ -170,7 +170,7 @@ class KandidatsammendragLookupTest {
     }
 
     @Test
-    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag om eget kontor og om bruker ikke har veileder`(wmRuntimeInfo: WireMockRuntimeInfo) { // TODO: Skal ha kun tilgang til egne
+    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag om eget kontor og om bruker ikke har veileder`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val veiledersIdent = "A100000"
         val veiledersOrgenhet = "1234"
 

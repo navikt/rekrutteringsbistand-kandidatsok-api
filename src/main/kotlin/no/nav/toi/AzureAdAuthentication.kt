@@ -72,7 +72,7 @@ class AuthenticatedUser(
     ): Boolean {
         val kontorer = modiaKlient.hentModiaEnheter(jwt).map(Enhet::enhetId)
         return if (orgEnhetForKandidat == null || veilederForKandidat == null) false
-        else veilederForKandidat == navIdent || orgEnhetForKandidat in kontorer
+        else veilederForKandidat.lowercase() == navIdent.lowercase() || orgEnhetForKandidat in kontorer
     }
 
     companion object {
