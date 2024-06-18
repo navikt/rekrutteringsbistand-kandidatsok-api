@@ -25,7 +25,7 @@ private data class RequestDto(
 )
 fun Javalin.handleLookupKandidatStillingssøk(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
-        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
+        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
         val request = ctx.bodyAsClass<RequestDto>()
         val result = openSearchClient.lookupKandidatStillingssøk(request)
         val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()

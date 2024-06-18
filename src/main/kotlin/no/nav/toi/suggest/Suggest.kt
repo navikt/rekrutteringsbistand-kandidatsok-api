@@ -36,7 +36,7 @@ private data class Request(
 )
 fun Javalin.handleSuggest(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
-        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
+        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
         val request = ctx.bodyAsClass<Request>()
         val result = openSearchClient.suggest(request.query, request.type.field)
         ctx.json(result.tilResponsJson())

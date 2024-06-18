@@ -28,7 +28,7 @@ private data class KontorRequest(
 )
 fun Javalin.handleKontorSuggest(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
-        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
+        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
 
         val request = ctx.bodyAsClass<KontorRequest>()
         val result = openSearchClient.suggest(request.query)

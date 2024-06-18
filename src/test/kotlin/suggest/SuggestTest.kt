@@ -158,11 +158,13 @@ class SuggestTest {
     }
 
     @Test
-    fun `jobbsøkerrettet skal ikke ha tilgang`() {
+    fun `jobbsøkerrettet skal ha tilgang`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockSuggest(wireMock)
         val token = lagToken(groups = listOf(jobbsøkerrettet))
         val (_, response) = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
 
     @Test

@@ -145,12 +145,14 @@ class KandidatStillingssokLookupTest {
         Assertions.assertThat(response.statusCode).isEqualTo(403)
     }
 
-    @Test
-    fun `jobbsøkerrettet skal ikke ha tilgang til kandidatsammendrag`() {
+    @Test // TODO: Skal ha kun tilgang til egne brukere
+    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockKandidatStillingssøk(wireMock)
         val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
         val (_, response) = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
 
     @Test
