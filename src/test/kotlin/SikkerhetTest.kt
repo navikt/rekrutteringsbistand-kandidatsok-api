@@ -48,7 +48,7 @@ class SikkerhetTest {
     @Test
     fun `autentisering feiler om man ikke har navident i token`() {
         val token = app.lagToken(
-            claims = mapOf("groups" to listOf(LokalApp.modiaGenerell))
+            claims = mapOf("groups" to listOf(LokalApp.arbeidsgiverrettet))
         )
         println(token.serialize())
         val (_, response) = Fuel.get("http://localhost:8080/api/me")
@@ -103,7 +103,7 @@ class SikkerhetTest {
             .responseObject<JsonNode>()
 
         assertThat(response.statusCode).isEqualTo(200)
-        assertThat(result.get()["roller"].get(0).asText()).isEqualTo("MODIA_GENERELL")
+        assertThat(result.get()["roller"].get(0).asText()).isEqualTo("ARBEIDSGIVER_RETTET")
     }
 
     @Test

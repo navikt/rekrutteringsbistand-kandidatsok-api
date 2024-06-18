@@ -294,7 +294,6 @@ class KandidatTest {
     }
 
     @Test
-    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
     fun `modia generell skal ikke ha tilgang til navn`() {
         val token = lagToken(groups = listOf(modiaGenerell))
         val (_, response) = gjørKallNavn("123", token)
@@ -344,7 +343,6 @@ class KandidatTest {
     }
 
     @Test
-    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
     fun `modia generell skal ikke ha tilgang til kandidatnummer`() {
         val token = lagToken(groups = listOf(modiaGenerell))
         val (_, response) = gjørKallKandidatnummer("123", token)
@@ -353,12 +351,14 @@ class KandidatTest {
     }
 
     @Test
-    fun `jobbsøkerrettet skal ikke ha tilgang til kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
-        val token = lagToken(groups = listOf(jobbsøkerrettet))
+    fun `jobbsøkerrettet skal ha tilgang til kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12345678910"
+        mockHentKandidatnummer(wireMock, fødselsnummer, "123")
+        val token = lagToken(groups = listOf(jobbsøkerrettet))
         val (_, response) = gjørKallKandidatnummer(fødselsnummer, token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
 
     @Test
@@ -401,7 +401,6 @@ class KandidatTest {
             )
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
-            modiaGenerell = UUID.fromString(modiaGenerell),
             jobbsøkerrettet = UUID.fromString(jobbsøkerrettet),
             arbeidsgiverrettet = UUID.fromString(arbeidsgiverrettet),
             utvikler = UUID.fromString(utvikler),

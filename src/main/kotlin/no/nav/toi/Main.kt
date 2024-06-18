@@ -139,7 +139,6 @@ fun main() {
                 null,
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
-            modiaGenerell = UUID.fromString(getenv("MODIA_GENERELL_GRUPPE")),
             jobbsøkerrettet = UUID.fromString(getenv("REKRUTTERINGSBISTAND_JOBBSOKERRETTET")),
             arbeidsgiverrettet = UUID.fromString(getenv("REKRUTTERINGSBISTAND_ARBEIDSGIVERRETTET")),
             utvikler = UUID.fromString(getenv("REKRUTTERINGSBISTAND_UTVIKLER"))

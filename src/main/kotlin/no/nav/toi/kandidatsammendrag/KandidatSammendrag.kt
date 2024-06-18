@@ -25,7 +25,7 @@ private data class RequestDto(
 )
 fun Javalin.handleKandidatSammendrag(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
-        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
+        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
 
         val request = ctx.bodyAsClass<RequestDto>()
         val result = openSearchClient.lookupKandidatsammendrag(request)

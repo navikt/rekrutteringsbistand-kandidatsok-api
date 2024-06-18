@@ -37,27 +37,11 @@ data class FilterParametre(
 )
 
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
-    handleKandidatsøkBasertPåSøketermer(openSearchClient, modiaKlient)
     handleMineBrukere(openSearchClient, modiaKlient)
     handleValgteKontorer(openSearchClient, modiaKlient)
     handleMineKontorer(openSearchClient, modiaKlient)
     handleMittKontor(openSearchClient, modiaKlient)
     handleAlleKandidater(openSearchClient, modiaKlient)
-}
-
-@OpenApi(
-    summary = "Søk på kandidater basert på søketermer",
-    operationId = "${endepunkt}",
-    tags = [],
-    requestBody = OpenApiRequestBody([OpenApiContent(FilterParametre::class)]),
-    responses = [OpenApiResponse("200", [OpenApiContent(KandidatSøkOpensearchResponseMedNavigering::class)])],
-    path = endepunkt,
-    methods = [HttpMethod.POST]
-)
-fun Javalin.handleKandidatsøkBasertPåSøketermer(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
-    post(endepunkt, håndterEndepunkt(modiaKlient, openSearchClient, Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { authenticatedUser, filterParametre ->
-        medPorteføljeFilter(filterParametre, authenticatedUser, modiaKlient)
-    })
 }
 
 @OpenApi(

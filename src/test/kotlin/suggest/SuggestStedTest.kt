@@ -77,7 +77,6 @@ class SuggestStedTest {
         .responseObject<JsonNode>()
 
     @Test
-    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
     fun `modia generell skal ikke ha tilgang`() {
         val token = lagToken(groups = listOf(modiaGenerell))
         val (_, response, _) = gjørKall(token)
@@ -86,11 +85,12 @@ class SuggestStedTest {
     }
 
     @Test
-    fun `jobbsøkerrettet skal ikke ha tilgang`() {
+    fun `jobbsøkerrettet skal ha tilgang`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        mockSuggest(wmRuntimeInfo)
         val token = lagToken(groups = listOf(jobbsøkerrettet))
         val (_, response) = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
 
     @Test
@@ -121,7 +121,6 @@ class SuggestStedTest {
         )
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
-            modiaGenerell = UUID.fromString(modiaGenerell),
             jobbsøkerrettet = UUID.fromString(jobbsøkerrettet),
             arbeidsgiverrettet = UUID.fromString(arbeidsgiverrettet),
             utvikler = UUID.fromString(utvikler)

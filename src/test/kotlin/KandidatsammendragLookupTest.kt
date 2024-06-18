@@ -106,7 +106,6 @@ class KandidatsammendragLookupTest {
     }
 
     @Test
-    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
     fun `modia generell skal ikke ha tilgang til kandidatsammendrag`() {
         val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
         val (_, response, _) = gjørKall(token)
@@ -115,11 +114,13 @@ class KandidatsammendragLookupTest {
     }
 
     @Test
-    fun `jobbsøkerrettet skal ikke ha tilgang til kandidatsammendrag`() {
+    fun `jobbsøkerrettet skal ha tilgang til kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) { // TODO: Skal ha kun tilgang til egne
+        val wireMock = wmRuntimeInfo.wireMock
+        mockKandidatSammendrag(wireMock)
         val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
         val (_, response) = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
 
     @Test

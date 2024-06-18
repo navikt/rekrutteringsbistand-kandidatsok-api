@@ -148,7 +148,6 @@ class Tokentest {
         )
         ),
         rolleUuidSpesifikasjon = RolleUuidSpesifikasjon(
-            modiaGenerell = UUID.randomUUID(),
             jobbsøkerrettet = UUID.randomUUID(),
             arbeidsgiverrettet = UUID.randomUUID(),
             utvikler = utvikler

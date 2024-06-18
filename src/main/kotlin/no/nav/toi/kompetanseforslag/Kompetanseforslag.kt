@@ -48,7 +48,7 @@ data class Bucket(
 )
 fun Javalin.handleKompetanseforslag(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
-        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
+        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
         val request = ctx.bodyAsClass<RequestDto>()
         val result = openSearchClient.lookupKompetanseforslag(request)
         ctx.json(result.toAggregationResponseJson() ?: throw RuntimeException("No aggregations found in response"))

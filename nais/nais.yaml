@@ -41,8 +41,6 @@ spec:
         - host: {{ pdlHost }}
         - host: {{ modiaContextHolderHost }}
   env:
-    - name: MODIA_GENERELL_GRUPPE
-      value: {{adGruppeModiaGenerellTilgang}}
     - name: REKRUTTERINGSBISTAND_JOBBSOKERRETTET
       value: {{adGruppeJobbsøkerrettet}}
     - name: REKRUTTERINGSBISTAND_ARBEIDSGIVERRETTET

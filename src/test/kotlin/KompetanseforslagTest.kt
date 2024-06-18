@@ -385,7 +385,6 @@ class KompetanseforslagTest {
     }
 
     @Test
-    @Disabled   // TODO Aktiver når tilgangskontroll er skrudd over
     fun `modia generell skal ikke ha tilgang`() {
         val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
         val (_, response, _) = gjørKall(token)
@@ -394,11 +393,13 @@ class KompetanseforslagTest {
     }
 
     @Test
-    fun `jobbsøkerrettet skal ikke ha tilgang`() {
+    fun `jobbsøkerettet skal ha tilgang`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockKompetanseforslag(wireMock)
         val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
         val (_, response) = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
 
     @Test
