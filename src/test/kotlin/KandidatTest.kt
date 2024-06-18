@@ -351,12 +351,14 @@ class KandidatTest {
     }
 
     @Test
-    fun `jobbsøkerrettet skal ikke ha tilgang til kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
-        val token = lagToken(groups = listOf(jobbsøkerrettet))
+    fun `jobbsøkerrettet skal ha tilgang til kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12345678910"
+        mockHentKandidatnummer(wireMock, fødselsnummer, "123")
+        val token = lagToken(groups = listOf(jobbsøkerrettet))
         val (_, response) = gjørKallKandidatnummer(fødselsnummer, token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
 
     @Test

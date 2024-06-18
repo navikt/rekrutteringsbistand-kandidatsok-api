@@ -32,7 +32,7 @@ private data class KandidatNavnResponsDto(
 )
 fun Javalin.handleKandidatNavn(openSearchClient: OpenSearchClient, pdlKlient: PdlKlient) {
     post(endepunkt) { ctx ->
-        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER, Rolle.JOBBSØKER_RETTET)
+        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.UTVIKLER, Rolle.ARBEIDSGIVER_RETTET, Rolle.JOBBSØKER_RETTET)
 
         val request = ctx.bodyAsClass<KandidatNavnRequestDto>()
         val result = openSearchClient.lookupKandidatNavn(request.fodselsnummer)
