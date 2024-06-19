@@ -30,7 +30,7 @@ jobs:
 
   deploy-to-dev:
     name: Deploy to dev
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/kandidatsammendrag_egenbruker'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/valider-kandidatinfo-for-stillinssøk-jobbrettet'
     needs: build-test-deploy
     runs-on: ubuntu-latest
     steps:

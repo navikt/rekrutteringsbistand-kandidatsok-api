@@ -5,6 +5,7 @@ import io.javalin.Javalin
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.ModiaKlient
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
 
@@ -23,14 +24,21 @@ private data class RequestDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleLookupKandidatStillingssøk(openSearchClient: OpenSearchClient) {
+fun Javalin.handleLookupKandidatStillingssøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
-        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
-        val request = ctx.bodyAsClass<RequestDto>()
-        val result = openSearchClient.lookupKandidatStillingssøk(request)
-        val fodselsnummer = result.hits().hits().firstOrNull()?.source()?.get("fodselsnummer")?.asText()
-        if (fodselsnummer != null) {
-            AuditLogg.loggOppslagKandidatStillingssøk(fodselsnummer, ctx.authenticatedUser().navIdent)
+        val authenticatedUser = ctx.authenticatedUser()
+
+        val navIdent = authenticatedUser.navIdent
+        val result = openSearchClient.lookupKandidatStillingssøk(ctx.bodyAsClass<RequestDto>())
+        val kandidat = result.hits().hits().firstOrNull()?.source()
+        val fodselsnummer = kandidat?.get("fodselsnummer")?.asText()
+        val orgEnhet = kandidat?.get("orgenhet")?.asText()
+        val veileder = kandidat?.get("veilederIdent")?.asText()
+
+        authenticatedUser.verifiserTilgangTilBruker(orgEnhet, veileder, modiaKlient) { permit ->
+            if (fodselsnummer != null) {
+                AuditLogg.loggOppslagKandidatStillingssøk(fodselsnummer, navIdent, permit)
+            }
         }
         ctx.json(result.toResponseJson())
     }
@@ -45,7 +53,8 @@ private fun OpenSearchClient.lookupKandidatStillingssøk(params: RequestDto): Se
         source_ {
             includes(
                 "geografiJobbonsker",
-                "yrkeJobbonskerObj", "kommunenummerstring", "kommuneNavn", "fodselsnummer"
+                "yrkeJobbonskerObj", "kommunenummerstring", "kommuneNavn", "fodselsnummer",
+                "veilederIdent", "orgenhet"
             )
         }
         size(1)
