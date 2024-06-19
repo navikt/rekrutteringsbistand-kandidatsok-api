@@ -565,7 +565,6 @@ object CvTestRespons {
                     "fornavn": "Redd",
                     "poststed": "Sarpsborg",
                     "kommunenummerstring": "3003",
-                    "veileder":${if (veileder == null) null else """"$veileder""""},
                     "fodselsdato": "1987-12-04",
                     "etternavn": "Lukt",
                     "epostadresse": "b@b.no",
@@ -585,7 +584,7 @@ object CvTestRespons {
                 }
         """.trimIndent()
 
-    val sourceKandidatStillingssøkLookup =
+    fun sourceKandidatStillingssøkLookup(veileder: String? = "A100000") =
         """
             {
                     "yrkeJobbonskerObj": [
@@ -613,7 +612,9 @@ object CvTestRespons {
                             "geografiKodeTekst": "Norge",
                             "geografiKode": "NO"
                         }
-                    ]
+                    ],
+                    "veilederIdent": ${if (veileder == null) null else """"$veileder""""},
+                    "orgenhet": "1234"
                 }
         """.trimIndent()
 
@@ -634,7 +635,7 @@ object CvTestRespons {
           "hits": {
             "hits": [
               {
-                "_source": $sourceKandidatStillingssøkLookup
+                "_source": ${sourceKandidatStillingssøkLookup()}
               }
             ]
           }

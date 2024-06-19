@@ -30,11 +30,12 @@ object AuditLogg {
         )
     }
 
-    fun loggOppslagKandidatStillingssøk(userid: String, navIdent: String) {
+    fun loggOppslagKandidatStillingssøk(userid: String, navIdent: String, permit: Boolean) {
         logCefMessage(
             navIdent = navIdent,
             userid = userid,
-            msg = "NAV-ansatt har sett etter stilling for kandidat, med jobbprofil fra brukers CV"
+            msg = "NAV-ansatt har sett etter stilling for kandidat, med jobbprofil fra brukers CV",
+            authorizationDecision = if (permit) AuthorizationDecision.PERMIT else AuthorizationDecision.DENY
         )
     }
 
