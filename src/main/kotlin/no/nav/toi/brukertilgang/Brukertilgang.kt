@@ -34,7 +34,7 @@ fun Javalin.handleBrukertilgang(openSearchClient: OpenSearchClient, modiaKlient:
 
         val result = when {
             request.fodselsnummer != null -> openSearchClient.lookupBrukertilgang("fodselsnummer", request.fodselsnummer)
-            request.aktorid != null -> openSearchClient.lookupBrukertilgang("aktorid", request.aktorid)
+            request.aktorid != null -> openSearchClient.lookupBrukertilgang("aktorId", request.aktorid)
             request.kandidatnr != null -> openSearchClient.lookupBrukertilgang("kandidatnr", request.kandidatnr)
             else -> {
                 ctx.status(HttpStatus.BAD_REQUEST).result("Bad Request: minst en identifikator (fodselsnummer, aktorid, kandidatnr) must sendes med")
