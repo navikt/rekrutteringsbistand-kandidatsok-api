@@ -35,6 +35,8 @@ spec:
     inbound:
       rules:
         - application: rekrutteringsbistand
+        - application: rekrutteringsbistand-kandidat-api
+          cluster: {{ rekrutteringsbistand-kandidat-api-cluster }}
     outbound:
       external:
         - host: {{ pdlHost }}

@@ -9,5 +9,6 @@
     "pdlHost": "pdl-api.prod-fss-pub.nais.io",
     "modiaContextHolderUrl": "https://modiacontextholder.prod-fss-pub.nais.io/modiacontextholder",
     "modiaContextHolderHost": "modiacontextholder.prod-fss-pub.nais.io",
-    "modiaContextHolderScope": "api://prod-fss.personoversikt.modiacontextholder/.default"
+    "modiaContextHolderScope": "api://prod-fss.personoversikt.modiacontextholder/.default",
+    "rekrutteringsbistand-kandidat-api-cluster": "prod-fss"
 }
