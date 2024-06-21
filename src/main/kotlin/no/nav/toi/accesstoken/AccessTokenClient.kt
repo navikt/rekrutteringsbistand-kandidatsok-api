@@ -45,7 +45,11 @@ class AccessTokenClient(
             }
 
             is Result.Failure -> {
-                secureLog.error("Noe feil skjedde ved henting av access_token. msg: ${response.body().asString("application/json")}", result.getException())
+                secureLog.error(
+                    "Noe feil skjedde ved henting av access_token. msg: ${
+                        response.body().asString("application/json")
+                    }", result.getException()
+                )
                 throw RuntimeException("Noe feil skjedde ved henting av access_token: ", result.getException())
             }
         }
@@ -56,8 +60,9 @@ private data class AccessTokenResponse(
     val access_token: String,
     val expires_in: Long
 ) {
-    fun tilEntry() = AccessTokenCacheEntry(access_token, Instant.now().plusSeconds(expires_in-10))
+    fun tilEntry() = AccessTokenCacheEntry(access_token, Instant.now().plusSeconds(expires_in - 10))
 }
+
 private class AccessTokenCacheEntry(
     val access_token: String,
     private val expiry: Instant
@@ -69,19 +74,16 @@ private class AccessTokenCacheEntry(
 private class CacheHjelper {
     private val cacheKonfigurasjon = CacheConfigurationBuilder.newCacheConfigurationBuilder(
         String::class.java, AccessTokenCacheEntry::class.java,
-        ResourcePoolsBuilder.newResourcePoolsBuilder().heap(200, MemoryUnit.MB)
+        ResourcePoolsBuilder.heap(666)
     )
-    private val tokenCache = CacheManagerBuilder.newCacheManagerBuilder()
+    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
         .withCache(
             "preConfiguredCache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(
-                String::class.java, AccessTokenCacheEntry::class.java,
-                ResourcePoolsBuilder.heap(200)
-            )
+            cacheKonfigurasjon
         ).build().also(CacheManager::init)
 
     fun lagCache(getter: (String) -> AccessTokenCacheEntry): (String) -> AccessTokenCacheEntry =
-        tokenCache.createCache(
+        cacheManager.createCache(
             "cache${UUID.randomUUID()}",
             cacheKonfigurasjon
         ).let { cache ->
