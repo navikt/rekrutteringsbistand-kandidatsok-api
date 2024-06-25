@@ -15,6 +15,7 @@ import io.javalin.http.*
 import no.nav.toi.kandidatsøk.Enhet
 import no.nav.toi.kandidatsøk.ModiaKlient
 import org.eclipse.jetty.http.HttpHeader
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.security.interfaces.RSAPublicKey
 import java.util.*
@@ -23,6 +24,8 @@ import java.util.concurrent.TimeUnit
 private const val navIdentClaim = "NAVident"
 
 typealias AuditLogMedPermit = (Boolean) -> Unit
+private val secureLog = LoggerFactory.getLogger("secureLog")!!
+
 
 /**
  * Representerer en autensiert bruker
@@ -141,7 +144,9 @@ private fun verifyJwt(
 ): DecodedJWT {
     for (verifier in verifiers) {
         try {
-            return verifier.verify(token)
+            val decodedJWT = verifier.verify(token)
+           secureLog.info("Verified token with issuer: ${decodedJWT.issuer}") // TOOD: fjern logg før merge/prod
+            return decodedJWT
         } catch (e: SigningKeyNotFoundException) {
             // Token ikke utstedt for denne verifieren, prøv neste
         } catch (e: JWTVerificationException) {
