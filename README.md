@@ -24,7 +24,6 @@ og så legge på svaret som
 Authorization: Bearer <token>
 ```
 
-
 ## Henvendelser
 
 ### For Nav-ansatte
