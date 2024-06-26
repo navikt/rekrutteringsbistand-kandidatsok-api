@@ -17,7 +17,7 @@ jobs:
           java-version: '21'
           cache: 'gradle'
 
-      - run: ./gradlew assemble
+      - run: ./gradlew build
 
       - uses: nais/docker-build-push@v0
         id: docker
