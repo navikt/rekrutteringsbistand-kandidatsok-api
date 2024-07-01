@@ -15,6 +15,7 @@ import io.javalin.http.*
 import no.nav.toi.kandidatsøk.Enhet
 import no.nav.toi.kandidatsøk.ModiaKlient
 import org.eclipse.jetty.http.HttpHeader
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.security.interfaces.RSAPublicKey
 import java.util.*
@@ -32,8 +33,11 @@ class AuthenticatedUser(
     val roller: Set<Rolle>,
     val jwt: String
 ) {
+    private val secureLog = LoggerFactory.getLogger("secureLog")!!
+
     fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle) {
         if(roller.none { it in gyldigeRoller }) {
+            secureLog.info("403 $navIdent med roller $roller  har ikke tilgang som krever en av rollene $gyldigeRoller ${Thread.currentThread().stackTrace}")
             throw ForbiddenResponse()
         }
     }
@@ -46,15 +50,18 @@ class AuthenticatedUser(
                 Rolle.JOBBSØKER_RETTET
             )
 
+            val modiaenheter = modiaKlient.hentModiaEnheter(jwt).map(Enhet::enhetId)
+
             if (Rolle.ARBEIDSGIVER_RETTET !in roller &&
                 Rolle.UTVIKLER !in roller &&
                 !erEgenBrukerEllerKontorenesBruker(
                     orgEnhetKandidat,
                     veilederKandidat,
-                    modiaKlient,
+                    modiaenheter,
                     navIdent
                 )
             ) {
+                secureLog.info("403 $navIdent med roller $roller og orgEnheter ${modiaenheter} har ikke tilgang til bruker med orgEnhet $orgEnhetKandidat og veileder $veilederKandidat ${Thread.currentThread().stackTrace}")
                 throw ForbiddenResponse()
             }
         } catch (e: ForbiddenResponse) {
@@ -67,10 +74,9 @@ class AuthenticatedUser(
     private fun erEgenBrukerEllerKontorenesBruker(
         orgEnhetForKandidat: String?,
         veilederForKandidat: String?,
-        modiaKlient: ModiaKlient,
+        kontorer: List<String>,
         navIdent: String
     ): Boolean {
-        val kontorer = modiaKlient.hentModiaEnheter(jwt).map(Enhet::enhetId)
         return if (orgEnhetForKandidat == null || veilederForKandidat == null) false
         else veilederForKandidat.lowercase() == navIdent.lowercase() || orgEnhetForKandidat in kontorer
     }
