@@ -37,7 +37,8 @@ class AuthenticatedUser(
 
     fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle) {
         if(roller.none { it in gyldigeRoller }) {
-            secureLog.info("403 $navIdent med roller $roller  har ikke tilgang som krever en av rollene $gyldigeRoller ${Thread.currentThread().stackTrace}")
+            Thread.currentThread().stackTrace.map {  }
+            secureLog.info("403 $navIdent med roller $roller  har ikke tilgang som krever en av rollene $gyldigeRoller ${hentStackTrace()}")
             throw ForbiddenResponse()
         }
     }
@@ -61,7 +62,7 @@ class AuthenticatedUser(
                     navIdent
                 )
             ) {
-                secureLog.info("403 $navIdent med roller $roller og orgEnheter ${modiaenheter} har ikke tilgang til bruker med orgEnhet $orgEnhetKandidat og veileder $veilederKandidat ${Thread.currentThread().stackTrace}")
+                secureLog.info("403 $navIdent med roller $roller og orgEnheter ${modiaenheter} har ikke tilgang til bruker med orgEnhet $orgEnhetKandidat og veileder $veilederKandidat ${hentStackTrace()}")
                 throw ForbiddenResponse()
             }
         } catch (e: ForbiddenResponse) {
@@ -70,6 +71,14 @@ class AuthenticatedUser(
         }
         auditLogFunksjon(true)
     }
+
+    private fun hentStackTrace() =
+        Thread.currentThread().stackTrace
+            .drop(2)
+            .filter { it.className.startsWith("no.nav") }
+            .joinToString("\n") { element ->
+                "${element.className}.${element.methodName}(${element.fileName}:${element.lineNumber})"
+            }
 
     private fun erEgenBrukerEllerKontorenesBruker(
         orgEnhetForKandidat: String?,
