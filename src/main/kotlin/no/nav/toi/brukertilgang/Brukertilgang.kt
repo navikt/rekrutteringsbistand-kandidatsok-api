@@ -9,6 +9,7 @@ import no.nav.toi.*
 import no.nav.toi.kandidatsøk.ModiaKlient
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
+import org.slf4j.LoggerFactory
 
 private const val endepunkt = "/api/brukertilgang"
 
@@ -17,6 +18,8 @@ private data class BrukertilgangRequestDto(
     val aktorid: String?,
     val kandidatnr: String?
 )
+
+private val secureLog = LoggerFactory.getLogger("secureLog")!!
 
 @OpenApi(
     summary = "Oppslag for å sjekke om en ident har tilgang til kandidatdata for en spesifikk bruker",
@@ -32,6 +35,8 @@ fun Javalin.handleBrukertilgang(openSearchClient: OpenSearchClient, modiaKlient:
         val authenticatedUser = ctx.authenticatedUser()
         val request = ctx.bodyAsClass<BrukertilgangRequestDto>()
 
+        log.info("Oppslag for brukertilgang")
+        secureLog.info("Brukertilgang-request: $request")
         val result = when {
             request.fodselsnummer != null -> openSearchClient.lookupBrukertilgang("fodselsnummer", request.fodselsnummer)
             request.aktorid != null -> openSearchClient.lookupBrukertilgang("aktorId", request.aktorid)
