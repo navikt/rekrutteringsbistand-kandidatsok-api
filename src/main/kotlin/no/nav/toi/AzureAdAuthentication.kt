@@ -36,12 +36,14 @@ class AuthenticatedUser(
     private val secureLog = LoggerFactory.getLogger("secureLog")!!
 
     fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle) {
-        if(roller.none { it in gyldigeRoller }) {
+        if(!erEnAvRollene(*gyldigeRoller)) {
             Thread.currentThread().stackTrace.map {  }
             secureLog.info("403 $navIdent med roller $roller  har ikke tilgang som krever en av rollene $gyldigeRoller ${hentStackTrace()}")
             throw ForbiddenResponse()
         }
     }
+
+    fun erEnAvRollene(vararg gyldigeRoller: Rolle) = roller.any { it in gyldigeRoller }
 
     fun verifiserTilgangTilBruker(orgEnhetKandidat: String?, veilederKandidat: String?, modiaKlient: ModiaKlient, auditLogFunksjon: AuditLogMedPermit) {
         try {

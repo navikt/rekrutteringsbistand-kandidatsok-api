@@ -11,6 +11,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
 import no.nav.toi.accesstoken.AccessTokenClient
 import no.nav.toi.brukertilgang.handleBrukertilgang
+import no.nav.toi.brukertilgang.handleKandidatlistetilgang
 import no.nav.toi.kandidatsammendrag.PdlKlient
 import no.nav.toi.kandidatsammendrag.handleKandidatKandidatnr
 import no.nav.toi.kandidatsammendrag.handleKandidatNavn
@@ -97,6 +98,7 @@ class App(
         javalin.handleKandidatNavn(openSearchClient, pdlKlient)
         javalin.handleKandidatKandidatnr(openSearchClient)
         javalin.handleBrukertilgang(openSearchClient, modiaClient)
+        javalin.handleKandidatlistetilgang(openSearchClient, modiaClient)
 
 
         javalin.azureAdAuthentication(
