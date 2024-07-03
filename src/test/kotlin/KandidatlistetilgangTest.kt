@@ -54,57 +54,40 @@ class KandidatlistetilgangTest {
         authServer.shutdown()
     }
 
-    @Test
-    fun `jobbsøkerrettet kan få filtrert en liste til bare egne brukere`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    @ParameterizedTest
+    @MethodSource("fungerendeTilganger")
+    fun `sjekk endepunkt per tilgang`(tilgang: Tilgang, harTilgang: Boolean, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        mockES(wireMock)
-        mockDecorator(wireMock)
-        val token = lagToken(navIdent = veilederIdent, groups = listOf(jobbsøkerrettet))
+
+        if(harTilgang) {
+            mockES(wireMock)
+            mockDecorator(wireMock)
+        }
+        val token = lagToken(navIdent = veilederIdent, groups = listOf(tilgang.uuid))
         val (_, response, result) = Fuel.post(endepunkt)
             .body("""["PAM000kanse1","PAM000kanse4","PAMkanikkese","PAM000kanse3","PAMikkekontor","PAMikkebruker","PAM000kanse2"]""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get().isArray).isTrue()
-        Assertions.assertThat((result.get() as ArrayNode).map { it.asText() }).isEqualTo(listOf("PAM000kanse1","PAM000kanse4","PAM000kanse3","PAM000kanse2"))
+        if(harTilgang) {
+            Assertions.assertThat(response.statusCode).isEqualTo(200)
+            Assertions.assertThat(result.get().isArray).isTrue()
+            Assertions.assertThat((result.get() as ArrayNode).map { it.asText() })
+                .isEqualTo(listOf("PAM000kanse1", "PAM000kanse4", "PAM000kanse3", "PAM000kanse2"))
+        } else {
+            Assertions.assertThat(response.statusCode).isEqualTo(403)
+        }
     }
 
-    @Test
-    fun `arbeidsgiverrettet kan se alle brukere`() {
-        val token = lagToken(navIdent = veilederIdent, groups = listOf(arbeidsgiverrettet))
-        val (_, response, result) = Fuel.post(endepunkt)
-            .body("""["PAM000kanse1","PAM000kanse4","PAMkanikkese","PAM000kanse3","PAMikkekontor","PAMikkebruker","PAM000kanse2"]""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+    fun fungerendeTilganger() = Stream.of(
+        Arguments.of(Tilgang.ModiaGenerell, false),
+        Arguments.of(Tilgang.Jobbsøkerrettet, true),
+        Arguments.of(Tilgang.Arbeidsgiverrettet, true),
+        Arguments.of(Tilgang.Utvikler, true)
+    )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get().isArray).isTrue()
-        Assertions.assertThat((result.get() as ArrayNode).map { it.asText() }).isEqualTo(listOf("PAM000kanse1","PAM000kanse4","PAMkanikkese","PAM000kanse3","PAMikkekontor","PAMikkebruker","PAM000kanse2"))
-    }
-
-    @Test
-    fun `utvikler kan se alle brukere`() {
-        val token = lagToken(navIdent = veilederIdent, groups = listOf(arbeidsgiverrettet))
-        val (_, response, result) = Fuel.post(endepunkt)
-            .body("""["PAM000kanse1","PAM000kanse4","PAMkanikkese","PAM000kanse3","PAMikkekontor","PAMikkebruker","PAM000kanse2"]""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
-
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get().isArray).isTrue()
-        Assertions.assertThat((result.get() as ArrayNode).map { it.asText() }).isEqualTo(listOf("PAM000kanse1","PAM000kanse4","PAMkanikkese","PAM000kanse3","PAMikkekontor","PAMikkebruker","PAM000kanse2"))
-    }
-
-    @Test
-    fun `modiagenerell har ikke tilgang`() {
-        val token = lagToken(navIdent = veilederIdent, groups = listOf(modiaGenerell))
-        val (_, response, _) = Fuel.post(endepunkt)
-            .body("""["PAM000kanse1","PAM000kanse4","PAMkanikkese","PAM000kanse3","PAMikkekontor","PAMikkebruker","PAM000kanse2"]""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
-
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+    enum class Tilgang(val uuid: String) {
+        ModiaGenerell(modiaGenerell), Jobbsøkerrettet(jobbsøkerrettet), Arbeidsgiverrettet(arbeidsgiverrettet), Utvikler(utvikler);
     }
 
     private fun mockDecorator(wireMock: WireMock) {

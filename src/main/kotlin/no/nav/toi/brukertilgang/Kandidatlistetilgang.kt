@@ -28,13 +28,9 @@ private const val endepunkt = "/api/kandidatlistetilgang"
 fun Javalin.handleKandidatlistetilgang(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
         val authenticatedUser = ctx.authenticatedUser()
-        val request = ctx.bodyAsClass<List<String>>()
-        if(authenticatedUser.erEnAvRollene(Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)) {
-            ctx.json(request)
-            return@post
-        }
-        authenticatedUser.verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET)
+        authenticatedUser.verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
 
+        val request = ctx.bodyAsClass<List<String>>()
         log.info("Oppslag for kandidatlistetilgang")
         val filter = listOf<Filter>().medMineBrukereFilter(authenticatedUser).medMineKontorerFilter(authenticatedUser, modiaKlient)
         val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon))
