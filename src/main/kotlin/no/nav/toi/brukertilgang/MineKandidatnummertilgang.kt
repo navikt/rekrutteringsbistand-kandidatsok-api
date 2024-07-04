@@ -14,7 +14,7 @@ import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
 import org.opensearch.client.opensearch.core.search.Hit
 
-private const val endepunkt = "/api/kandidatlistetilgang"
+private const val endepunkt = "/api/minekandidatnummer"
 
 @OpenApi(
     summary = "Oppslag for å sjekke hvilke kandidater en bruker har tilgang til",
@@ -25,13 +25,13 @@ private const val endepunkt = "/api/kandidatlistetilgang"
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKandidatlistetilgang(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun Javalin.handleMinekandidatnummer(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
         val authenticatedUser = ctx.authenticatedUser()
         authenticatedUser.verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
 
         val request = ctx.bodyAsClass<List<String>>()
-        log.info("Oppslag for kandidatlistetilgang")
+        log.info("Oppslag for minekandidatnummer")
         val filter = listOf<Filter>().medMineBrukereFilter(authenticatedUser).medMineKontorerFilter(authenticatedUser, modiaKlient)
         val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon))
 

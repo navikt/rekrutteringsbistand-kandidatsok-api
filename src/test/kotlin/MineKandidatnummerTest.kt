@@ -12,20 +12,18 @@ import no.nav.toi.RolleUuidSpesifikasjon
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.*
 import java.util.stream.Stream
-import kotlin.math.max
 
-private const val endepunkt = "http://localhost:8080/api/kandidatlistetilgang"
+private const val endepunkt = "http://localhost:8080/api/minekandidatnummer"
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WireMockTest(httpPort = 10000)
-class KandidatlistetilgangTest {
+class MineKandidatnummerTest {
     private val authPort = 18306
 
     companion object {
@@ -125,7 +123,7 @@ class KandidatlistetilgangTest {
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
-                        KandidatsøkRespons.kandidatlisteValideringQuery(KandidatsøkRespons.mineKontorerTerm, KandidatsøkRespons.mineBrukereTerm),
+                        KandidatsøkRespons.mineKandidatnummerValideringQuery(KandidatsøkRespons.mineKontorerTerm, KandidatsøkRespons.mineBrukereTerm),
                         true,
                         false
                     )

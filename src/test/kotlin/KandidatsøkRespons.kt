@@ -1,6 +1,5 @@
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.google.gson.Gson
 import java.time.LocalDate
 
 object KandidatsøkRespons {
@@ -13,7 +12,7 @@ object KandidatsøkRespons {
             """{"_source":false,"from":$from,"query":{"bool":{"must":$terms}},"size":500,"track_total_hits":true${if(sortering)""","sort":[{"tidsstempel":{"order":"desc"}}]""" else ""}}"""
         }
 
-    fun kandidatlisteValideringQuery(mineKontorerTerm: String, mineBrukereTerm: String) = listOf(mineBrukereTerm, mineKontorerTerm).let { terms ->
+    fun mineKandidatnummerValideringQuery(mineKontorerTerm: String, mineBrukereTerm: String) = listOf(mineBrukereTerm, mineKontorerTerm).let { terms ->
         """{"_source":false,"from":0,"query":{"bool":{"must":$terms}},"size":10000,"track_total_hits":true}"""
     }
 
