@@ -13,7 +13,7 @@ object KandidatsøkRespons {
         }
 
     fun mineKandidatnummerValideringQuery(mineKontorerTerm: String, mineBrukereTerm: String) = listOf(mineBrukereTerm, mineKontorerTerm).let { terms ->
-        """{"_source":false,"from":0,"query":{"bool":{"must":$terms}},"size":10000,"track_total_hits":true}"""
+        """{"_source":false,"from":0,"query":{"bool":{"should":$terms}},"size":10000,"track_total_hits":true}"""
     }
 
     val stedTerm = """{"bool":{"should":[{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO18.1804|NO18|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO50.5001|NO50|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO02.*|NO02|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO.*|NO|NO"}}}]}}}}]}}"""

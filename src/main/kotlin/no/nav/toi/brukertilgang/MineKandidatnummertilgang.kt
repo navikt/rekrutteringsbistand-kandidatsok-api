@@ -7,7 +7,6 @@ import io.javalin.openapi.*
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.ModiaKlient
 import no.nav.toi.kandidatsøk.filter.Filter
-import no.nav.toi.kandidatsøk.filter.FilterFunksjon
 import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMineBrukereFilter
 import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMineKontorerFilter
 import org.opensearch.client.opensearch.OpenSearchClient
@@ -32,8 +31,7 @@ fun Javalin.handleMinekandidatnummer(openSearchClient: OpenSearchClient, modiaKl
 
         val request = ctx.bodyAsClass<List<String>>()
         log.info("Oppslag for minekandidatnummer")
-        val filter = listOf<Filter>().medMineBrukereFilter(authenticatedUser).medMineKontorerFilter(authenticatedUser, modiaKlient)
-        val result = openSearchClient.kandidatSøk(filter.map(Filter::lagESFilterFunksjon))
+        val result = openSearchClient.kandidatSøk(authenticatedUser, kontorer = modiaKlient.hentModiaEnheter(authenticatedUser.jwt).map { it.navn })
 
         val kandidaterBrukerKanSe = result.hits().hits().map(Hit<JsonNode>::id)
 
@@ -41,12 +39,33 @@ fun Javalin.handleMinekandidatnummer(openSearchClient: OpenSearchClient, modiaKl
     }
 }
 
-private fun OpenSearchClient.kandidatSøk(filter: List<FilterFunksjon>): SearchResponse<JsonNode> {
+private fun OpenSearchClient.kandidatSøk(authenticatedUser: AuthenticatedUser, kontorer: List<String>): SearchResponse<JsonNode> {
     return search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {
             bool_ {
-                apply { filter.forEach{it()} }
+                should_ {
+                    term_ {
+                        field("veileder")
+                        value(authenticatedUser!!.navIdent)
+                        caseInsensitive(true)
+                    }
+                }
+                should_ {
+                    bool_ {
+                        apply {
+                            kontorer.forEach { kontor ->
+                                should_ {
+                                    term_ {
+                                        field("navkontor")
+                                        value(kontor)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
         source(false)
