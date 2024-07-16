@@ -14,5 +14,6 @@
     "modiaContextHolderUrl": "https://modiacontextholder-q1.dev-fss-pub.nais.io/modiacontextholder",
     "modiaContextHolderHost": "modiacontextholder-q1.dev-fss-pub.nais.io",
     "modiaContextHolderScope": "api://dev-fss.personoversikt.modiacontextholder-q1/.default",
-    "rekrutteringsbistand-kandidat-api-cluster": "dev-fss"
+    "rekrutteringsbistand-kandidat-api-cluster": "dev-fss",
+    "foresporsel-om-deling-av-cv-api-cluster": "dev-fss"
 }

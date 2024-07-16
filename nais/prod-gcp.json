@@ -11,5 +11,6 @@
     "modiaContextHolderUrl": "https://modiacontextholder.prod-fss-pub.nais.io/modiacontextholder",
     "modiaContextHolderHost": "modiacontextholder.prod-fss-pub.nais.io",
     "modiaContextHolderScope": "api://prod-fss.personoversikt.modiacontextholder/.default",
-    "rekrutteringsbistand-kandidat-api-cluster": "prod-fss"
+    "rekrutteringsbistand-kandidat-api-cluster": "prod-fss",
+    "foresporsel-om-deling-av-cv-api-cluster": "prod-fss"
 }
