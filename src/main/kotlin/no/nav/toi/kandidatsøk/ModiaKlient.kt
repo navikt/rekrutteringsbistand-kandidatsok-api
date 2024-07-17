@@ -28,9 +28,9 @@ class ModiaKlient(private val modiaUrl: String, private val accessTokenClient: A
 
 data class ModiaPerson(
     val ident: String,
-    val navn: String,
-    val fornavn: String,
-    val etternavn: String,
+    val navn: String?,
+    val fornavn: String?,
+    val etternavn: String?,
     val enheter: List<Enhet>
 )
 
