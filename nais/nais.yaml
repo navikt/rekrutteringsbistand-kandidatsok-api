@@ -38,6 +38,7 @@ spec:
         - application: rekrutteringsbistand-kandidat-api
           cluster: {{ rekrutteringsbistand-kandidat-api-cluster }}
         - application: foresporsel-om-deling-av-cv-api
+          namespace: arbeidsgiver-inkludering
           cluster: {{ foresporsel-om-deling-av-cv-api-cluster }}
     outbound:
       external:
