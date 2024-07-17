@@ -6,8 +6,11 @@ import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.kittinunf.result.Result
 import no.nav.toi.accesstoken.AccessTokenClient
+import org.slf4j.LoggerFactory
 
 class ModiaKlient(private val modiaUrl: String, private val accessTokenClient: AccessTokenClient) {
+    private val secureLog = LoggerFactory.getLogger("secureLog")!!
+
     fun hentModiaEnheter(innkommendeToken: String): List<Enhet> {
         val accessToken = accessTokenClient.hentAccessToken(innkommendeToken)
         val (_, response, result) = Fuel.get(modiaUrl + "/api/decorator")
@@ -16,6 +19,9 @@ class ModiaKlient(private val modiaUrl: String, private val accessTokenClient: A
             .responseObject<ModiaPerson>()
 
         if(response.statusCode == 404) return emptyList()
+
+        secureLog.info("Modiaresponse:${result.get()}")
+
 
         when (result) {
             is Result.Success -> return result.get().enheter
