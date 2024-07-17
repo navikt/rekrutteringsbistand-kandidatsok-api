@@ -9,7 +9,6 @@ import no.nav.toi.accesstoken.AccessTokenClient
 import org.slf4j.LoggerFactory
 
 class ModiaKlient(private val modiaUrl: String, private val accessTokenClient: AccessTokenClient) {
-    private val secureLog = LoggerFactory.getLogger("secureLog")!!
 
     fun hentModiaEnheter(innkommendeToken: String): List<Enhet> {
         val accessToken = accessTokenClient.hentAccessToken(innkommendeToken)
