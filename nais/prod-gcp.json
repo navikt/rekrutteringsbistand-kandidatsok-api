@@ -3,6 +3,7 @@
     "adGruppeArbeidsgiverrettet": "46c8e3b2-0469-4740-983f-d8cd2b6e4fee",
     "adGruppeUtvikler": "41080368-439f-4128-858a-afbef876431e",
     "ingress": [
+        "https://rekrutteringsbistand-kandidatsok-api.intern.nav.no/api"
     ],
     "pdlUrl": "https://pdl-api.prod-fss-pub.nais.io/graphql",
     "pdlScope": "api://prod-fss.pdl.pdl-api/.default",
@@ -10,5 +11,6 @@
     "modiaContextHolderUrl": "https://modiacontextholder.prod-fss-pub.nais.io/modiacontextholder",
     "modiaContextHolderHost": "modiacontextholder.prod-fss-pub.nais.io",
     "modiaContextHolderScope": "api://prod-fss.personoversikt.modiacontextholder/.default",
-    "rekrutteringsbistand-kandidat-api-cluster": "prod-fss"
+    "rekrutteringsbistand-kandidat-api-cluster": "prod-fss",
+    "foresporsel-om-deling-av-cv-api-cluster": "prod-fss"
 }

@@ -1,6 +1,5 @@
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.google.gson.Gson
 import java.time.LocalDate
 
 object KandidatsøkRespons {
@@ -12,6 +11,10 @@ object KandidatsøkRespons {
         .let { terms ->
             """{"_source":false,"from":$from,"query":{"bool":{"must":$terms}},"size":500,"track_total_hits":true${if(sortering)""","sort":[{"tidsstempel":{"order":"desc"}}]""" else ""}}"""
         }
+
+    fun mineKandidatnummerValideringQuery(mineKontorerTerm: String, mineBrukereTerm: String) = listOf(mineBrukereTerm, mineKontorerTerm).let { terms ->
+        """{"_source":false,"from":0,"query":{"bool":{"should":$terms}},"size":10000,"track_total_hits":true}"""
+    }
 
     val stedTerm = """{"bool":{"should":[{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO18.1804|NO18|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO50.5001|NO50|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO02.*|NO02|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO.*|NO|NO"}}}]}}}}]}}"""
     val stedMedMåBoPåTerm = """{"bool": {"should": [{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO03.0301|NO03|NO"}}}]}}}},{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO46.4601|NO46|NO"}}}]}}}},{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO.*|NO|NO"}}}]}}}},{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO15.*|NO15|NO"}}}]}}}}]}},{"bool": {"should": [{"regexp": {"kommunenummerstring": {"value":"0301"}}},{"regexp": {"kommunenummerstring": {"value":"4601"}}},{"regexp": {"kommunenummerstring": {"value":".*"}}},{"regexp": {"kommunenummerstring": {"value":"15.*"}}}]}}"""

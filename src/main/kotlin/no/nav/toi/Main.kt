@@ -11,6 +11,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
 import no.nav.toi.accesstoken.AccessTokenClient
 import no.nav.toi.brukertilgang.handleBrukertilgang
+import no.nav.toi.brukertilgang.handleMinekandidatnummer
 import no.nav.toi.kandidatsammendrag.PdlKlient
 import no.nav.toi.kandidatsammendrag.handleKandidatKandidatnr
 import no.nav.toi.kandidatsammendrag.handleKandidatNavn
@@ -57,9 +58,12 @@ class App(
         openSearchPassword = openSearchPassword,
         openSearchUri = openSearchUri,
     )
-    private val pdlKlient = PdlKlient(pdlUrl, AccessTokenClient(azureSecret,azureClientId,pdlScope,azureUrl))
+    private val pdlKlient = PdlKlient(pdlUrl, AccessTokenClient(azureSecret, azureClientId, pdlScope, azureUrl))
 
-    private val modiaClient = ModiaKlient(modiaContextHolderUrl, AccessTokenClient(azureSecret,azureClientId,modiaContextHolderScope, azureUrl))
+    private val modiaClient = ModiaKlient(
+        modiaContextHolderUrl,
+        AccessTokenClient(azureSecret, azureClientId, modiaContextHolderScope, azureUrl)
+    )
 
     fun configureOpenApi(config: JavalinConfig) {
         val openApiConfiguration = OpenApiPluginConfiguration().apply {
@@ -97,6 +101,7 @@ class App(
         javalin.handleKandidatNavn(openSearchClient, pdlKlient)
         javalin.handleKandidatKandidatnr(openSearchClient)
         javalin.handleBrukertilgang(openSearchClient, modiaClient)
+        javalin.handleMinekandidatnummer(openSearchClient, modiaClient)
 
 
         javalin.azureAdAuthentication(
@@ -133,7 +138,7 @@ fun main() {
             AuthenticationConfiguration(
                 audience = getenv("AZURE_APP_CLIENT_ID"),
                 issuer = getenv("AZURE_OPENID_CONFIG_ISSUER"),
-                jwksUri  = getenv("AZURE_OPENID_CONFIG_JWKS_URI"),
+                jwksUri = getenv("AZURE_OPENID_CONFIG_JWKS_URI"),
             ),
             if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp")
                 fakedingsAuthenticationConfiguration
@@ -158,7 +163,8 @@ fun main() {
     ).start()
 }
 
-private fun getenv(key: String) = System.getenv(key) ?: throw IllegalArgumentException("Det finnes ingen system-variabel ved navn $key")
+private fun getenv(key: String) =
+    System.getenv(key) ?: throw IllegalArgumentException("Det finnes ingen system-variabel ved navn $key")
 
 
 val Any.log: Logger
