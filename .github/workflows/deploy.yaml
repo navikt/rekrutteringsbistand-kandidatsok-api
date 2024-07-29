@@ -6,6 +6,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      security-events: write # Push Trivy/Sarif to Github Security
     outputs:
       image: ${{ steps.docker.outputs.image }}
     steps:
@@ -28,9 +29,24 @@ jobs:
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
 
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE }}'
+          format: 'sarif'
+          output: 'trivy.sarif'
+          severity: 'HIGH,CRITICAL'
+          limit-severities-for-sarif: true
+
+      - name: Upload Trivy results to GitHub Security
+        if: inputs.upload-sarif
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy.sarif'
+
   deploy-to-dev:
     name: Deploy to dev
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/nullverdier-i-modiaresponse2'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/trivy'
     needs: build-test-deploy
     runs-on: ubuntu-latest
     steps:
