@@ -35,7 +35,7 @@ jobs:
           image-ref: '${{ steps.docker.outputs.image }}'
           format: 'sarif'
           output: 'trivy.sarif'
-          severity: 'HIGH,CRITICAL,MEDIUM,LOW'
+          severity: 'HIGH,CRITICAL'
           limit-severities-for-sarif: true
 
       - name: Upload Trivy results to GitHub Security
