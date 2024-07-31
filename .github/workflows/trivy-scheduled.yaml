@@ -1,7 +1,7 @@
-name: Scan Docker image for security issues with Trivy, independent of push to repo
+name: Trivy security scan
 on:
   schedule:
-    - cron: '19 * * * *' # TODO Are sett ordentlig shedule
+    - cron: '40 6 * * *'
 
 jobs:
   build-test-deploy:
