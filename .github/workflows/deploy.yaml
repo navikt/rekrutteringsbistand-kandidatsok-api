@@ -7,7 +7,7 @@ jobs:
   deploy-to-dev:
     name: Deploy to dev
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/trivy2'
-    needs: build-test-deploy
+    needs: build-and-publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
   deploy-to-prod:
     name: Deploy to prod
     if: github.ref == 'refs/heads/main'
-    needs: [ build-test-deploy, deploy-to-dev ]
+    needs: [ build-and-publish, deploy-to-dev ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
