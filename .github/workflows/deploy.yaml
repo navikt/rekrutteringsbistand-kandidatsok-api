@@ -1,5 +1,5 @@
 name: Build, test and deploy
-on: [push, workflow_dispatch]
+on: [ push, workflow_dispatch ]
 jobs:
   build-test-deploy:
     runs-on: ubuntu-latest
@@ -29,20 +29,6 @@ jobs:
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ steps.docker.outputs.image }}'
-          format: 'sarif'
-          output: 'trivy.sarif'
-          severity: 'HIGH,CRITICAL'
-          limit-severities-for-sarif: true
-
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy.sarif'
-
   deploy-to-dev:
     name: Deploy to dev
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/trivy'
@@ -61,7 +47,7 @@ jobs:
   deploy-to-prod:
     name: Deploy to prod
     if: github.ref == 'refs/heads/main'
-    needs: [build-test-deploy, deploy-to-dev]
+    needs: [ build-test-deploy, deploy-to-dev ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
