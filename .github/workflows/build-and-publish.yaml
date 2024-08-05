@@ -5,7 +5,7 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     outputs:
-      image: ${{ steps.docker.outputs.image }}
+      image: ${{ steps.docker-build-push.outputs.image }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,3 +25,5 @@ jobs:
           dockerfile: Dockerfile
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+
+
