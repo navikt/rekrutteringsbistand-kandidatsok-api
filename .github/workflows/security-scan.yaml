@@ -18,6 +18,7 @@ permissions:
 jobs:
   call-build-and-publish:
     uses: ./.github/workflows/build-and-publish.yaml
+    secrets: inherit
 
   trivy:
     runs-on: ubuntu-latest
