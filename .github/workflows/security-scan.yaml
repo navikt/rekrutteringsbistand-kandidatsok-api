@@ -11,6 +11,10 @@ on:
       - main
       - master
 
+permissions:
+  contents: read
+  id-token: write # TODO Are: Unødvenidg og kan slettes?
+
 jobs:
   call-build-and-publish:
     uses: ./.github/workflows/build-and-publish.yaml
@@ -18,8 +22,6 @@ jobs:
   trivy:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      id-token: write # TODO Are: Unødvenidg og kan slettes?
       security-events: write # Push Trivy/Sarif to Github Security
     steps:
       - name: Run Trivy vulnerability scanner

@@ -4,9 +4,6 @@ on:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     outputs:
       image: ${{ steps.docker.outputs.image }}
     steps:

@@ -1,6 +1,10 @@
 name: Build and deploy
 on: [ push, workflow_dispatch ]
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   call-build-and-publish:
     uses: ./.github/workflows/build-and-publish.yaml
