@@ -1,5 +1,6 @@
 name: Build and deploy
 on: [ push, workflow_dispatch ]
+
 jobs:
   call-build-and-publish:
     uses: ./.github/workflows/build-and-publish.yaml
@@ -7,7 +8,7 @@ jobs:
   deploy-to-dev:
     name: Deploy to dev
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/trivy2'
-    needs: build-and-publish
+    needs: call-build-and-publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,13 +17,13 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: nais/nais.yaml
-          VAR: image=${{ needs.build-and.publish.outputs.image }}
+          VAR: image=${{ needs.call-build-and-publish.outputs.image }}
           VARS: nais/dev-gcp.json
 
   deploy-to-prod:
     name: Deploy to prod
     if: github.ref == 'refs/heads/main'
-    needs: [ build-and-publish, deploy-to-dev ]
+    needs: [ call-build-and-publish, deploy-to-dev ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,5 +32,5 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: nais/nais.yaml
-          VAR: image=${{ needs.build-test-deploy.outputs.image }}
+          VAR: image=${{ needs.call-build-and-publish.outputs.image }}
           VARS: nais/prod-gcp.json
