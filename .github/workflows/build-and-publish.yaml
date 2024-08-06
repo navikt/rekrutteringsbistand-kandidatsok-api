@@ -3,13 +3,13 @@ on:
     outputs:
       image:
         description: "Name of the built Docker image"
-        value: ${{ jobs.docker.image }}
+        value: ${{ jobs.build-and-publish.image }}
 
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     outputs:
-      image: ${{ steps.docker-build-push.outputs.image }}
+      image: ${{ steps.docker.outputs.image }}
     steps:
       - uses: actions/checkout@v4
 
