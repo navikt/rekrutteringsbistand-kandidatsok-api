@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       security-events: write # Push Trivy/Sarif to Github Security
+      packages: read
     needs: call-build-and-publish
     steps:
       - name: Run Trivy vulnerability scanner
