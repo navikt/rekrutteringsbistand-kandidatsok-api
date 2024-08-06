@@ -3,7 +3,7 @@ on:
     outputs:
       image:
         description: "Name of the built Docker image"
-        value: ${{ jobs.build-and-publish.image }}
+        value: ${{ jobs.build-and-publish.outputs.image }}
 
 jobs:
   build-and-publish:
