@@ -21,10 +21,10 @@ jobs:
     secrets: inherit
 
   trivy:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-20.04 # TODO Are: Bruk latest?
     permissions:
       security-events: write # Push Trivy/Sarif to Github Security
-      packages: read
+      packages: read # TODO Are: Unødvenidg og kan slettes?
     needs: call-build-and-publish
     steps:
       - name: Run Trivy vulnerability scanner
