@@ -12,8 +12,16 @@ on:
       - master
 
 permissions:
-  contents: read
-  id-token: write # TODO Are: Unødvenidg og kan slettes?
+#  contents: read
+#  id-token: write # TODO Are: Unødvenidg og kan slettes?
+# TODO ARE: Hva av det følgende er egentlig nødvendig?
+  actions: read
+  contents: write
+  security-events: write
+  packages: write
+  id-token: write
+
+
 
 jobs:
   call-build-and-publish:
