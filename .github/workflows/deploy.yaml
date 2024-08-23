@@ -14,7 +14,7 @@ jobs:
     name: Deploy to dev
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/trivy2'
     needs: call-build-and-publish
-    runs-on: ubuntu-20.04 # TODO Are: Bruk latest?
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v1
