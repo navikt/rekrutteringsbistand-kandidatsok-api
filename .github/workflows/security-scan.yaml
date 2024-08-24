@@ -25,6 +25,8 @@ on:
 jobs:
   call-build-and-publish:
     uses: ./.github/workflows/build-and-publish.yaml
+    permissions:
+      id-token: write
     secrets: inherit
 
   call-trivy-security-scan:
