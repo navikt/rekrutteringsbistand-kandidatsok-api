@@ -12,17 +12,15 @@ on:
       - master
 
 # TODO Are: Slette alle disse, ev. flytte inn i hver job?
-permissions:
+#permissions:
   #  contents: read
   #  id-token: write # TODO Are: Unødvenidg og kan slettes?
   # TODO ARE: Hva av det følgende er egentlig nødvendig?
-  actions: read
-  contents: write
-  security-events: write
-  packages: write
-  id-token: write
-
-
+#  actions: read
+#  contents: write
+#  security-events: write
+#  packages: write
+#  id-token: write
 
 jobs:
   call-build-and-publish:
@@ -31,9 +29,6 @@ jobs:
 
   call-trivy-security-scan:
     needs: call-build-and-publish
-    permissions:
-      id-token: 'write'
-      security-events: 'write'
     uses: navikt/toi-github-actions-workflows/.github/workflows/trivy-security-scan.yaml@main # TODO Are: Droppe @main?
     with:
       image: ${{ needs.call-build-and-publish.outputs.image }}

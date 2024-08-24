@@ -7,7 +7,10 @@ on:
 
 jobs:
   build-and-publish:
-    runs-on: ubuntu-20.04 # TODO Are: Bruk latest?
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.docker.outputs.image }}
     steps:
