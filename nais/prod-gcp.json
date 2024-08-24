@@ -1,16 +1,13 @@
 {
-    "adGruppeJobbsøkerrettet": "66b70a6a-3d05-47b3-8b5a-47c681dcd1d5",
-    "adGruppeArbeidsgiverrettet": "46c8e3b2-0469-4740-983f-d8cd2b6e4fee",
-    "adGruppeUtvikler": "41080368-439f-4128-858a-afbef876431e",
-    "ingress": [
-        "https://rekrutteringsbistand-kandidatsok-api.intern.nav.no/api"
-    ],
-    "pdlUrl": "https://pdl-api.prod-fss-pub.nais.io/graphql",
-    "pdlScope": "api://prod-fss.pdl.pdl-api/.default",
-    "pdlHost": "pdl-api.prod-fss-pub.nais.io",
-    "modiaContextHolderUrl": "https://modiacontextholder.prod-fss-pub.nais.io/modiacontextholder",
-    "modiaContextHolderHost": "modiacontextholder.prod-fss-pub.nais.io",
-    "modiaContextHolderScope": "api://prod-fss.personoversikt.modiacontextholder/.default",
-    "rekrutteringsbistand-kandidat-api-cluster": "prod-fss",
-    "foresporsel-om-deling-av-cv-api-cluster": "prod-fss"
+  "adGruppeJobbsøkerrettet": "66b70a6a-3d05-47b3-8b5a-47c681dcd1d5",
+  "adGruppeArbeidsgiverrettet": "46c8e3b2-0469-4740-983f-d8cd2b6e4fee",
+  "adGruppeUtvikler": "41080368-439f-4128-858a-afbef876431e",
+  "ingress": ["https://rekrutteringsbistand-kandidatsok-api.intern.nav.no/api"],
+  "pdlUrl": "https://pdl-api.prod-fss-pub.nais.io/graphql",
+  "pdlScope": "api://prod-fss.pdl.pdl-api/.default",
+  "pdlHost": "pdl-api.prod-fss-pub.nais.io",
+  "modiaContextHolderUrl": "http://modiacontextholder.personoversikt",
+  "modiaContextHolderScope": "api://prod-gcp.personoversikt.modiacontextholder/.default",
+  "rekrutteringsbistand-kandidat-api-cluster": "prod-fss",
+  "foresporsel-om-deling-av-cv-api-cluster": "prod-fss"
 }
