@@ -35,4 +35,7 @@ jobs:
     uses: navikt/toi-github-actions-workflows/.github/workflows/trivy-security-scan.yaml@main # TODO Are: Droppe @main?
     with:
       image: ${{ needs.call-build-and-publish.outputs.image }}
+    permissions:
+      id-token: write
+      security-events: write
     secrets: inherit
