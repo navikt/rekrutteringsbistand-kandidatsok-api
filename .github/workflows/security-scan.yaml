@@ -11,10 +11,11 @@ on:
       - main
       - master
 
+# TODO Are: Slette alle disse, ev. flytte inn i hver job?
 permissions:
-#  contents: read
-#  id-token: write # TODO Are: Unødvenidg og kan slettes?
-# TODO ARE: Hva av det følgende er egentlig nødvendig?
+  #  contents: read
+  #  id-token: write # TODO Are: Unødvenidg og kan slettes?
+  # TODO ARE: Hva av det følgende er egentlig nødvendig?
   actions: read
   contents: write
   security-events: write
@@ -28,30 +29,40 @@ jobs:
     uses: ./.github/workflows/build-and-publish.yaml
     secrets: inherit
 
-  trivy:
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write # Push Trivy/Sarif to Github Security
-      packages: read # TODO Are: Unødvenidg og kan slettes?
+  call-trivy-security-scan:
     needs: call-build-and-publish
-    steps:
-      - run: touch me # TODO Are: name istedenfor run?
-      - uses: nais/login@v0
-        with:
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          team: toi # TODO Are: Hente fra variabel?
+    permissions:
+      id-token: 'write'
+      security-events: 'write'
+    uses: navikt/toi-github-actions-workflows/.github/workflows/trivy-security-scan.yaml@main # TODO Are: Droppe @main?
+    with:
+      image: ${{ needs.call-build-and-publish.outputs.image }}
+    secrets: inherit
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ needs.call-build-and-publish.outputs.image }}'
-          format: 'sarif'
-          output: 'trivy.sarif'
-          severity: 'HIGH,CRITICAL'
-          limit-severities-for-sarif: true
-
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy.sarif'
+#  trivy:
+#    runs-on: ubuntu-latest
+#    permissions:
+#      security-events: write # Push Trivy/Sarif to Github Security
+#      packages: read # TODO Are: Unødvenidg og kan slettes?
+#    needs: call-build-and-publish
+#    steps:
+#      - run: touch me # TODO Are: name istedenfor run?
+#      - uses: nais/login@v0
+#        with:
+#          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+#          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+#          team: toi # TODO Are: Hente fra variabel?
+#
+#      - name: Run Trivy vulnerability scanner
+#        uses: aquasecurity/trivy-action@master
+#        with:
+#          image-ref: '${{ needs.call-build-and-publish.outputs.image }}'
+#          format: 'sarif'
+#          output: 'trivy.sarif'
+#          severity: 'HIGH,CRITICAL'
+#          limit-severities-for-sarif: true
+#
+#      - name: Upload Trivy results to GitHub Security
+#        uses: github/codeql-action/upload-sarif@v3
+#        with:
+#          sarif_file: 'trivy.sarif'
