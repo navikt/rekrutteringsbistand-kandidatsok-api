@@ -7,8 +7,6 @@ on:
 
 jobs:
   build-and-publish:
-    permissions:
-      contents: read
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.docker.outputs.image }}
