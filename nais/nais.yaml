@@ -35,6 +35,7 @@ spec:
     inbound:
       rules:
         - application: rekrutteringsbistand
+        - application: rekrutteringsbistand-next
         - application: rekrutteringsbistand-kandidatvarsel-api
         - application: rekrutteringsbistand-kandidat-api
           cluster: {{ rekrutteringsbistand-kandidat-api-cluster }}
