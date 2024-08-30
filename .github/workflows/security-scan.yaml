@@ -13,7 +13,7 @@ on:
 
 jobs:
   call-build-and-publish:
-    uses: navikt/toi-github-actions-workflows/.github/workflows/build-java-gradlew.yaml
+    uses: navikt/toi-github-actions-workflows/.github/workflows/build-java-gradlew.yaml@main
     permissions:
       contents: read
       id-token: write
