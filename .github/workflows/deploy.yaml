@@ -10,7 +10,11 @@ jobs:
     secrets: inherit
 
   call-deploy:
+    needs: call-build-and-publish
     uses: navikt/toi-github-actions-workflows/.github/workflows/deploy.yaml@main
+    with:
+      image: ${{ needs.call-build-and-publish.outputs.image }}
+      branch: 'reusable-workflow'
     permissions:
       contents: read
       id-token: write
