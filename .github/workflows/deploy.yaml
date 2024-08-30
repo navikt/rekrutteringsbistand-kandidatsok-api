@@ -11,7 +11,7 @@ jobs:
 
   deploy-to-dev:
     name: Deploy to dev
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/trivy2'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/reusable-workflow'
     needs: call-build-and-publish
     runs-on: ubuntu-latest
     steps:
