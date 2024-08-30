@@ -9,32 +9,39 @@ jobs:
       id-token: write
     secrets: inherit
 
-  deploy-to-dev:
-    name: Deploy to dev
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/reusable-workflow'
-    needs: call-build-and-publish
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: nais/nais.yaml
-          VAR: image=${{ needs.call-build-and-publish.outputs.image }}
-          VARS: nais/dev-gcp.json
+  call-deploy:
+    uses: navikt/toi-github-actions-workflows/.github/workflows/deploy.yaml@main
+    permissions:
+      contents: read
+      id-token: write
+    secrets: inherit
 
-  deploy-to-prod:
-    name: Deploy to prod
-    if: github.ref == 'refs/heads/main'
-    needs: [ call-build-and-publish, deploy-to-dev ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-gcp
-          RESOURCE: nais/nais.yaml
-          VAR: image=${{ needs.call-build-and-publish.outputs.image }}
-          VARS: nais/prod-gcp.json
+
+#    name: Deploy to dev
+#    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/reusable-workflow'
+#    needs: call-build-and-publish
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#          CLUSTER: dev-gcp
+#          RESOURCE: nais/nais.yaml
+#          VAR: image=${{ needs.call-build-and-publish.outputs.image }}
+#          VARS: nais/dev-gcp.json
+#
+#  deploy-to-prod:
+#    name: Deploy to prod
+#    if: github.ref == 'refs/heads/main'
+#    needs: [ call-build-and-publish, deploy-to-dev ]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#          CLUSTER: prod-gcp
+#          RESOURCE: nais/nais.yaml
+#          VAR: image=${{ needs.call-build-and-publish.outputs.image }}
+#          VARS: nais/prod-gcp.json
