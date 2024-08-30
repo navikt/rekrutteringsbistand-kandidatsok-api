@@ -3,7 +3,7 @@ on: [ push, workflow_dispatch ]
 
 jobs:
   call-build-and-publish:
-    uses: ./.github/workflows/build-and-publish.yaml
+    uses: navikt/toi-github-actions-workflows/.github/workflows/build-java-gradlew.yaml@main
     permissions:
       contents: read
       id-token: write
