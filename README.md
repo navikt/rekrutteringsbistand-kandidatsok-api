@@ -1,5 +1,5 @@
 # rekrutteringsbistand-kandidatsok-api
-TODO
+TODO: Hva skal være ansvaret til denne appen?
 
 ## Fakedings-autentisering (lokal utikling) 
 Vi bruker [fakedings](https://github.com/navikt/fakedings?tab=readme-ov-file) for autentisering
