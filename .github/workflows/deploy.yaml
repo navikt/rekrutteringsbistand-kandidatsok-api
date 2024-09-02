@@ -14,7 +14,7 @@ jobs:
     uses: navikt/toi-github-actions-workflows/.github/workflows/deploy.yaml@main
     with:
       image: ${{ needs.call-build-and-publish.outputs.image }}
-#      branch: 'reusable-workflow' # Optional Git feature-branch name
+      branch: 'tullenavn-som-ikke-finnes' # Optional Git feature-branch name
     permissions:
       contents: read
       id-token: write
