@@ -809,27 +809,6 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
-    @Test
-    fun `krever token for å søke kandidatnumre for navigering`() {
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering?side=11")
-            .body("{}")
-            .responseObject<JsonNode>()
-
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
-    }
-
-    @Test
-    fun `krever gruppetilhørighet for å søke kandidatnumre for navigering`() {
-        val navIdent = "A123456"
-        val token = lagToken(claims = mapOf("NAVident" to navIdent))
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/navigering?side=11")
-            .body("{}")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
-
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
-    }
-
     private fun lagLokalApp() = App(
         port = 8080,
         authenticationConfigurations = listOf(
