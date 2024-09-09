@@ -1,13 +1,17 @@
 package no.nav.toi.accesstoken
 
+import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.kittinunf.result.Result
+import io.github.resilience4j.retry.Retry
+import io.github.resilience4j.retry.RetryConfig
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.ehcache.config.units.MemoryUnit
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
@@ -24,26 +28,21 @@ class AccessTokenClient(
     fun hentAccessToken(innkommendeToken: String) = cache.invoke(innkommendeToken).access_token
 
     private fun fetchAccessToken(token: String): AccessTokenResponse {
-        val url = azureUrl
+        fun fetch(): Triple<Request, Response, Result<AccessTokenResponse, FuelError>> {
+            val formData = listOf(
+                "grant_type" to "urn:ietf:params:oauth:grant-type:jwt-bearer",
+                "client_secret" to secret,
+                "client_id" to clientId,
+                "assertion" to token,
+                "scope" to scope,
+                "requested_token_use" to "on_behalf_of"
+            )
+            return FuelManager().post(azureUrl, formData).responseObject<AccessTokenResponse>()
+        }
 
-        val formData = listOf(
-            "grant_type" to "urn:ietf:params:oauth:grant-type:jwt-bearer",
-            "client_secret" to secret,
-            "client_id" to clientId,
-            "assertion" to token,
-            "scope" to scope,
-            "requested_token_use" to "on_behalf_of"
-        )
-
-        val (_, response, result) = FuelManager()
-            .post(url, formData)
-            .responseObject<AccessTokenResponse>()
-
-        when (result) {
-            is Result.Success -> {
-                return result.get()
-            }
-
+        val (_, response, result) = withRetry(::fetch)
+        return when (result) {
+            is Result.Success -> result.get()
             is Result.Failure -> {
                 secureLog.error(
                     "Noe feil skjedde ved henting av access_token. msg: ${
@@ -54,7 +53,21 @@ class AccessTokenClient(
             }
         }
     }
+
+    companion object {
+        private fun withRetry(fetch: () -> Triple<Request, Response, Result<AccessTokenResponse, FuelError>>): Triple<Request, Response, Result<AccessTokenResponse, FuelError>> {
+            fun isFailure(t: Triple<Request, Response, Result<Any, Exception>>) = t.third is Result.Failure
+            val retryConfig =
+                RetryConfig.custom<Triple<Request, Response, Result<Any, Exception>>>()
+                    .retryOnResult(::isFailure)
+                    .build()
+            val retry = Retry.of("fetch access token", retryConfig)
+            val fetchAccessTokenWithRetry = Retry.decorateSupplier(retry, fetch)
+            return fetchAccessTokenWithRetry.get()
+        }
+    }
 }
+
 
 private data class AccessTokenResponse(
     val access_token: String,

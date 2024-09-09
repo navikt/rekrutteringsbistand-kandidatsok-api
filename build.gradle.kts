@@ -11,6 +11,7 @@ val mockOAuth2ServerVersion = "2.1.0"
 val fuelVersion = "2.3.1"
 val javalinVersion = "5.6.3"
 val jupiterVersion = "5.10.2"
+val resilience4jVersion = "2.2.0"
 
 application {
     mainClass.set("no.nav.toi.MainKt")
@@ -38,6 +39,7 @@ dependencies {
     implementation("com.github.kittinunf.fuel:fuel-jackson:$fuelVersion")
     kapt("io.javalin.community.openapi:openapi-annotation-processor:$javalinVersion")
     implementation("org.ehcache:ehcache:3.10.8")
+    implementation("io.github.resilience4j:resilience4j-retry:$resilience4jVersion")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.assertj:assertj-core:3.23.1")
