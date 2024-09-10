@@ -21,7 +21,6 @@ class ModiaKlient(private val modiaUrl: String, private val accessTokenClient: A
                 RetryConfig.custom<Triple<Request, Response, Result<Any, Exception>>>()
                     .retryOnResult(::isFailure)
                     .maxAttempts(3)
-                    .failAfterMaxAttempts(true)
                     .build()
             val retry = Retry.of("fetch access token", retryConfig)
             val fetchWithRetry = Retry.decorateSupplier(retry, fetch)
