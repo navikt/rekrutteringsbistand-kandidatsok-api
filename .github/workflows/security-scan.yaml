@@ -14,6 +14,8 @@ on:
 jobs:
   call-build-and-publish:
     uses: navikt/toi-github-actions-workflows/.github/workflows/build-java-gradlew.yaml@main
+    with:
+      java-version: '21'
     permissions:
       contents: read
       id-token: write
