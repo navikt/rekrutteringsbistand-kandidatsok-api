@@ -4,6 +4,8 @@ on: [ push, workflow_dispatch ]
 jobs:
   call-build-and-publish:
     uses: navikt/toi-github-actions-workflows/.github/workflows/build-java-gradlew.yaml@main
+    with:
+      java-version: '21'
     permissions:
       contents: read
       id-token: write
@@ -14,7 +16,7 @@ jobs:
     uses: navikt/toi-github-actions-workflows/.github/workflows/deploy.yaml@main
     with:
       image: ${{ needs.call-build-and-publish.outputs.image }}
-      deploy-to-dev-if-branch-name-is: 'alerts'
+      deploy-to-dev-if-branch-name-is: 'workflow-java-param'
     permissions:
       contents: read
       id-token: write
