@@ -1,23 +1,13 @@
 name: Trivy security scan
 on:
   schedule:
-    - cron: '40 5 * * *'
-  push:
-    branches:
-      - main
-      - master
-  pull_request:
-    branches:
-      - main
-      - master
+    - cron: '*/10 * * * *'
+#    - cron: '40 5 * * *'
 
 jobs:
-  call-build-and-trivy:
-    uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-trivy.yaml@main
-    with:
-      java-version: '21'
+  call-trivy-security-scan:
+    uses: navikt/toi-github-actions-workflows/.github/workflows/trivy-security-scan.yaml@main
     permissions:
-      contents: read
       id-token: write
       security-events: write
     secrets: inherit
