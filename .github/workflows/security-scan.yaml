@@ -1,8 +1,7 @@
 name: Trivy security scan
 on:
   schedule:
-    - cron: '*/30 * * * *' # TODO Are: Byttes ut med den nedenfor etter testing
-#    - cron: '40 5 * * 1'
+    - cron: '40 5 * * 1'
 
 jobs:
   call-trivy-security-scan:
