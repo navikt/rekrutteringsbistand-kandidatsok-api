@@ -6,10 +6,10 @@ metadata:
   labels:
     team: toi
 spec:
-  image: {{{image}}}
+  image: {{image}}
   ingresses:
   {{#each ingress as |url|}}
-     - {{ url }}
+     - {{url}}
   {{/each}}
   liveness:
     path: /internal/alive
@@ -38,16 +38,16 @@ spec:
         - application: rekrutteringsbistand-frontend
         - application: rekrutteringsbistand-kandidatvarsel-api
         - application: rekrutteringsbistand-kandidat-api
-          cluster: {{ rekrutteringsbistand-kandidat-api-cluster }}
+          cluster: {{rekrutteringsbistand-kandidat-api-cluster}}
         - application: foresporsel-om-deling-av-cv-api
           namespace: arbeidsgiver-inkludering
-          cluster: {{ foresporsel-om-deling-av-cv-api-cluster }}
+          cluster: {{foresporsel-om-deling-av-cv-api-cluster}}
     outbound:
       rules:
         - application: modiacontextholder
           namespace: personoversikt
       external:
-        - host: {{ pdlHost }}
+        - host: {{pdlHost}}
   env:
     - name: REKRUTTERINGSBISTAND_JOBBSOKERRETTET
       value: {{adGruppeJobbsøkerrettet}}
