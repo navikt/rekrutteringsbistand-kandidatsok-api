@@ -40,7 +40,7 @@ spec:
         - application: rekrutteringsbistand-kandidat-api
           cluster: {{rekrutteringsbistand-kandidat-api-cluster}}
         - application: foresporsel-om-deling-av-cv-api
-          namespace: arbeidsgiver-inkludering
+          namespace: toi
           cluster: {{foresporsel-om-deling-av-cv-api-cluster}}
     outbound:
       rules:
