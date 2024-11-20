@@ -65,7 +65,7 @@ object AuditLogg {
             .extension("msg", msg)
             .build()
 
-        val ekstraSpaceSidenAuditloggerInnimellomKutterSisteTegn = "  "
+        val ekstraSpaceSidenAuditloggerInnimellomKutterSisteTegn = " "
         auditLogger.log("$message" + ekstraSpaceSidenAuditloggerInnimellomKutterSisteTegn)
         secureLog.info("auditlogger: {}", "$message" + ekstraSpaceSidenAuditloggerInnimellomKutterSisteTegn)
     }
