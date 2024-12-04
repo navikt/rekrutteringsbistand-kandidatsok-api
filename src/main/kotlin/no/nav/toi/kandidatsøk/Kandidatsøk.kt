@@ -4,13 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
 import io.javalin.http.Handler
-import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.filter.Filter
 import no.nav.toi.kandidatsøk.filter.FilterFunksjon
-import no.nav.toi.kandidatsøk.filter.Valideringsfeil
 import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMineBrukereFilter
 import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMineKontorerFilter
 import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMittKontorFilter
@@ -170,55 +168,45 @@ private fun håndterEndepunkt(
 
     val request = ctx.bodyAsClass<FilterParametre>()
     val sorterting = ctx.queryParam("sortering").tilSortering()
+    val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient, request)
+        .filterPopuleringsFunksjon(ctx.authenticatedUser(), request)
+        .filter(Filter::erAktiv)
+    val filterFunksjoner = filter
+        .map(Filter::lagESFilterFunksjon)
+
+    // TODO Are: Rydd, fjern logging?, gjør om til val. Se https://trello.com/c/6jeQjtGn
+    var side: Int = -1
     try {
-        val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient, request)
-            .filterPopuleringsFunksjon(ctx.authenticatedUser(), request)
-            .filter(Filter::erAktiv)
-        val filterFunksjoner = filter
-            .map(Filter::lagESFilterFunksjon)
-
-        // TODO Are: Rydd, fjern logging?, gjør om til val
-        var side: Int = -1
-        try {
-            side = ctx.queryParam("side")?.toInt() ?: 1
-        } catch (e: java.lang.NumberFormatException) {
-            val actualSideParam: String? = ctx.queryParam("side")
-            val requestUrl: String = ctx.req().requestURL.toString()
-            val endpointHandlerPath: String = ctx.endpointHandlerPath()
-            val msg =
-                "URL query parameter 'side' lar seg ikke gjøre om til en Int. side=[$actualSideParam], requestUrl=[$requestUrl], endpointHandlerPath=[$endpointHandlerPath]"
-            log.warn(msg, e)
-            throw e
-        }
-
-        val result = openSearchClient.kandidatSøk(filterFunksjoner, side, sorterting).toResponseJson()
-        val navigeringResult =
-            openSearchClient.kandidatSøkNavigering(filterFunksjoner, side, sorterting).hentUtKandidatnumre()
-        val hits = result.hits
-        filter.forEach {
-            it.auditLog(
-                ctx.authenticatedUser().navIdent,
-                hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
-            )
-        }
-
-        val kandidater: List<JsonNode> = hits.hits.map { it._source }
-        ctx.json(
-            KandidatSøkOpensearchResponseMedNavigering(
-                kandidater,
-                NavigeringRespons(navigeringResult.kandidatnumre),
-                hits.total.value
-            )
-        )
-    } catch (e: Valideringsfeil) {
-        val httpStatus = HttpStatus.BAD_REQUEST
+        side = ctx.queryParam("side")?.toInt() ?: 1
+    } catch (e: java.lang.NumberFormatException) {
+        val actualSideParam: String? = ctx.queryParam("side")
         val requestUrl: String = ctx.req().requestURL.toString()
         val endpointHandlerPath: String = ctx.endpointHandlerPath()
         val msg =
-            "Returnerer HTTP respons status $httpStatus. requestUrl=[$requestUrl], endpointHandlerPath=[$endpointHandlerPath]"
+            "URL query parameter 'side' lar seg ikke gjøre om til en Int. side=[$actualSideParam], requestUrl=[$requestUrl], endpointHandlerPath=[$endpointHandlerPath]"
         log.warn(msg, e)
-        ctx.status(httpStatus)
+        throw e
     }
+
+    val result = openSearchClient.kandidatSøk(filterFunksjoner, side, sorterting).toResponseJson()
+    val navigeringResult =
+        openSearchClient.kandidatSøkNavigering(filterFunksjoner, side, sorterting).hentUtKandidatnumre()
+    val hits = result.hits
+    filter.forEach {
+        it.auditLog(
+            ctx.authenticatedUser().navIdent,
+            hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
+        )
+    }
+
+    val kandidater: List<JsonNode> = hits.hits.map { it._source }
+    ctx.json(
+        KandidatSøkOpensearchResponseMedNavigering(
+            kandidater,
+            NavigeringRespons(navigeringResult.kandidatnumre),
+            hits.total.value
+        )
+    )
 }
 
 

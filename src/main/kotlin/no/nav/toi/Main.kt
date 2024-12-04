@@ -112,12 +112,22 @@ class App(
 
         val app = javalin.start(port)
         app.exception(ValidationException::class.java) { e, ctx ->
-            log.info("Returnerer 400 Bad Request på grunn av: ${e.errors}", e)
-            ctx.json(e.errors).status(BAD_REQUEST)
+            val httpStatus = BAD_REQUEST
+            val requestUrl: String = ctx.req().requestURL.toString()
+            val endpointHandlerPath: String = ctx.endpointHandlerPath()
+            val msg =
+                "Returnerer HTTP respons status $httpStatus. requestUrl=[$requestUrl], endpointHandlerPath=[$endpointHandlerPath]"
+            log.info(msg, e)
+            ctx.status(httpStatus)
         }
         app.exception(Exception::class.java) { e, ctx ->
-            log.error(e.message, e)
-            ctx.status(INTERNAL_SERVER_ERROR)
+            val httpStatus = INTERNAL_SERVER_ERROR
+            val requestUrl: String = ctx.req().requestURL.toString()
+            val endpointHandlerPath: String = ctx.endpointHandlerPath()
+            val msg =
+                "Returnerer HTTP respons status $httpStatus. requestUrl=[$requestUrl], endpointHandlerPath=[$endpointHandlerPath]"
+            log.error(msg, e)
+            ctx.status(httpStatus)
         }
     }
 
