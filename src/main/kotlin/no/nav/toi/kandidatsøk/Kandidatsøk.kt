@@ -177,7 +177,7 @@ private fun håndterEndepunkt(
         val filterFunksjoner = filter
             .map(Filter::lagESFilterFunksjon)
 
-        // TODO Are: Rydd, fjern logging?, gjør om til val
+        // TODO Are: Rydd, fjern logging?, gjør om til val. Se https://trello.com/c/6jeQjtGn
         var side: Int = -1
         try {
             side = ctx.queryParam("side")?.toInt() ?: 1
