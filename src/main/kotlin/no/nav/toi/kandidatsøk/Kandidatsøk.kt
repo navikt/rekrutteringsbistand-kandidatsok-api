@@ -182,10 +182,12 @@ private fun håndterEndepunkt(
         val actualSideParam: String? = ctx.queryParam("side")
         val requestUrl: String = ctx.req().requestURL.toString()
         val endpointHandlerPath: String = ctx.endpointHandlerPath()
+        val httpMethod: String = ctx.req().method
         val msg =
-            "URL query parameter 'side' lar seg ikke gjøre om til en Int. side=[$actualSideParam], requestUrl=[$requestUrl], endpointHandlerPath=[$endpointHandlerPath]"
+            "URL query parameter 'side' lar seg ikke gjøre om til en Int. side=[$actualSideParam], requestUrl=[$requestUrl], httpMethod=[$httpMethod], endpointHandlerPath=[$endpointHandlerPath]"
         log.warn(msg, e)
-        throw e
+    //        throw e
+        side = 1 // TODO Are: Midlertidig løsning, bedre enn å kaste exception og returnere HTTP 500 server error. Samarbeid med Erlend om frontend når han er tilbake fra ferie i desember 2024. Returnere 400 client error når dette skjer, så det blir lett for Erlend å vite hvor han ev. skal fikse?
     }
 
     val result = openSearchClient.kandidatSøk(filterFunksjoner, side, sorterting).toResponseJson()

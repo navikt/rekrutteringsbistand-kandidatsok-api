@@ -115,8 +115,9 @@ class App(
             val httpStatus = BAD_REQUEST
             val requestUrl: String = ctx.req().requestURL.toString()
             val endpointHandlerPath: String = ctx.endpointHandlerPath()
+            val httpMethod: String = ctx.req().method
             val msg =
-                "Returnerer HTTP respons status $httpStatus. requestUrl=[$requestUrl], endpointHandlerPath=[$endpointHandlerPath]"
+                "Returnerer HTTP respons status $httpStatus. requestUrl=[$requestUrl], httpMethod=[$httpMethod], endpointHandlerPath=[$endpointHandlerPath]"
             log.info(msg, e)
             ctx.status(httpStatus)
         }
@@ -124,8 +125,9 @@ class App(
             val httpStatus = INTERNAL_SERVER_ERROR
             val requestUrl: String = ctx.req().requestURL.toString()
             val endpointHandlerPath: String = ctx.endpointHandlerPath()
+            val httpMethod: String = ctx.req().method
             val msg =
-                "Returnerer HTTP respons status $httpStatus. requestUrl=[$requestUrl], endpointHandlerPath=[$endpointHandlerPath]"
+                "Returnerer HTTP respons status $httpStatus. requestUrl=[$requestUrl], httpMethod=[$httpMethod], endpointHandlerPath=[$endpointHandlerPath]"
             log.error(msg, e)
             ctx.status(httpStatus)
         }
