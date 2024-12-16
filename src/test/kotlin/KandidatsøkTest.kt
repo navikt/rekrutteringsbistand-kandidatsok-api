@@ -365,7 +365,28 @@ class KandidatsøkTest {
 
     @ParameterizedTest
     @MethodSource("endepunktSomParameter")
-    fun `Kan søke kandidater med ANDRE innsatsgrupper`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Kan søke kandidater med GRADERT_VARIG_TILPASSET_INNSATS innsatsgruppe`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockES(
+            wireMock,
+            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedGradertVarigTilpasset,
+            extraTerms = endepunkt.extraTerms
+        )
+        endepunkt.ekstraMocking(wireMock)
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"innsatsgruppe":["GRADERT_VARIG_TILPASSET_INNSATS"]${endepunkt.bodyParameter(true)}}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+    }
+
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med HAR_IKKE_GJELDENDE_14A_VEDTAK innsatsgruppe`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockES(
             wireMock,
@@ -376,7 +397,7 @@ class KandidatsøkTest {
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"innsatsgruppe":["ANDRE"]${endepunkt.bodyParameter(true)}}""")
+            .body("""{"innsatsgruppe":["HAR_IKKE_GJELDENDE_14A_VEDTAK"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
