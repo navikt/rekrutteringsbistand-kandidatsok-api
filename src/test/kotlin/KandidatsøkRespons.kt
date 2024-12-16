@@ -3,11 +3,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
 
 object KandidatsøkRespons {
-    fun query(vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM","IKVAL","VARIG"]}}""", from: Int = 0) = (extraTerms.toList() + innsatsgruppeTerm)
+    fun query(vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS"]}}""", from: Int = 0) = (extraTerms.toList() + innsatsgruppeTerm)
         .let { terms ->
-            """{"_source":{"includes":["fodselsnummer","fornavn","etternavn","arenaKandidatnr","kvalifiseringsgruppekode","yrkeJobbonskerObj","geografiJobbonsker","kommuneNavn","postnummer"]},"from":$from,"query":{"bool":{"must":$terms}},"size":25,"track_total_hits":true${if(sortering)""","sort":[{"tidsstempel":{"order":"desc"}}]""" else ""}}"""
+            """{"_source":{"includes":["fodselsnummer","fornavn","etternavn","arenaKandidatnr","innsatsgruppe","yrkeJobbonskerObj","geografiJobbonsker","kommuneNavn","postnummer"]},"from":$from,"query":{"bool":{"must":$terms}},"size":25,"track_total_hits":true${if(sortering)""","sort":[{"tidsstempel":{"order":"desc"}}]""" else ""}}"""
         }
-    fun navigeringQuery(vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM","IKVAL","VARIG"]}}""", from: Int = 0) = (extraTerms.toList() + innsatsgruppeTerm)
+    fun navigeringQuery(vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS"]}}""", from: Int = 0) = (extraTerms.toList() + innsatsgruppeTerm)
         .let { terms ->
             """{"_source":false,"from":$from,"query":{"bool":{"must":$terms}},"size":500,"track_total_hits":true${if(sortering)""","sort":[{"tidsstempel":{"order":"desc"}}]""" else ""}}"""
         }
@@ -19,13 +19,13 @@ object KandidatsøkRespons {
     val stedTerm = """{"bool":{"should":[{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO18.1804|NO18|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO50.5001|NO50|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO02.*|NO02|NO"}}}]}}}},{"nested":{"path":"geografiJobbonsker","query":{"bool":{"should":[{"regexp":{"geografiJobbonsker.geografiKode":{"value":"NO.*|NO|NO"}}}]}}}}]}}"""
     val stedMedMåBoPåTerm = """{"bool": {"should": [{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO03.0301|NO03|NO"}}}]}}}},{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO46.4601|NO46|NO"}}}]}}}},{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO.*|NO|NO"}}}]}}}},{"nested": {"path": "geografiJobbonsker","query": {"bool": {"should": [{"regexp": {"geografiJobbonsker.geografiKode": {"value":"NO15.*|NO15|NO"}}}]}}}}]}},{"bool": {"should": [{"regexp": {"kommunenummerstring": {"value":"0301"}}},{"regexp": {"kommunenummerstring": {"value":"4601"}}},{"regexp": {"kommunenummerstring": {"value":".*"}}},{"regexp": {"kommunenummerstring": {"value":"15.*"}}}]}}"""
     val arbeidsønskeTerm = """{"bool":{"should":[{"match":{"yrkeJobbonskerObj.styrkBeskrivelse":{"query":"Sauegjeter","fuzziness":"0","operator":"and"}}},{"match":{"yrkeJobbonskerObj.sokeTitler":{"query":"Sauegjeter","fuzziness":"0","operator":"and"}}},{"match":{"yrkeJobbonskerObj.styrkBeskrivelse":{"query":"Saueklipper","fuzziness":"0","operator":"and"}}},{"match":{"yrkeJobbonskerObj.sokeTitler":{"query":"Saueklipper","fuzziness":"0","operator":"and"}}}]}}"""
-    val innsatsgruppeTermMedBATTogBFORM = """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM"]}}"""
-    val innsatsgruppeTermMedANDRE = """{"terms":{"kvalifiseringsgruppekode":["ANDRE","IVURD","BKART","OPPFI","VURDI","VURDU"]}}"""
-    val innsatsgruppeTermMedAlle = """{"terms":{"kvalifiseringsgruppekode":["ANDRE","IKVAL","VARIG","BFORM","BATT","IVURD","BKART","OPPFI","VURDI","VURDU"]}}"""
+    val innsatsgruppeTermMedSpesieltOgSituasjonsbestemtInnsats = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS"]}}"""
+    val innsatsgruppeTermMedIkkeVurdert = """{"terms":{"innsatsgruppe":["HAR_IKKE_GJELDENDE_14A_VEDTAK"]}}"""
+    val innsatsgruppeTermMedAlle = """{"terms":{"innsatsgruppe":["HAR_IKKE_GJELDENDE_14A_VEDTAK","SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS","GRADERT_VARIG_TILPASSET_INNSATS"]}}"""
     val språkTerm = """{"bool":{"should":[{"nested":{"path":"sprak","query":{"match":{"sprak.sprakKodeTekst":{"query":"Nynorsk","operator":"and"}}},"score_mode":"sum"}},{"nested":{"path":"sprak","query":{"match":{"sprak.sprakKodeTekst":{"query":"Norsk","operator":"and"}}},"score_mode":"sum"}}]}}"""
     val arbeidsErfaringTerm = """{"bool":{"should":[{"nested":{"path":"yrkeserfaring","query":{"match":{"yrkeserfaring.sokeTitler":{"query":"Barnehageassistent","operator":"and"}}}}},{"nested":{"path":"yrkeserfaring","query":{"match":{"yrkeserfaring.sokeTitler":{"query":"Butikkansvarlig","operator":"and"}}}}}]}}"""
     val nyligArbeidsErfaringTerm = """{"bool":{"should":[{"nested":{"path":"yrkeserfaring","query":{"bool":{"must":[{"match":{"yrkeserfaring.sokeTitler":{"query":"Hvalfanger","operator":"and"}}},{"range":{"yrkeserfaring.tilDato":{"gte":"now-2y"}}}]}}}},{"nested":{"path":"yrkeserfaring","query":{"bool":{"must":[{"match":{"yrkeserfaring.sokeTitler":{"query":"Kokk","operator":"and"}}},{"range":{"yrkeserfaring.tilDato":{"gte":"now-2y"}}}]}}}}]}}"""
-    val hovedmålTerm = """{"terms":{"hovedmaalkode":["SKAFFEA","OKEDELT"]}}"""
+    val hovedmålTerm = """{"terms":{"hovedmal":["SKAFFE_ARBEID","OKE_DELTAKELSE"]}}"""
     val kompetanseTerm = """{"bool":{"should":[{"match_phrase":{"samletKompetanseObj.samletKompetanseTekst":{"query":"Fagbrev FU-operatør","slop":4}}},{"match_phrase":{"samletKompetanseObj.samletKompetanseTekst":{"query":"Kotlin","slop":4}}}]}}"""
     val førerkortTerm = """{"bool":{"should":[{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"BE - Personbil med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"D - Buss"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"C1E - Lett lastebil med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"CE - Lastebil med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"D1E - Minibuss med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"DE - Buss med tilhenger"}}},"score_mode":"sum"}}]}}"""
     val utdanningTerm = """{"bool":{"should":[{"bool":{"must":[{"nested":{"path":"utdanning","query":{"regexp":{"utdanning.nusKode":{"value":"[3-4][0-9]*"}}}}}],"must_not":[{"nested":{"path":"utdanning","query":{"regexp":{"utdanning.nusKode":{"value":"[5-8][0-9]*"}}}}}]}},{"bool":{"must":[{"nested":{"path":"utdanning","query":{"regexp":{"utdanning.nusKode":{"value":"6[0-9]*"}}}}}],"must_not":[{"nested":{"path":"utdanning","query":{"regexp":{"utdanning.nusKode":{"value":"[7-8][0-9]*"}}}}}]}},{"bool":{"must":[{"nested":{"path":"utdanning","query":{"regexp":{"utdanning.nusKode":{"value":"8[0-9]*"}}}}}]}}]}}"""
@@ -142,7 +142,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Redd",
                             "fodselsnummer": "04928797045",
-                            "kvalifiseringsgruppekode": "IKVAL"
+                            "innsatsgruppe": "STANDARD_INNSATS"
                         },
                         "sort": [
                             1706527557597
@@ -298,7 +298,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Uklar",
                             "fodselsnummer": "07858597719",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1706262413137
@@ -348,7 +348,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "From",
                             "fodselsnummer": "12447120117",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1706186807071
@@ -389,7 +389,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Fast",
                             "fodselsnummer": "23427744876",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1706186573969
@@ -435,7 +435,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Possessiv",
                             "fodselsnummer": "07499738492",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1706185850959
@@ -510,7 +510,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Rettferdig",
                             "fodselsnummer": "25898097334",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1702467078063
@@ -621,7 +621,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Umotivert",
                             "fodselsnummer": "10428826731",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1702294042484
@@ -659,7 +659,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Opplyst",
                             "fodselsnummer": "04829398279",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1702042431227
@@ -695,7 +695,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Ufruktbar",
                             "fodselsnummer": "66870375701",
-                            "kvalifiseringsgruppekode": "VARIG"
+                            "innsatsgruppe": "VARIG_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1702041367345
@@ -811,7 +811,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Uklar",
                             "fodselsnummer": "07858597719",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701934631768
@@ -886,7 +886,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "From",
                             "fodselsnummer": "07897498280",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701178008204
@@ -961,7 +961,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Passiv",
                             "fodselsnummer": "28869099653",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701177434350
@@ -1036,7 +1036,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Hevngjerrig",
                             "fodselsnummer": "17838298621",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701177432334
@@ -1111,7 +1111,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Skamfull",
                             "fodselsnummer": "13898799837",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701177431555
@@ -1186,7 +1186,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Motvillig",
                             "fodselsnummer": "11857998776",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701177431533
@@ -1261,7 +1261,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Pompøs",
                             "fodselsnummer": "06888699277",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701177431478
@@ -1336,7 +1336,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Handlekraftig",
                             "fodselsnummer": "09850499419",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701177431476
@@ -1411,7 +1411,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Melankolsk",
                             "fodselsnummer": "13898297912",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701177431388
@@ -1486,7 +1486,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Oriental",
                             "fodselsnummer": "08837598290",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701177431061
@@ -1561,7 +1561,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Velkommen",
                             "fodselsnummer": "15927296591",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701177431020
@@ -1636,7 +1636,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Oppjaget",
                             "fodselsnummer": "20877599184",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1701177430801
@@ -1711,7 +1711,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Patent",
                             "fodselsnummer": "17907096467",
-                            "kvalifiseringsgruppekode": "BFORM"
+                            "innsatsgruppe": "SITUASJONSBESTEMT_INNSATS"
                         },
                         "sort": [
                             1701170557004
