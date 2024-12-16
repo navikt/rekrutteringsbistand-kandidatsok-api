@@ -839,7 +839,7 @@ class KandidatsøkTest {
         wireMock: WireMock,
         vararg extraTerms: String,
         sortering: Boolean = true,
-        innsatsgruppeTerm: String = """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM","IKVAL","VARIG"]}}""",
+        innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS"]}}""",
         from: Int = 0
     ) {
         wireMock.register(

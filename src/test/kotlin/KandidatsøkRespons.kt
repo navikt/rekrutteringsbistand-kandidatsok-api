@@ -79,7 +79,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Nybakt",
                             "fodselsnummer": "31419334556",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1707134341159
@@ -99,7 +99,7 @@ object KandidatsøkRespons {
                             "geografiJobbonsker": [],
                             "fornavn": "Vennlig",
                             "fodselsnummer": "02497030229",
-                            "kvalifiseringsgruppekode": "BATT"
+                            "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
                             1706786611727
@@ -182,7 +182,7 @@ object KandidatsøkRespons {
                             ],
                             "fornavn": "Oppfyllende Korrekt Boble",
                             "fodselsnummer": "19810297487",
-                            "kvalifiseringsgruppekode": "IKVAL"
+                            "innsatsgruppe": "STANDARD_INNSATS"
                         },
                         "sort": [
                             1706522288354
