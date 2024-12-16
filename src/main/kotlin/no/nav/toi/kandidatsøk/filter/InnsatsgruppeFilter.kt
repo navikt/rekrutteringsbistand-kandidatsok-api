@@ -19,7 +19,7 @@ private class InnsatsgruppeFilter(parametre: FilterParametre): Filter {
 
     override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
-            terms("innsatsgruppe" to valgteGyldigeInnsatsgrupper)
+            terms("innsatsgruppe.keyword" to valgteGyldigeInnsatsgrupper)
         }
     }
 }

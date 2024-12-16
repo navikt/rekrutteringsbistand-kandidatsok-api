@@ -13,7 +13,7 @@ private class HovedmålFilter(parametre: FilterParametre): Filter {
 
     override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
-            terms("hovedmal" to hovedMål)
+            terms("hovedmal.keyword" to hovedMål)
         }
     }
 }
