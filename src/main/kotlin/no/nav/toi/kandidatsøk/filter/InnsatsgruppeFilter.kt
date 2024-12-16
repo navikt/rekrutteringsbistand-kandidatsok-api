@@ -6,20 +6,20 @@ import no.nav.toi.terms
 
 fun List<Filter>.medInnsatsgruppeFilter(filterParametre: FilterParametre) = this + InnsatsgruppeFilter(filterParametre)
 
-private val lovligeVerdier = listOf("ANDRE","IKVAL","VARIG","BFORM","BATT","IVURD","BKART","OPPFI","VURDI","VURDU")
-private val defaultInnsatsgrupper = listOf("BATT","BFORM","IKVAL","VARIG")
+private val defaultInnsatsgrupper = listOf("SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS","GRADERT_VARIG_TILPASSET_INNSATS")
+
+private val lovligeVerdier = defaultInnsatsgrupper + "HAR_IKKE_GJELDENDE_14A_VEDTAK"
 
 private class InnsatsgruppeFilter(parametre: FilterParametre): Filter {
-    private val innsatsgrupper = parametre.innsatsgruppe
+    private val valgteGyldigeInnsatsgrupper = parametre.innsatsgruppe
         ?.filter { it in lovligeVerdier }
-        ?.flatMap { if(it=="ANDRE") listOf(it,"IVURD","BKART","OPPFI","VURDI","VURDU") else listOf(it) }
         .let { if(it?.isNotEmpty() == true) it else defaultInnsatsgrupper }
 
     override fun erAktiv() = true
 
     override fun lagESFilterFunksjon(): FilterFunksjon = {
         must_ {
-            terms("kvalifiseringsgruppekode" to innsatsgrupper)
+            terms("innsatsgruppe" to valgteGyldigeInnsatsgrupper)
         }
     }
 }
