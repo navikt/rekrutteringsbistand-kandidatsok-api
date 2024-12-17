@@ -129,6 +129,10 @@ class App(
             ctx.status(httpStatus)
         }
     }
+
+    fun close() {
+        javalin.stop()
+    }
 }
 
 private val fakedingsAuthenticationConfiguration = AuthenticationConfiguration(
