@@ -6,7 +6,7 @@ jobs:
     uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-deploy.yaml@main
     with:
       java-version: '21'
-      deploy-to-dev-if-branch-name-is: 'bedre-logging-av-feil'
+      deploy-to-dev-if-branch-name-is: 'oppgrader_javalin'
     permissions:
       contents: read
       id-token: write
