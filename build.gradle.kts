@@ -9,7 +9,7 @@ version = "1.0-SNAPSHOT"
 
 val mockOAuth2ServerVersion = "2.1.0"
 val fuelVersion = "2.3.1"
-val javalinVersion = "5.6.3"
+val javalinVersion = "6.3.0"
 val jupiterVersion = "5.10.2"
 val resilience4jVersion = "2.2.0"
 

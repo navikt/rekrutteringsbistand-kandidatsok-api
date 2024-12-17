@@ -5,8 +5,6 @@ import io.javalin.config.JavalinConfig
 import io.javalin.http.HttpStatus.BAD_REQUEST
 import io.javalin.http.HttpStatus.INTERNAL_SERVER_ERROR
 import io.javalin.openapi.plugin.OpenApiPlugin
-import io.javalin.openapi.plugin.OpenApiPluginConfiguration
-import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
 import no.nav.toi.accesstoken.AccessTokenClient
@@ -28,7 +26,6 @@ import no.nav.toi.suggest.handleStedSuggest
 import no.nav.toi.suggest.handleSuggest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.Closeable
 import java.util.*
 
 
@@ -49,7 +46,7 @@ class App(
     azureUrl: String,
     modiaContextHolderUrl: String,
     modiaContextHolderScope: String
-) : Closeable {
+) {
 
     lateinit var javalin: Javalin
 
@@ -66,20 +63,20 @@ class App(
     )
 
     fun configureOpenApi(config: JavalinConfig) {
-        val openApiConfiguration = OpenApiPluginConfiguration().apply {
-            withDefinitionConfiguration { _, definition ->
+        val openApiConfiguration = OpenApiPlugin {
+            openApiConfig ->
+            openApiConfig.withDefinitionConfiguration { _, definition ->
                 definition.apply {
-                    withOpenApiInfo {
+                    withInfo {
                         it.title = "Kandidatsøk API"
                     }
                 }
             }
         }
-        config.plugins.register(OpenApiPlugin(openApiConfiguration))
-        config.plugins.register(SwaggerPlugin(SwaggerConfiguration().apply {
-            this.validatorUrl = null
-        }
-        ))
+        config.registerPlugin(openApiConfiguration)
+        config.registerPlugin(SwaggerPlugin { swaggerConfiguration ->
+            swaggerConfiguration.validatorUrl = null
+        })
     }
 
 
@@ -133,8 +130,8 @@ class App(
         }
     }
 
-    override fun close() {
-        javalin.close()
+    fun close() {
+        javalin.stop()
     }
 }
 
