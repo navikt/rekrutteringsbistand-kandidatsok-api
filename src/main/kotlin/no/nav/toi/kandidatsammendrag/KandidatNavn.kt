@@ -51,7 +51,6 @@ private fun OpenSearchClient.lookupKandidatNavn(fodselsnummer: String): SearchRe
         query_ {
             term_ { field("fodselsnummer").value(fodselsnummer) }
         }
-        size(1)
         source_ {
             includes("fornavn", "etternavn")
         }

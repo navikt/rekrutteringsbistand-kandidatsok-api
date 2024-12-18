@@ -57,6 +57,5 @@ private fun OpenSearchClient.lookupKandidatStillingssøk(params: RequestDto): Se
                 "veilederIdent", "orgenhet"
             )
         }
-        size(1)
     }
 }

@@ -53,5 +53,4 @@ private fun OpenSearchClient.lookupCv(params: RequestDto): SearchResponse<JsonNo
                 field("kandidatnr").value(params.kandidatnr)
             }
         }
-        size(1)
     }

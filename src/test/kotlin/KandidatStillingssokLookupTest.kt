@@ -55,8 +55,7 @@ class KandidatStillingssokLookupTest {
                             "value": "PAM0xtfrwli5"
                           }
                         }
-                      },
-                      "size": 1
+                      }
                     }
                 """.trimIndent()
                     )
@@ -103,8 +102,7 @@ class KandidatStillingssokLookupTest {
                             "value": "PAM000000001"
                           }
                         }
-                      },
-                      "size": 1
+                      }
                     }
                 """.trimIndent()
                     )
@@ -129,7 +127,7 @@ class KandidatStillingssokLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     notFound()
                 )
@@ -267,8 +265,7 @@ class KandidatStillingssokLookupTest {
                             "value": "PAM0xtfrwli5"
                           }
                         }
-                      },
-                      "size": 1
+                      }
                     }
                 """.trimIndent()
                     )
