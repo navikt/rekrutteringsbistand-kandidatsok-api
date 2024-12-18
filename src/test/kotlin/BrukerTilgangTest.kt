@@ -145,7 +145,7 @@ class BrukerTilgangTest {
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
-                        """{"_source":{"includes":["veilederIdent","orgenhet"]},"query":{"term":{"$mockESFelt":{"value":"12345678910"}}},"size":1}""".trimIndent()
+                        """{"_source":{"includes":["veilederIdent","orgenhet"]},"query":{"term":{"$mockESFelt":{"value":"12345678910"}}}}""".trimIndent()
                     )
                 )
                 .willReturn(

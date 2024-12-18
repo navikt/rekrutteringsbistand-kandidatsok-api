@@ -111,7 +111,7 @@ class SikkerhetTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"kandidatnr":{"value":"\",!xz" }}},"size":1}"""))
+                .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"kandidatnr":{"value":"\",!xz" }}}}"""))
                 .willReturn(
                     WireMock.ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
                 )
