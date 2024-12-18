@@ -68,6 +68,5 @@ private fun OpenSearchClient.lookupBrukertilgang(field: String, value: String): 
                 "orgenhet"
             )
         }
-        size(1)
     }
 }
