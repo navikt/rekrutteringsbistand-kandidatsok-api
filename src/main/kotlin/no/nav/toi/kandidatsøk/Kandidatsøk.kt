@@ -3,6 +3,7 @@ package no.nav.toi.kandidatsøk
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
+import io.javalin.http.Context
 import io.javalin.http.Handler
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
@@ -168,28 +169,12 @@ private fun håndterEndepunkt(
 
     val request = ctx.bodyAsClass<FilterParametre>()
     val sorterting = ctx.queryParam("sortering").tilSortering()
-    val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient, request)
-        .filterPopuleringsFunksjon(ctx.authenticatedUser(), request)
-        .filter(Filter::erAktiv)
-    val filterFunksjoner = filter
-        .map(Filter::lagESFilterFunksjon)
-
-    // TODO Are: Rydd, fjern logging?, gjør om til val. Se https://trello.com/c/6jeQjtGn
-    var side: Int = -1
-    try {
-        side = ctx.queryParam("side")?.toInt() ?: 1
-    } catch (e: java.lang.NumberFormatException) {
-        val actualSideParam: String? = ctx.queryParam("side")
-        val requestUrl: String = ctx.req().requestURL.toString()
-        val endpointHandlerPath: String = ctx.endpointHandlerPath()
-        val httpMethod: String = ctx.req().method
-        val msg =
-            "URL query parameter 'side' lar seg ikke gjøre om til en Int. side=[$actualSideParam], requestUrl=[$requestUrl], httpMethod=[$httpMethod], endpointHandlerPath=[$endpointHandlerPath]"
-        log.warn(msg, e)
-    //        throw e
-        side = 1 // TODO Are: Midlertidig løsning, bedre enn å kaste exception og returnere HTTP 500 server error. Samarbeid med Erlend om frontend når han er tilbake fra ferie i desember 2024. Returnere 400 client error når dette skjer, så det blir lett for Erlend å vite hvor han ev. skal fikse?
-    }
-
+    val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient, request).filterPopuleringsFunksjon(
+        ctx.authenticatedUser(),
+        request
+    ).filter(Filter::erAktiv)
+    val filterFunksjoner = filter.map(Filter::lagESFilterFunksjon)
+    val side = hentProblematiskQueryParamSideMedLogging(ctx)
     val result = openSearchClient.kandidatSøk(filterFunksjoner, side, sorterting).toResponseJson()
     val navigeringResult =
         openSearchClient.kandidatSøkNavigering(filterFunksjoner, side, sorterting).hentUtKandidatnumre()
@@ -200,7 +185,6 @@ private fun håndterEndepunkt(
             hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
         )
     }
-
     val kandidater: List<JsonNode> = hits.hits.map { it._source }
     ctx.json(
         KandidatSøkOpensearchResponseMedNavigering(
@@ -211,6 +195,26 @@ private fun håndterEndepunkt(
     )
 }
 
+private fun hentProblematiskQueryParamSideMedLogging(ctx: Context): Int {
+    /* Dette førte til mange errors i apploggen i 2024, men vi regner med at problemet forsvinner når vi erstatter eksisterende app
+    "rekrutteringsbistand" med ny, next.js-basert "rekrutteringsbistand-frontend", som er planlagt prodsatt i løpet av
+    januar 2025. Når det er gjort kan vi sikkert slette denne feilhånteringskoden. */
+    var side: Int = -1
+    try {
+        side = ctx.queryParam("side")?.toInt() ?: 1
+    } catch (e: java.lang.NumberFormatException) {
+        val actualSideParam: String? = ctx.queryParam("side")
+        val requestUrl: String = ctx.req().requestURL.toString()
+        val endpointHandlerPath: String = ctx.endpointHandlerPath()
+        val httpMethod: String = ctx.req().method
+        val msg =
+            "URL query parameter 'side' sin verdi lar seg ikke gjøre om til en Int. Fallback til '1'. side=[$actualSideParam], requestUrl=[$requestUrl], httpMethod=[$httpMethod], endpointHandlerPath=[$endpointHandlerPath]"
+        log.info(msg, e)
+        side =
+            1 // Bedre å hardkode et sidetall enn å kaste exception og returnere HTTP 500 server error, selv om vi strengt tatt ikke vet om dette fører til det resultatet brukerene våre ønsker.
+    }
+    return side
+}
 
 private fun OpenSearchClient.kandidatSøk(
     filter: List<FilterFunksjon>,
