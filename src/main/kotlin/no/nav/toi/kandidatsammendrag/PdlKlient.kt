@@ -38,7 +38,18 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
 
         return """
             {
-                "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
+                "query": "query(${'$'}ident: ID!) {
+                    hentPerson(ident: ${'$'}ident) {
+                        navn(historikk: false) {
+                            fornavn
+                            mellomnavn
+                            etternavn
+                        }
+                    }
+                    adressebeskyttelse {
+                        gradering
+                    }
+                }",
                 "variables": {
                     "ident":"$fødselsnummer"
                 }
@@ -64,6 +75,12 @@ private data class Navn(
     val mellomnavn: String?,
     val etternavn: String
 )
+
+private data class Adressebeskyttelse(
+    val gradering: Gradering
+)
+
+enum class Gradering { STRENGT_FORTROLIG_UTLAND, STRENGT_FORTROLIG, FORTROLIG, UGRADERT }
 
 private data class Error(
     val message: String
