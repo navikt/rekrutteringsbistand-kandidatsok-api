@@ -9,7 +9,7 @@ import com.github.kittinunf.result.Result
 import no.nav.toi.accesstoken.AccessTokenClient
 
 class PdlKlient(private val pdlUrl: String, private val accessTokenClient: AccessTokenClient) {
-    fun hentFornavnOgEtternavn(fødselsnummer: String, innkommendeToken: String): Pair<String, String>? {
+    fun hentFornavnOgEtternavn(fødselsnummer: String, innkommendeToken: String): NavnOgGradering? {
 
         val accessToken = accessTokenClient.hentAccessToken(innkommendeToken)
         val graphql = lagGraphQLSpørring(fødselsnummer)
@@ -25,8 +25,12 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
         if(response.statusCode == 404) return null
 
         when (result) {
-            is Result.Success -> return result.get().data.hentPerson?.navn?.first()?.let {
-                it.fornavn + (it.mellomnavn?.let { " $it" } ?: "") to it.etternavn
+            is Result.Success -> {
+                val person = result.get().data.hentPerson?.navn?.first() ?: return null
+                val fornavnOgMellomnavn = person.fornavn + (person.mellomnavn?.let { " $it" } ?: "")
+                val gradering = result.get().data.hentGradering ?: return null
+
+                return NavnOgGradering(fornavnOgMellomnavn, person.etternavn, gradering)
             }
 
             is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av navn fra PDL: ", result.getException())
@@ -64,6 +68,13 @@ private data class Respons(
 
 private data class Data(
     val hentPerson: HentPerson?,
+    val hentGradering: Gradering?
+)
+
+data class NavnOgGradering(
+    val fornavn: String,
+    val etternavn: String,
+    val gradering: Gradering
 )
 
 private data class HentPerson(
