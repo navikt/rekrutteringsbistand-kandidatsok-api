@@ -18,7 +18,7 @@ private enum class Kilde { REKRUTTERINGSBISTAND, PDL }
 private data class KandidatNavnOgGraderingResponsDto(
     val fornavn: String,
     val etternavn: String,
-    val gradering: Gradering?,
+    val harAdressebeskyttelse: Boolean?,
     val kilde: Kilde
 )
 
@@ -40,8 +40,10 @@ fun Javalin.handleKandidatNavn(openSearchClient: OpenSearchClient, pdlKlient: Pd
         AuditLogg.loggOppslagNavn(request.fodselsnummer, ctx.authenticatedUser().navIdent)
         result.hits().hits().firstOrNull()?.source()?.let {
             ctx.json(KandidatNavnOgGraderingResponsDto(it["fornavn"]!!.asText(), it["etternavn"]!!.asText(), null, Kilde.REKRUTTERINGSBISTAND))
-        } ?: pdlKlient.hentFornavnOgEtternavn(request.fodselsnummer, ctx.authenticatedUser().jwt)?.let { (fornavn, etternavn, gradering) ->
-            ctx.json(KandidatNavnOgGraderingResponsDto(fornavn, etternavn, gradering, Kilde.PDL))
+        } ?: pdlKlient.hentFornavnOgEtternavn(request.fodselsnummer, ctx.authenticatedUser().jwt)?.let { (fornavn, etternavn, gradering) -> {
+            val harAdressebeskyttelse = if (gradering != Gradering.UGRADERT) true else null
+            ctx.json(KandidatNavnOgGraderingResponsDto(fornavn, etternavn, harAdressebeskyttelse, Kilde.PDL))
+        }
         } ?: ctx.status(404)
     }
 }
