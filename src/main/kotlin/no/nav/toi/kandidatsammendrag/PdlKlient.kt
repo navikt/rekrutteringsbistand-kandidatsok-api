@@ -50,8 +50,8 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
                             etternavn
                         }
                         adressebeskyttelse {
-                        gradering
-                    }
+                            gradering
+                        }
                     }
                 }",
                 "variables": {
