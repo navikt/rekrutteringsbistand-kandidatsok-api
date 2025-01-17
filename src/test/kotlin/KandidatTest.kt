@@ -10,6 +10,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
 import no.nav.toi.RolleUuidSpesifikasjon
+import no.nav.toi.kandidatsammendrag.Gradering
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
 import org.skyscreamer.jsonassert.JSONAssert
@@ -135,7 +136,7 @@ class KandidatTest {
         Assertions.assertThat(response.statusCode).isEqualTo(200)
         JSONAssert.assertEquals(
             result.get().toPrettyString(),
-            """{"fornavn": "$fornavn","etternavn": "$etternavn", "kilde":"REKRUTTERINGSBISTAND"}""",
+            """{"fornavn": "$fornavn","etternavn": "$etternavn", "harAdressebeskyttelse": null, "kilde":"REKRUTTERINGSBISTAND"}""",
             true
         )
     }
@@ -187,7 +188,7 @@ class KandidatTest {
                     WireMock.equalToJson(
                         """
                     {
-                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
+                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn} adressebeskyttelse {gradering}}}",
                         "variables": {
                             "ident":"$fødselsnummer"
                         }
@@ -207,7 +208,10 @@ class KandidatTest {
                               "mellomnavn": "$mellomnavn",
                               "etternavn": "$etternavn"
                             }
-                          ]
+                          ],
+                          "adressebeskyttelse": {
+                            "gradering": "${Gradering.UGRADERT}"
+                          }
                         }
                       }
                     }
@@ -223,7 +227,7 @@ class KandidatTest {
         Assertions.assertThat(response.statusCode).isEqualTo(200)
         JSONAssert.assertEquals(
             result.get().toPrettyString(),
-            """{"fornavn": "$fornavn $mellomnavn","etternavn": "$etternavn", "kilde":"PDL"}""",
+            """{"fornavn": "$fornavn $mellomnavn","etternavn": "$etternavn", "harAdressebeskyttelse": false, "kilde":"PDL"}""",
             true
         )
     }
@@ -275,7 +279,7 @@ class KandidatTest {
                     WireMock.equalToJson(
                         """
                     {
-                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
+                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn} adressebeskyttelse {gradering}}}",
                         "variables": {
                             "ident":"$fødselsnummer"
                         }

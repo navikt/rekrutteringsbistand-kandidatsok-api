@@ -42,18 +42,7 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
 
         return """
             {
-                "query": "query(${'$'}ident: ID!) {
-                    hentPerson(ident: ${'$'}ident) {
-                        navn(historikk: false) {
-                            fornavn
-                            mellomnavn
-                            etternavn
-                        }
-                        adressebeskyttelse {
-                            gradering
-                        }
-                    }
-                }",
+                "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn} adressebeskyttelse {gradering}}}",
                 "variables": {
                     "ident":"$fødselsnummer"
                 }
