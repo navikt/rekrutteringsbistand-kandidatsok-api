@@ -39,11 +39,10 @@ fun Javalin.handleKandidatNavn(openSearchClient: OpenSearchClient, pdlKlient: Pd
         val result = openSearchClient.lookupKandidatNavn(request.fodselsnummer)
         AuditLogg.loggOppslagNavn(request.fodselsnummer, ctx.authenticatedUser().navIdent)
         result.hits().hits().firstOrNull()?.source()?.let {
-            ctx.json(KandidatNavnOgGraderingResponsDto(it["fornavn"]!!.asText(), it["etternavn"]!!.asText(), it["gradering"]!!.asBoolean(), Kilde.REKRUTTERINGSBISTAND))
-        } ?: pdlKlient.hentFornavnOgEtternavn(request.fodselsnummer, ctx.authenticatedUser().jwt)?.let { (fornavn, etternavn, gradering) -> {
-            val harAdressebeskyttelse = if (gradering != Gradering.UGRADERT) true else null
-            ctx.json(KandidatNavnOgGraderingResponsDto(fornavn, etternavn, harAdressebeskyttelse, Kilde.PDL))
-        }
+            ctx.json(KandidatNavnOgGraderingResponsDto(it["fornavn"]!!.asText(), it["etternavn"]!!.asText(), null, Kilde.REKRUTTERINGSBISTAND))
+        } ?: pdlKlient.hentFornavnOgEtternavn(request.fodselsnummer, ctx.authenticatedUser().jwt)?.let {
+            val harAdressebeskyttelse = it.gradering != Gradering.UGRADERT
+            ctx.json(KandidatNavnOgGraderingResponsDto(it.fornavn, it.etternavn, harAdressebeskyttelse, Kilde.PDL))
         } ?: ctx.status(404)
     }
 }

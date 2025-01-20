@@ -210,7 +210,7 @@ class KandidatTest {
                             }
                           ],
                           "adressebeskyttelse": {
-                            "gradering": "${Gradering.UGRADERT}"
+                            "gradering": "${Gradering.UGRADERT.name}"
                           }
                         }
                       }
