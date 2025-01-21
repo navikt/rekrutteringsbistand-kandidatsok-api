@@ -1,4 +1,4 @@
-package no.nav.toi.kandidatsøk
+package no.nav.toi
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
