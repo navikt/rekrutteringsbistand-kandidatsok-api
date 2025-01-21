@@ -1,3 +1,5 @@
+package no.nav.toi.kandidatsøk
+
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
