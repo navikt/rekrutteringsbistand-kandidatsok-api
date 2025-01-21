@@ -1,6 +1,5 @@
 # rekrutteringsbistand-kandidatsok-api
-TODO: Hva skal være ansvaret til denne appen?
-
+TODO: Hva skal være ansvaret til denne appen? Håpet var å erstatte rekrutteringsbistand-kandidat-api men det skjedde ikke, så....
 
 ## Fakedings-autentisering ved kjøring lokalt 
 Vi bruker [fakedings](https://github.com/navikt/fakedings?tab=readme-ov-file) for autentisering når vi kjører lokalt for å teste underveis i utviklingen. For å hente et fake token, kan du gjøre et kall ala
