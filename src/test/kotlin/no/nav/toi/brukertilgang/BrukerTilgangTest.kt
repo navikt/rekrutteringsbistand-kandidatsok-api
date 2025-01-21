@@ -1,6 +1,6 @@
-import com.fasterxml.jackson.databind.JsonNode
+package no.nav.toi.brukertilgang
+
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest

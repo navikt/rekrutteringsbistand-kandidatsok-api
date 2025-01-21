@@ -6,7 +6,7 @@ import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.kittinunf.result.Result
-import no.nav.toi.accesstoken.AccessTokenClient
+import no.nav.toi.AccessTokenClient
 
 class PdlKlient(private val pdlUrl: String, private val accessTokenClient: AccessTokenClient) {
     fun hentFornavnOgEtternavn(fødselsnummer: String, innkommendeToken: String): Pair<String, String>? {
