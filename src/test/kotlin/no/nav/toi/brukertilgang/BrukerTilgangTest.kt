@@ -1,6 +1,6 @@
-import com.fasterxml.jackson.databind.JsonNode
+package no.nav.toi.brukertilgang
+
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
@@ -66,10 +66,10 @@ class BrukerTilgangTest {
         ForskjelligKontorOgVeileder("z999999", "9876"),
     }
 
-    enum class Søkeparameter(val mockESFelt: String, val requestParameter: String){
-        Fødselsnummer("fodselsnummer","fodselsnummer"),
-        AktørId("aktorId","aktorid"),
-        Kandidatnummer("kandidatnr","kandidatnr");
+    enum class Søkeparameter(val mockESFelt: String, val requestParameter: String) {
+        Fødselsnummer("fodselsnummer", "fodselsnummer"),
+        AktørId("aktorId", "aktorid"),
+        Kandidatnummer("kandidatnr", "kandidatnr");
     }
 
     fun tilgangParametre() = Stream.of(
@@ -90,9 +90,10 @@ class BrukerTilgangTest {
         listOf(Tilgang.Utvikler, Kandidat.SammeVeilederForskjelligKontor, 200),
         listOf(Tilgang.Utvikler, Kandidat.ForskjelligKontorOgVeileder, 200),
     ).flatMap { (tilgang, kandidat, statusCode) ->
-        Stream.of(Søkeparameter.Fødselsnummer, Søkeparameter.AktørId, Søkeparameter.Kandidatnummer).map { søkeparameter ->
-            Arguments.of(tilgang, kandidat, statusCode, søkeparameter)
-        }
+        Stream.of(Søkeparameter.Fødselsnummer, Søkeparameter.AktørId, Søkeparameter.Kandidatnummer)
+            .map { søkeparameter ->
+                Arguments.of(tilgang, kandidat, statusCode, søkeparameter)
+            }
     }
 
 
@@ -116,6 +117,7 @@ class BrukerTilgangTest {
 
         Assertions.assertThat(response.statusCode).isEqualTo(statusCode)
     }
+
     private fun mockDecorator(wireMock: WireMock) {
         wireMock.register(
             WireMock.get("/modia/api/decorator")
@@ -149,7 +151,8 @@ class BrukerTilgangTest {
                     )
                 )
                 .willReturn(
-                    WireMock.ok("""
+                    WireMock.ok(
+                        """
             {
                 "took": 10,
                 "timed_out": false,
@@ -179,7 +182,8 @@ class BrukerTilgangTest {
                     ]
                 }                            
             }
-    """.trimIndent())
+    """.trimIndent()
+                    )
                 )
         )
     }

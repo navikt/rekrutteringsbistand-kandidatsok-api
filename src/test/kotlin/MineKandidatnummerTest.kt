@@ -9,6 +9,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
 import no.nav.toi.RolleUuidSpesifikasjon
+import no.nav.toi.kandidatsøk.KandidatsøkRespons
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll

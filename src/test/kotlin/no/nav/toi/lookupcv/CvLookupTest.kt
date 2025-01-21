@@ -1,3 +1,5 @@
+package no.nav.toi.lookupcv
+
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -174,9 +176,8 @@ class CvLookupTest {
 
         val veiledersIdent = "A000001"
         val veiledersOrgenhet = "1234"
-        val feilVeiledersOrgenhet = "0000"
-
         val wireMock = wmRuntimeInfo.wireMock
+
         wireMock.register(
             get("/modia/api/decorator")
                 .willReturn(
@@ -221,8 +222,6 @@ class CvLookupTest {
         val veiledersIdent = "A000001"
         val feilVeilederIdent = "X100000"
         val veiledersOrgenhet = "0403"
-        val feilVeiledersOrgenhet = "0000"
-
 
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
@@ -272,7 +271,6 @@ class CvLookupTest {
     fun `jobbsøkerrettet skal ikke ha tilgang til cv dersom hen ikke er kandidatens veileder og ikke er tilknyttet kandidatens kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val veiledersIdent = "A000001"
         val feilVeiledersIdent = "X100000"
-        val veiledersOrgenhet = "1234"
         val feilVeiledersOrgenhet = "0000"
 
         val wireMock = wmRuntimeInfo.wireMock
@@ -318,7 +316,6 @@ class CvLookupTest {
     fun `jobbsøkerrettet skal ha tilgang til cv dersom hen ikke er kandidatens veileder og ikke er tilknyttet kandidatens kontor, men har også arbeidsgiverrettet rolle`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val veiledersIdent = "A000001"
         val feilVeiledersIdent = "X100000"
-        val veiledersOrgenhet = "1234"
         val feilVeiledersOrgenhet = "0000"
 
         val wireMock = wmRuntimeInfo.wireMock

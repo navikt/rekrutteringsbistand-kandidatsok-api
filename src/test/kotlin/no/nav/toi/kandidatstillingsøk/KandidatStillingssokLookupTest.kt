@@ -1,3 +1,5 @@
+package no.nav.toi.kandidatstillingsøk
+
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.kittinunf.fuel.Fuel

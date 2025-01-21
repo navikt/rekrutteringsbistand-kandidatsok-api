@@ -1,3 +1,6 @@
+package no.nav.toi.kandidatsammendrag
+
+import CvTestRespons
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.kittinunf.fuel.Fuel
@@ -9,8 +12,10 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import com.nimbusds.jwt.SignedJWT
 import no.nav.toi.LokalApp
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.*
-import org.mockito.kotlin.mock
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WireMockTest(httpPort = 10000)
