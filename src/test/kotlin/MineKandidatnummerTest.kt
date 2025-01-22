@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
-import no.nav.toi.KandidatsøkRespons
 import no.nav.toi.RolleUuidSpesifikasjon
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
