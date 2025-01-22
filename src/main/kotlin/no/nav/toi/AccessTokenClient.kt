@@ -1,4 +1,4 @@
-package no.nav.toi.accesstoken
+package no.nav.toi
 
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
