@@ -1,5 +1,3 @@
-package no.nav.toi.kandidatsøk
-
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.jackson.responseObject
