@@ -7,7 +7,6 @@ import io.javalin.http.HttpStatus.INTERNAL_SERVER_ERROR
 import io.javalin.openapi.plugin.OpenApiPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
-import no.nav.toi.accesstoken.AccessTokenClient
 import no.nav.toi.brukertilgang.handleBrukertilgang
 import no.nav.toi.brukertilgang.handleMinekandidatnummer
 import no.nav.toi.kandidatsammendrag.PdlKlient
