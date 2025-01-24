@@ -168,6 +168,7 @@ private fun håndterEndepunkt(
     ctx.authenticatedUser().verifiserAutorisasjon(*gyldigeRoller)
 
     val request = ctx.bodyAsClass<FilterParametre>()
+    // TODO Are: Spør PDL om adressebeskyttelse her
     val sorterting = ctx.queryParam("sortering").tilSortering()
     val filter = søkeFilter(ctx.authenticatedUser(), modiaKlient, request).filterPopuleringsFunksjon(
         ctx.authenticatedUser(),
