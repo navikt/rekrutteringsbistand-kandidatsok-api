@@ -7,10 +7,8 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.kittinunf.result.Result
 import no.nav.toi.AccessTokenClient
-import org.slf4j.LoggerFactory
 
 class PdlKlient(private val pdlUrl: String, private val accessTokenClient: AccessTokenClient) {
-    private val secureLog = LoggerFactory.getLogger("secureLog")!!
 
     fun hentFornavnOgEtternavn(fødselsnummer: String, innkommendeToken: String): NavnOgGradering? {
 
@@ -26,8 +24,6 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
             .responseObject<Respons>()
 
         if(response.statusCode == 404) return null
-
-        secureLog.info("Respons fra PDL: ${result.get()}")
 
         when (result) {
             is Result.Success -> {
