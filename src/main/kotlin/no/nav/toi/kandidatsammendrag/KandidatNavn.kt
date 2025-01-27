@@ -41,8 +41,7 @@ fun Javalin.handleKandidatNavn(openSearchClient: OpenSearchClient, pdlKlient: Pd
         result.hits().hits().firstOrNull()?.source()?.let {
             ctx.json(KandidatNavnOgGraderingResponsDto(it["fornavn"]!!.asText(), it["etternavn"]!!.asText(), null, Kilde.REKRUTTERINGSBISTAND))
         } ?: pdlKlient.hentFornavnOgEtternavn(request.fodselsnummer, ctx.authenticatedUser().jwt)?.let {
-            val harAdressebeskyttelse = it.gradering != Gradering.UGRADERT
-            ctx.json(KandidatNavnOgGraderingResponsDto(it.fornavn, it.etternavn, harAdressebeskyttelse, Kilde.PDL))
+            ctx.json(KandidatNavnOgGraderingResponsDto(it.fornavn, it.etternavn, it.harAdressebeskyttelse, Kilde.PDL))
         } ?: ctx.status(404)
     }
 }

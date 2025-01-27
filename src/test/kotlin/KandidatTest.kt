@@ -209,9 +209,11 @@ class KandidatTest {
                               "etternavn": "$etternavn"
                             }
                           ],
-                          "adressebeskyttelse": {
-                            "gradering": "${Gradering.UGRADERT.name}"
-                          }
+                          "adressebeskyttelse": [
+                              {
+                                "gradering": "${Gradering.UGRADERT.name}"
+                              }
+                          ]
                         }
                       }
                     }

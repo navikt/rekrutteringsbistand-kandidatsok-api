@@ -33,9 +33,9 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
             is Result.Success -> {
                 val person = result.get().data.hentPerson ?: return null
                 val fornavnOgMellomnavn = person.navn.first().fornavn + (person.navn.first().mellomnavn?.let { " $it" } ?: "")
-                val gradering = person.adressebeskyttelse.gradering
+                val harAdressebeskyttelse = person.adressebeskyttelse.any { it.gradering != Gradering.UGRADERT }
 
-                return NavnOgGradering(fornavnOgMellomnavn, person.navn.first().etternavn, gradering)
+                return NavnOgGradering(fornavnOgMellomnavn, person.navn.first().etternavn, harAdressebeskyttelse)
             }
 
             is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av navn fra PDL: ", result.getException())
@@ -68,12 +68,12 @@ private data class Data(
 data class NavnOgGradering(
     val fornavn: String,
     val etternavn: String,
-    val gradering: Gradering
+    val harAdressebeskyttelse: Boolean
 )
 
 private data class HentPerson(
     val navn: List<Navn>,
-    val adressebeskyttelse: Adressebeskyttelse
+    val adressebeskyttelse: List<Adressebeskyttelse>
 )
 
 private data class Navn(
