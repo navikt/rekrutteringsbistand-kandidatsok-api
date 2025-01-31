@@ -94,7 +94,7 @@ class App(
         javalin.handleSuggest(openSearchClient)
         javalin.handleStedSuggest(openSearchClient)
         javalin.handleKontorSuggest(openSearchClient)
-        javalin.handleKandidatNavn(openSearchClient, pdlKlient)
+        javalin.handleKandidatNavn(pdlKlient)
         javalin.handleKandidatKandidatnr(openSearchClient)
         javalin.handleBrukertilgang(openSearchClient, modiaClient)
         javalin.handleMinekandidatnummer(openSearchClient, modiaClient)
