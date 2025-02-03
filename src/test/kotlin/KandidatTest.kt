@@ -10,6 +10,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
 import no.nav.toi.RolleUuidSpesifikasjon
+import no.nav.toi.kandidatsammendrag.Gradering
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
 import org.skyscreamer.jsonassert.JSONAssert
@@ -125,8 +126,9 @@ class KandidatTest {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12312312312"
         val fornavn = "Kjæreste"
+        val mellomnavn = "Udugelig"
         val etternavn = "Parodisk"
-        mockNavnSøk(wireMock, fødselsnummer, fornavn, etternavn)
+        mockNavnSøkPdl(wireMock, fødselsnummer, fornavn, mellomnavn, etternavn)
         val (_, response, result) = Fuel.post("$endepunkt/navn")
             .body("""{"fodselsnummer":"$fødselsnummer"}""")
             .leggPåAutensiering()
@@ -135,7 +137,7 @@ class KandidatTest {
         Assertions.assertThat(response.statusCode).isEqualTo(200)
         JSONAssert.assertEquals(
             result.get().toPrettyString(),
-            """{"fornavn": "$fornavn","etternavn": "$etternavn", "kilde":"REKRUTTERINGSBISTAND"}""",
+            """{"fornavn": "$fornavn $mellomnavn","etternavn": "$etternavn", "harAdressebeskyttelse": false, "kilde":"PDL"}""",
             true
         )
     }
@@ -187,7 +189,7 @@ class KandidatTest {
                     WireMock.equalToJson(
                         """
                     {
-                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
+                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn} adressebeskyttelse {gradering}}}",
                         "variables": {
                             "ident":"$fødselsnummer"
                         }
@@ -207,6 +209,11 @@ class KandidatTest {
                               "mellomnavn": "$mellomnavn",
                               "etternavn": "$etternavn"
                             }
+                          ],
+                          "adressebeskyttelse": [
+                              {
+                                "gradering": "${Gradering.UGRADERT.name}"
+                              }
                           ]
                         }
                       }
@@ -223,7 +230,7 @@ class KandidatTest {
         Assertions.assertThat(response.statusCode).isEqualTo(200)
         JSONAssert.assertEquals(
             result.get().toPrettyString(),
-            """{"fornavn": "$fornavn $mellomnavn","etternavn": "$etternavn", "kilde":"PDL"}""",
+            """{"fornavn": "$fornavn $mellomnavn","etternavn": "$etternavn", "harAdressebeskyttelse": false, "kilde":"PDL"}""",
             true
         )
     }
@@ -275,7 +282,7 @@ class KandidatTest {
                     WireMock.equalToJson(
                         """
                     {
-                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
+                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn} adressebeskyttelse {gradering}}}",
                         "variables": {
                             "ident":"$fødselsnummer"
                         }
@@ -305,7 +312,7 @@ class KandidatTest {
     fun `jobbsøkerrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12345678910"
-        mockNavnSøk(wireMock, fødselsnummer, "N", "A")
+        mockNavnSøkPdl(wireMock, fødselsnummer, "N", "S", "A")
         val token = lagToken(groups = listOf(jobbsøkerrettet))
         val (_, response) = gjørKallNavn(fødselsnummer, token)
 
@@ -316,7 +323,7 @@ class KandidatTest {
     fun `arbeidsgiverrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12345678910"
-        mockNavnSøk(wireMock, fødselsnummer, "N", "A")
+        mockNavnSøkPdl(wireMock, fødselsnummer, "N", "S","A")
         val token = lagToken(groups = listOf(arbeidsgiverrettet))
         val (_, response) = gjørKallNavn(fødselsnummer, token)
 
@@ -327,7 +334,7 @@ class KandidatTest {
     fun `utvikler skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12345678910"
-        mockNavnSøk(wireMock, fødselsnummer, "N", "A")
+        mockNavnSøkPdl(wireMock, fødselsnummer, "N", "S","A")
         val token = lagToken(groups = listOf(utvikler))
         val (_, response) = gjørKallNavn(fødselsnummer, token)
 
@@ -436,54 +443,49 @@ class KandidatTest {
         header("Authorization", "Bearer ${lagToken(navIdent = "A123456").serialize()}")
 
 
-    private fun mockNavnSøk(
+    private fun mockNavnSøkPdl(
         wireMock: WireMock,
         fødselsnummer: String,
         fornavn: String,
-        etternavn: String,
+        mellomnavn: String,
+        etternavn: String
     ) {
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/pdl")
                 .withRequestBody(
                     WireMock.equalToJson(
-                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["fornavn","etternavn"]}}""",
-                        true,
-                        false
+                        """
+                    {
+                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn} adressebeskyttelse {gradering}}}",
+                        "variables": {
+                            "ident":"$fødselsnummer"
+                        }
+                    }
+                """.trimIndent(), false, false
                     )
                 )
                 .willReturn(
                     WireMock.ok(
                         """
-                        {
-                            "took": 1,
-                            "timed_out": false,
-                            "_shards": {
-                                "total": 3,
-                                "successful": 3,
-                                "skipped": 0,
-                                "failed": 0
-                            },
-                            "hits": {
-                                "total": {
-                                    "value": 1,
-                                    "relation": "eq"
-                                },
-                                "max_score": 3.2580965,
-                                "hits": [
-                                    {
-                                        "_index": "veilederkandidat_os4",
-                                        "_type": "_doc",
-                                        "_id": "PAM123456789",
-                                        "_score": 3.2580965,
-                                        "_source": {
-                                            "fornavn": "$fornavn",
-                                            "etternavn": "$etternavn"
-                                        }
-                                    }
-                                ]
+                    {
+                      "data": {
+                        "hentPerson": {
+                          "navn": [
+                            {
+                              "fornavn": "$fornavn",
+                              "mellomnavn": "$mellomnavn",
+                              "etternavn": "$etternavn"
                             }
+                          ],
+                          "adressebeskyttelse": [
+                              {
+                                "gradering": "${Gradering.UGRADERT.name}"
+                              }
+                          ]
                         }
-                    """.trimIndent()
+                      }
+                    }
+                """.trimIndent()
                     )
                 )
         )
