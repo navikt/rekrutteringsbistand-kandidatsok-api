@@ -9,7 +9,8 @@ import com.github.kittinunf.result.Result
 import no.nav.toi.AccessTokenClient
 
 class PdlKlient(private val pdlUrl: String, private val accessTokenClient: AccessTokenClient) {
-    fun hentFornavnOgEtternavn(fødselsnummer: String, innkommendeToken: String): Pair<String, String>? {
+
+    fun hentFornavnOgEtternavn(fødselsnummer: String, innkommendeToken: String): NavnOgGradering? {
 
         val accessToken = accessTokenClient.hentAccessToken(innkommendeToken)
         val graphql = lagGraphQLSpørring(fødselsnummer)
@@ -25,8 +26,12 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
         if(response.statusCode == 404) return null
 
         when (result) {
-            is Result.Success -> return result.get().data.hentPerson?.navn?.first()?.let {
-                it.fornavn + (it.mellomnavn?.let { " $it" } ?: "") to it.etternavn
+            is Result.Success -> {
+                val person = result.get().data.hentPerson ?: return null
+                val fornavnOgMellomnavn = person.navn.first().fornavn + (person.navn.first().mellomnavn?.let { " $it" } ?: "")
+                val harAdressebeskyttelse = person.adressebeskyttelse.any { it.gradering != Gradering.UGRADERT }
+
+                return NavnOgGradering(fornavnOgMellomnavn, person.navn.first().etternavn, harAdressebeskyttelse)
             }
 
             is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av navn fra PDL: ", result.getException())
@@ -38,7 +43,7 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
 
         return """
             {
-                "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
+                "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn} adressebeskyttelse {gradering}}}",
                 "variables": {
                     "ident":"$fødselsnummer"
                 }
@@ -46,6 +51,7 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
         """.trimIndent()
     }
 }
+
 private data class Respons(
     var data: Data,
     val errors: List<Error>?,
@@ -55,8 +61,15 @@ private data class Data(
     val hentPerson: HentPerson?,
 )
 
+data class NavnOgGradering(
+    val fornavn: String,
+    val etternavn: String,
+    val harAdressebeskyttelse: Boolean
+)
+
 private data class HentPerson(
     val navn: List<Navn>,
+    val adressebeskyttelse: List<Adressebeskyttelse>
 )
 
 private data class Navn(
@@ -64,6 +77,12 @@ private data class Navn(
     val mellomnavn: String?,
     val etternavn: String
 )
+
+private data class Adressebeskyttelse(
+    val gradering: Gradering
+)
+
+enum class Gradering { STRENGT_FORTROLIG_UTLAND, STRENGT_FORTROLIG, FORTROLIG, UGRADERT }
 
 private data class Error(
     val message: String
