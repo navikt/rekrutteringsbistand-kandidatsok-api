@@ -126,9 +126,8 @@ class KandidatTest {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12312312312"
         val fornavn = "Kjæreste"
-        val mellomnavn = "Udugelig"
         val etternavn = "Parodisk"
-        mockNavnSøkPdl(wireMock, fødselsnummer, fornavn, mellomnavn, etternavn)
+        mockNavnSøk(wireMock, fødselsnummer, fornavn, etternavn)
         val (_, response, result) = Fuel.post("$endepunkt/navn")
             .body("""{"fodselsnummer":"$fødselsnummer"}""")
             .leggPåAutensiering()
@@ -137,7 +136,7 @@ class KandidatTest {
         Assertions.assertThat(response.statusCode).isEqualTo(200)
         JSONAssert.assertEquals(
             result.get().toPrettyString(),
-            """{"fornavn": "$fornavn $mellomnavn","etternavn": "$etternavn", "harAdressebeskyttelse": false, "kilde":"PDL"}""",
+            """{"fornavn": "$fornavn","etternavn": "$etternavn", "harAdressebeskyttelse": null, "kilde":"REKRUTTERINGSBISTAND"}""",
             true
         )
     }
@@ -312,7 +311,7 @@ class KandidatTest {
     fun `jobbsøkerrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12345678910"
-        mockNavnSøkPdl(wireMock, fødselsnummer, "N", "S", "A")
+        mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(jobbsøkerrettet))
         val (_, response) = gjørKallNavn(fødselsnummer, token)
 
@@ -323,7 +322,7 @@ class KandidatTest {
     fun `arbeidsgiverrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12345678910"
-        mockNavnSøkPdl(wireMock, fødselsnummer, "N", "S","A")
+        mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(arbeidsgiverrettet))
         val (_, response) = gjørKallNavn(fødselsnummer, token)
 
@@ -334,7 +333,7 @@ class KandidatTest {
     fun `utvikler skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12345678910"
-        mockNavnSøkPdl(wireMock, fødselsnummer, "N", "S","A")
+        mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(utvikler))
         val (_, response) = gjørKallNavn(fødselsnummer, token)
 
@@ -443,49 +442,54 @@ class KandidatTest {
         header("Authorization", "Bearer ${lagToken(navIdent = "A123456").serialize()}")
 
 
-    private fun mockNavnSøkPdl(
+    private fun mockNavnSøk(
         wireMock: WireMock,
         fødselsnummer: String,
         fornavn: String,
-        mellomnavn: String,
-        etternavn: String
+        etternavn: String,
     ) {
         wireMock.register(
-            WireMock.post("/pdl")
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
-                        """
-                    {
-                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn} adressebeskyttelse {gradering}}}",
-                        "variables": {
-                            "ident":"$fødselsnummer"
-                        }
-                    }
-                """.trimIndent(), false, false
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["fornavn","etternavn"]}}""",
+                        true,
+                        false
                     )
                 )
                 .willReturn(
                     WireMock.ok(
                         """
-                    {
-                      "data": {
-                        "hentPerson": {
-                          "navn": [
-                            {
-                              "fornavn": "$fornavn",
-                              "mellomnavn": "$mellomnavn",
-                              "etternavn": "$etternavn"
+                        {
+                            "took": 1,
+                            "timed_out": false,
+                            "_shards": {
+                                "total": 3,
+                                "successful": 3,
+                                "skipped": 0,
+                                "failed": 0
+                            },
+                            "hits": {
+                                "total": {
+                                    "value": 1,
+                                    "relation": "eq"
+                                },
+                                "max_score": 3.2580965,
+                                "hits": [
+                                    {
+                                        "_index": "veilederkandidat_os4",
+                                        "_type": "_doc",
+                                        "_id": "PAM123456789",
+                                        "_score": 3.2580965,
+                                        "_source": {
+                                            "fornavn": "$fornavn",
+                                            "etternavn": "$etternavn"
+                                        }
+                                    }
+                                ]
                             }
-                          ],
-                          "adressebeskyttelse": [
-                              {
-                                "gradering": "${Gradering.UGRADERT.name}"
-                              }
-                          ]
                         }
-                      }
-                    }
-                """.trimIndent()
+                    """.trimIndent()
                     )
                 )
         )
