@@ -10,7 +10,7 @@ import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.kittinunf.result.Result
 import io.github.resilience4j.retry.Retry
 import io.github.resilience4j.retry.RetryConfig
-import no.nav.toi.accesstoken.AccessTokenClient
+import no.nav.toi.AccessTokenClient
 
 class ModiaKlient(private val modiaUrl: String, private val accessTokenClient: AccessTokenClient) {
 

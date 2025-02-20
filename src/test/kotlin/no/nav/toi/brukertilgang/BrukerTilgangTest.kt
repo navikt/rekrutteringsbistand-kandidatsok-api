@@ -1,6 +1,6 @@
-import com.fasterxml.jackson.databind.JsonNode
+package no.nav.toi.brukertilgang
+
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
@@ -145,7 +145,7 @@ class BrukerTilgangTest {
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
-                        """{"_source":{"includes":["veilederIdent","orgenhet"]},"query":{"term":{"$mockESFelt":{"value":"12345678910"}}},"size":1}""".trimIndent()
+                        """{"_source":{"includes":["veilederIdent","orgenhet"]},"query":{"term":{"$mockESFelt":{"value":"12345678910"}}}}""".trimIndent()
                     )
                 )
                 .willReturn(

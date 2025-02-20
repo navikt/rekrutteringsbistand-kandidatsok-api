@@ -1,3 +1,5 @@
+package no.nav.toi.lookupcv
+
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -35,7 +37,7 @@ class CvLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
                 )
@@ -53,7 +55,7 @@ class CvLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM000000000" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM000000000" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpensearchIngenTreff)
                 )
@@ -80,7 +82,7 @@ class CvLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     notFound()
                 )
@@ -97,7 +99,7 @@ class CvLookupTest {
         val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
         wmRuntimeInfo.wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
                 )
@@ -112,7 +114,7 @@ class CvLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
                 )
@@ -157,7 +159,7 @@ class CvLookupTest {
 
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
                 )
@@ -203,7 +205,7 @@ class CvLookupTest {
 
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(returUtenVeilederEllerKontor))
                 )
@@ -255,7 +257,7 @@ class CvLookupTest {
 
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
                 )
@@ -302,7 +304,7 @@ class CvLookupTest {
 
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
                 )
@@ -348,7 +350,7 @@ class CvLookupTest {
 
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
                 )
@@ -366,7 +368,7 @@ class CvLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
                 )
@@ -382,7 +384,7 @@ class CvLookupTest {
         val token = app.lagToken(groups = emptyList())
         wmRuntimeInfo.wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}},"size":1}"""))
+                .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
                 )

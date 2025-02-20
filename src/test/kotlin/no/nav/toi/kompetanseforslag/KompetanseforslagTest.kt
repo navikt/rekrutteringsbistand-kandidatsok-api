@@ -1,3 +1,5 @@
+package no.nav.toi.kompetanseforslag
+
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.kittinunf.fuel.Fuel

@@ -3,10 +3,10 @@ on: [ push, workflow_dispatch ]
 
 jobs:
   call-build-and-deploy:
-    uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-deploy.yaml@main
+    uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-deploy.yaml@v1
     with:
       java-version: '21'
-      deploy-to-dev-if-branch-name-is: '14a-innsatsgrupper-hovedmål'
+      deploy-to-dev-if-branch-name-is: 'todo'
     permissions:
       contents: read
       id-token: write

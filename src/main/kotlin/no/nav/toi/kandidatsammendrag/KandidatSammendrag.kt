@@ -58,6 +58,5 @@ private fun OpenSearchClient.lookupKandidatsammendrag(params: RequestDto): Searc
                 "veilederEpost", "orgenhet"
             )
         }
-        size(1)
     }
 }

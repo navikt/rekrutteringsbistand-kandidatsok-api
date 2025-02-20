@@ -1,4 +1,4 @@
-package suggest
+package no.nav.toi.suggest
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.kittinunf.fuel.Fuel

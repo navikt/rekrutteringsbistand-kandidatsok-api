@@ -61,7 +61,7 @@ class KandidatTest {
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
-                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["arenaKandidatnr"]}}""",
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["arenaKandidatnr"]}}""",
                         true,
                         false
                     )
@@ -151,7 +151,7 @@ class KandidatTest {
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
-                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""",
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["fornavn","etternavn"]}}""",
                         true,
                         false
                     )
@@ -239,7 +239,7 @@ class KandidatTest {
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
-                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""",
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["fornavn","etternavn"]}}""",
                         true,
                         false
                     )
@@ -446,7 +446,7 @@ class KandidatTest {
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
-                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["fornavn","etternavn"]}}""",
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["fornavn","etternavn"]}}""",
                         true,
                         false
                     )
@@ -508,7 +508,7 @@ class KandidatTest {
             WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
-                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"size":1,"_source":{"includes":["arenaKandidatnr"]}}""",
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["arenaKandidatnr"]}}""",
                         true,
                         false
                     )
