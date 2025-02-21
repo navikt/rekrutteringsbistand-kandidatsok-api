@@ -350,14 +350,14 @@ class KandidatsøkTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockES(
             wireMock,
-            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM,
+            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedSpesieltOgSituasjonsbestemtInnsats,
             extraTerms = endepunkt.extraTerms
         )
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"innsatsgruppe":["BATT","BFORM"]${endepunkt.bodyParameter(true)}}""")
+            .body("""{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -367,18 +367,39 @@ class KandidatsøkTest {
 
     @ParameterizedTest
     @MethodSource("endepunktSomParameter")
-    fun `Kan søke kandidater med ANDRE innsatsgrupper`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `Kan søke kandidater med GRADERT_VARIG_TILPASSET_INNSATS innsatsgruppe`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockES(
             wireMock,
-            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedANDRE,
+            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedGradertVarigTilpasset,
             extraTerms = endepunkt.extraTerms
         )
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"innsatsgruppe":["ANDRE"]${endepunkt.bodyParameter(true)}}""")
+            .body("""{"innsatsgruppe":["GRADERT_VARIG_TILPASSET_INNSATS"]${endepunkt.bodyParameter(true)}}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+    }
+
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidater med HAR_IKKE_GJELDENDE_14A_VEDTAK innsatsgruppe`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockES(
+            wireMock,
+            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedIkkeVurdert,
+            extraTerms = endepunkt.extraTerms
+        )
+        endepunkt.ekstraMocking(wireMock)
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"innsatsgruppe":["HAR_IKKE_GJELDENDE_14A_VEDTAK"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -399,7 +420,7 @@ class KandidatsøkTest {
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"innsatsgruppe":["BATT","BFORM","IKVAL","VARIG","ANDRE"]${endepunkt.bodyParameter(true)}}""")
+            .body("""{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS","HAR_IKKE_GJELDENDE_14A_VEDTAK", "GRADERT_VARIG_TILPASSET_INNSATS"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -487,7 +508,7 @@ class KandidatsøkTest {
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"hovedmål":["SKAFFEA","OKEDELT"]${endepunkt.bodyParameter(true)}}""")
+            .body("""{"hovedmål":["SKAFFE_ARBEID","OKE_DELTAKELSE"]${endepunkt.bodyParameter(true)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
@@ -780,7 +801,7 @@ class KandidatsøkTest {
                 KandidatsøkRespons.førerkortTerm,
                 KandidatsøkRespons.språkTerm
             ),
-            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedBATTogBFORM
+            innsatsgruppeTerm = KandidatsøkRespons.innsatsgruppeTermMedSpesieltOgSituasjonsbestemtInnsats
         )
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
@@ -792,10 +813,10 @@ class KandidatsøkTest {
                     "fritekst":"søkeord",
                     "ønsketSted":["Bodø.NO18.1804","Kristiansund.NO50.5001","Akershus.NO02","Norge.NO"],
                     "ønsketYrke":["Sauegjeter", "Saueklipper"],
-                    "innsatsgruppe":["BATT","BFORM"],
+                    "innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS"],
                     "språk":["Nynorsk","Norsk"],
                     "arbeidserfaring":["Hvalfanger","Kokk"],"ferskhet":2,
-                    "hovedmål":["SKAFFEA","OKEDELT"],
+                    "hovedmål":["SKAFFE_ARBEID","OKE_DELTAKELSE"],
                     "kompetanse":["Fagbrev FU-operatør","Kotlin"],
                     "førerkort":["D - Buss","BE - Personbil med tilhenger"],
                     "utdanningsnivå":["videregaende","bachelor","doktorgrad"],
@@ -841,7 +862,7 @@ class KandidatsøkTest {
         wireMock: WireMock,
         vararg extraTerms: String,
         sortering: Boolean = true,
-        innsatsgruppeTerm: String = """{"terms":{"kvalifiseringsgruppekode":["BATT","BFORM","IKVAL","VARIG"]}}""",
+        innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe.keyword":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS"]}}""",
         from: Int = 0
     ) {
         wireMock.register(
