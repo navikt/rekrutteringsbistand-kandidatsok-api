@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 
+private val noClassLogger = noClassLogger()
+
 /*
     Oppsett av applikasjon, som kan kjøres av både tester og main-metode.
  */
@@ -62,8 +64,7 @@ class App(
     )
 
     fun configureOpenApi(config: JavalinConfig) {
-        val openApiConfiguration = OpenApiPlugin {
-            openApiConfig ->
+        val openApiConfiguration = OpenApiPlugin { openApiConfig ->
             openApiConfig.withDefinitionConfiguration { _, definition ->
                 definition.apply {
                     withInfo {
@@ -141,6 +142,10 @@ private val fakedingsAuthenticationConfiguration = AuthenticationConfiguration(
 )
 
 fun main() {
+    noClassLogger.info("Starter app.")
+    LoggerFactory.getLogger("secureLog")!!
+        .info("Starter app. Dette er ment å logges til Securelogs. Hvis du ser dette i den ordinære apploggen er noe galt, og sensitive data kan havne i feil logg.")
+
     App(
         authenticationConfigurations = listOfNotNull(
             AuthenticationConfiguration(
@@ -177,3 +182,24 @@ private fun getenv(key: String) =
 
 val Any.log: Logger
     get() = LoggerFactory.getLogger(this::class.java)
+
+/**
+ * Convenience for å slippe å skrive eksplistt navn på Logger når Logger opprettes. Ment å tilsvare Java-måten, hvor
+ * Loggernavnet pleier å være pakkenavn+klassenavn på den loggende koden.
+ * Brukes til å logging fra Kotlin-kode hvor vi ikke er inne i en klasse, typisk i en "top level function".
+ * Kalles fra den filen du ønsker å logg i slik:
+ *```
+ * import no.nav.yada.noClassLogger
+ * private val log: Logger = noClassLogger()
+ * fun myTopLevelFunction() {
+ *      log.info("yada yada yada")
+ *      ...
+ * }
+ *```
+ *
+ *@return En Logger hvor navnet er sammensatt av pakkenavnet og filnavnet til den kallende koden
+ */
+fun noClassLogger(): Logger {
+    val callerClassName = Throwable().stackTrace[1].className
+    return LoggerFactory.getLogger(callerClassName)
+}
