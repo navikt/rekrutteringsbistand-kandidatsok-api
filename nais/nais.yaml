@@ -63,3 +63,5 @@ spec:
       value: {{modiaContextHolderUrl}}
     - name: MODIA_CONTEXT_HOLDER_SCOPE
       value: {{modiaContextHolderScope}}
+    - name: TOI_LIVSHENDELSE_SCOPE
+      value: {{toiLivshendelseScope}}

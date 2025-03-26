@@ -46,7 +46,8 @@ class App(
     pdlScope: String,
     azureUrl: String,
     modiaContextHolderUrl: String,
-    modiaContextHolderScope: String
+    modiaContextHolderScope: String,
+    toiLivshendelseScope: String
 ) {
 
     lateinit var javalin: Javalin
@@ -62,6 +63,8 @@ class App(
         modiaContextHolderUrl,
         AccessTokenClient(azureSecret, azureClientId, modiaContextHolderScope, azureUrl)
     )
+
+    private val adressebeskyttelseAccessTokenClient = AccessTokenClient(azureSecret, azureClientId, toiLivshendelseScope, azureUrl)
 
     fun configureOpenApi(config: JavalinConfig) {
         val openApiConfiguration = OpenApiPlugin { openApiConfig ->
@@ -95,7 +98,7 @@ class App(
         javalin.handleSuggest(openSearchClient)
         javalin.handleStedSuggest(openSearchClient)
         javalin.handleKontorSuggest(openSearchClient)
-        javalin.handleKandidatNavn(openSearchClient, pdlKlient)
+        javalin.handleKandidatNavn(openSearchClient, pdlKlient, adressebeskyttelseAccessTokenClient)
         javalin.handleKandidatKandidatnr(openSearchClient)
         javalin.handleBrukertilgang(openSearchClient, modiaClient)
         javalin.handleMinekandidatnummer(openSearchClient, modiaClient)
@@ -173,6 +176,7 @@ fun main() {
         azureUrl = getenv("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
         modiaContextHolderUrl = getenv("MODIA_CONTEXT_HOLDER_URL"),
         modiaContextHolderScope = getenv("MODIA_CONTEXT_HOLDER_SCOPE"),
+        toiLivshendelseScope = getenv("TOI_LIVSHENDELSE_SCOPE"),
     ).start()
 }
 
