@@ -283,7 +283,25 @@ class KandidatTest {
                 """.trimIndent(), false, false
                     )
                 )
-                .willReturn(WireMock.notFound())
+                .willReturn(WireMock.ok(
+                    """
+                        {
+                          "errors": [
+                            {
+                              "message": "Fant ikke person",
+                              "locations": [],
+                              "path": [],
+                              "extensions": {
+                                "code": "not_found",
+                                "details": null,
+                                "classification": "ExecutionAborted"
+                              }
+                            }
+                          ],
+                          "data": {}
+                        }
+                    """.trimIndent()
+                ))
         )
         val (_, response, result) = Fuel.post("$endepunkt/navn")
             .body("""{"fodselsnummer":"$fødselsnummer"}""")
@@ -291,6 +309,86 @@ class KandidatTest {
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(404)
+    }
+
+    @Test
+    fun `skal feile om pdl returerer error-code som ikke er not_found`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val fødselsnummer = "12312312312"
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["fornavn","etternavn"]}}""",
+                        true,
+                        false
+                    )
+                )
+                .willReturn(
+                    WireMock.ok(
+                        """
+                    {
+                    	"took": 1,
+                    	"timed_out": false,
+                    	"_shards": {
+                    		"total": 3,
+                    		"successful": 3,
+                    		"skipped": 0,
+                    		"failed": 0
+                    	},
+                    	"hits": {
+                    		"total": {
+                    			"value": 0,
+                    			"relation": "eq"
+                    		},
+                    		"max_score": 3.2580965,
+                    		"hits": []
+                    	}
+                    }
+                """.trimIndent()
+                    )
+                )
+        )
+        wireMock.register(
+            WireMock.post("/pdl")
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """
+                    {
+                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
+                        "variables": {
+                            "ident":"$fødselsnummer"
+                        }
+                    }
+                """.trimIndent(), false, false
+                    )
+                )
+                .willReturn(WireMock.ok(
+                    """
+                        {
+                          "errors": [
+                            {
+                              "message": "Server error",
+                              "locations": [],
+                              "path": [],
+                              "extensions": {
+                                "code": "server_error",
+                                "details": null,
+                                "classification": "ExecutionAborted"
+                              }
+                            }
+                          ],
+                          "data": {}
+                        }
+                    """.trimIndent()
+                ))
+        )
+        val statusCode = Fuel.post("$endepunkt/navn")
+            .body("""{"fodselsnummer":"$fødselsnummer"}""")
+            .leggPåAutensiering()
+            .responseObject<JsonNode>().second.statusCode
+
+        Assertions.assertThat(statusCode).isEqualTo(500)
     }
 
     @Test

@@ -6,6 +6,8 @@ import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.kittinunf.result.Result
+import io.javalin.http.InternalServerErrorResponse
+import io.javalin.http.NotFoundResponse
 import no.nav.toi.AccessTokenClient
 
 class PdlKlient(private val pdlUrl: String, private val accessTokenClient: AccessTokenClient) {
@@ -14,7 +16,7 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
         val accessToken = accessTokenClient.hentAccessToken(innkommendeToken)
         val graphql = lagGraphQLSpørring(fødselsnummer)
 
-        val (_, response, result) = Fuel.post(pdlUrl)
+        val (_, _, result) = Fuel.post(pdlUrl)
             .header(Headers.CONTENT_TYPE, "application/json")
             .header("Tema", "GEN")
             .header("Behandlingsnummer", "B346")
@@ -23,8 +25,17 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
             .responseObject<Respons>()
 
         when (result) {
-            is Result.Success -> return result.get().data.hentPerson?.navn?.first()?.let {
-                it.fornavn + (it.mellomnavn?.let { " $it" } ?: "") to it.etternavn
+            is Result.Success -> {
+                val respons = result.get()
+                if(respons.errors?.isNotEmpty() == true) {
+                    if(respons.errors.any { it.extensions.code != "not_found" }) {
+                        throw InternalServerErrorResponse("Feil ved henting av navn fra PDL: ${respons.errors.first().message}")
+                    }
+                    else throw NotFoundResponse("Fant ikke person i PDL")
+                }
+                return respons.data.hentPerson?.navn?.first()?.let {
+                    it.fornavn + (it.mellomnavn?.let { " $it" } ?: "") to it.etternavn
+                }
             }
 
             is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av navn fra PDL: ", result.getException())
@@ -64,5 +75,10 @@ private data class Navn(
 )
 
 private data class Error(
-    val message: String
+    val message: String,
+    val extensions: Extensions
+)
+
+private data class Extensions(
+    val code: String
 )
