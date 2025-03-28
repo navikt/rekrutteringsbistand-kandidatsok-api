@@ -208,7 +208,8 @@ class BrukerTilgangTest {
         azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
         modiaContextHolderUrl = "http://localhost:10000/modia",
         modiaContextHolderScope = "http://localhost/.default",
-        toiLivshendelseScope = "http://localhost/.default"
+        toiLivshendelseScope = "http://localhost/.default",
+        toiLivshendelseUrl = "http://localhost:10000/livshendelse"
     )
 
     private fun lagToken(

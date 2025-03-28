@@ -37,13 +37,13 @@ private data class KandidatNavnResponsDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKandidatNavn(openSearchClient: OpenSearchClient, pdlKlient: PdlKlient, accessTokenClient: AccessTokenClient) {
+fun Javalin.handleKandidatNavn(livshendelseKlient: LivshendelseKlient, openSearchClient: OpenSearchClient, pdlKlient: PdlKlient) {
     post(endepunkt) { ctx ->
         ctx.authenticatedUser().verifiserAutorisasjon(Rolle.UTVIKLER, Rolle.ARBEIDSGIVER_RETTET, Rolle.JOBBSØKER_RETTET)
 
         val request = ctx.bodyAsClass<KandidatNavnRequestDto>()
         AuditLogg.loggOppslagNavn(request.fodselsnummer, ctx.authenticatedUser().navIdent)
-        if (harAdressebeskyttelse(request.fodselsnummer, accessTokenClient, ctx.authenticatedUser().jwt)) {
+        if (livshendelseKlient.harAdressebeskyttelse(request.fodselsnummer, ctx.authenticatedUser().jwt)) {
             ctx.status(403)
             return@post
         }
@@ -67,22 +67,3 @@ private fun OpenSearchClient.lookupKandidatNavn(fodselsnummer: String): SearchRe
         }
     }
 }
-
-private fun harAdressebeskyttelse(fodselsnummer: String, accessTokenClient: AccessTokenClient, innkommendeToken: String): Boolean {
-    val accessToken = accessTokenClient.hentAccessToken(innkommendeToken)
-
-    val (_, response, result) = Fuel.post("http://toi-livshendelse/adressebeskyttelse")
-        .header(Headers.CONTENT_TYPE, "application/json")
-        .authentication().bearer(accessToken)
-        .jsonBody("""{"fnr": "$fodselsnummer"}""")
-        .responseObject<ResponseAdressebeskyttelse>()
-
-    if(response.statusCode == 401) throw UnauthorizedResponse("Du har ikke tilgang")
-    if (response.statusCode == 500) throw InternalServerErrorResponse("Noe gikk galt")
-
-    return result.get().harAdressebeskyttelse
-}
-
-private class ResponseAdressebeskyttelse(
-    val harAdressebeskyttelse: Boolean
-)

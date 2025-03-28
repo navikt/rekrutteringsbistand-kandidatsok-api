@@ -123,6 +123,7 @@ class KandidatTest {
     @Test
     fun `map fødselsnummer til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12312312312"
         val fornavn = "Kjæreste"
         val etternavn = "Parodisk"
@@ -143,6 +144,7 @@ class KandidatTest {
     @Test
     fun `map fødselsnummer til navn fra PDL om det ikke finnes i ES`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12312312312"
         val fornavn = "Kjæreste"
         val mellomnavn: String? = "Mellom"
@@ -231,6 +233,7 @@ class KandidatTest {
     @Test
     fun `fødselsnummer som ikke eksisterer i hverken pdl eller ES returnerer 404`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12312312312"
         val fornavn = "Kjæreste"
         val mellomnavn: String? = "Mellom"
@@ -402,6 +405,7 @@ class KandidatTest {
     @Test
     fun `jobbsøkerrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(jobbsøkerrettet))
@@ -413,6 +417,7 @@ class KandidatTest {
     @Test
     fun `arbeidsgiverrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(arbeidsgiverrettet))
@@ -424,6 +429,7 @@ class KandidatTest {
     @Test
     fun `utvikler skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(utvikler))
@@ -513,7 +519,8 @@ class KandidatTest {
         azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
         modiaContextHolderUrl = "http://localhost/modia",
         modiaContextHolderScope = "http://localhost/.default",
-        toiLivshendelseScope = "http://localhost/.default"
+        toiLivshendelseScope = "http://localhost/.default",
+        toiLivshendelseUrl = "http://localhost:10000/livshendelse"
     )
 
     private fun lagToken(
@@ -534,6 +541,20 @@ class KandidatTest {
     private fun Request.leggPåAutensiering() =
         header("Authorization", "Bearer ${lagToken(navIdent = "A123456").serialize()}")
 
+    private fun mockAdressebeskyttelse(wireMock: WireMock, harAdressebeskyttelse: Boolean = false) {
+        wireMock.register(
+            WireMock.post("/livshendelse/adressebeskyttelse")
+                .willReturn(
+                    WireMock.ok(
+                        """
+                            {
+                                "harAdressebeskyttelse": $harAdressebeskyttelse
+                            }
+                        """.trimIndent()
+                    )
+                )
+        )
+    }
 
     private fun mockNavnSøk(
         wireMock: WireMock,

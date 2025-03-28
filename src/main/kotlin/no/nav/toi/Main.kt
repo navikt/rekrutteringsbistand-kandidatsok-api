@@ -9,10 +9,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
 import no.nav.toi.brukertilgang.handleBrukertilgang
 import no.nav.toi.brukertilgang.handleMinekandidatnummer
-import no.nav.toi.kandidatsammendrag.PdlKlient
-import no.nav.toi.kandidatsammendrag.handleKandidatKandidatnr
-import no.nav.toi.kandidatsammendrag.handleKandidatNavn
-import no.nav.toi.kandidatsammendrag.handleKandidatSammendrag
+import no.nav.toi.kandidatsammendrag.*
 import no.nav.toi.kandidatstillingsøk.handleLookupKandidatStillingssøk
 import no.nav.toi.kandidatsøk.ModiaKlient
 import no.nav.toi.kandidatsøk.handleKandidatSøk
@@ -47,7 +44,8 @@ class App(
     azureUrl: String,
     modiaContextHolderUrl: String,
     modiaContextHolderScope: String,
-    toiLivshendelseScope: String
+    toiLivshendelseScope: String,
+    toiLivshendelseUrl: String
 ) {
 
     lateinit var javalin: Javalin
@@ -64,7 +62,7 @@ class App(
         AccessTokenClient(azureSecret, azureClientId, modiaContextHolderScope, azureUrl)
     )
 
-    private val adressebeskyttelseAccessTokenClient = AccessTokenClient(azureSecret, azureClientId, toiLivshendelseScope, azureUrl)
+    private val livshendelseKlient = LivshendelseKlient(toiLivshendelseUrl, AccessTokenClient(azureSecret, azureClientId, toiLivshendelseScope, azureUrl))
 
     fun configureOpenApi(config: JavalinConfig) {
         val openApiConfiguration = OpenApiPlugin { openApiConfig ->
@@ -98,7 +96,7 @@ class App(
         javalin.handleSuggest(openSearchClient)
         javalin.handleStedSuggest(openSearchClient)
         javalin.handleKontorSuggest(openSearchClient)
-        javalin.handleKandidatNavn(openSearchClient, pdlKlient, adressebeskyttelseAccessTokenClient)
+        javalin.handleKandidatNavn(livshendelseKlient, openSearchClient, pdlKlient)
         javalin.handleKandidatKandidatnr(openSearchClient)
         javalin.handleBrukertilgang(openSearchClient, modiaClient)
         javalin.handleMinekandidatnummer(openSearchClient, modiaClient)
@@ -177,6 +175,7 @@ fun main() {
         modiaContextHolderUrl = getenv("MODIA_CONTEXT_HOLDER_URL"),
         modiaContextHolderScope = getenv("MODIA_CONTEXT_HOLDER_SCOPE"),
         toiLivshendelseScope = getenv("TOI_LIVSHENDELSE_SCOPE"),
+        toiLivshendelseUrl = "http://toi-livshendelse",
     ).start()
 }
 
