@@ -1,14 +1,7 @@
 package no.nav.toi.kandidatsammendrag
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.Headers
-import com.github.kittinunf.fuel.core.extensions.authentication
-import com.github.kittinunf.fuel.core.extensions.jsonBody
-import com.github.kittinunf.fuel.jackson.responseObject
 import io.javalin.Javalin
-import io.javalin.http.InternalServerErrorResponse
-import io.javalin.http.UnauthorizedResponse
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
@@ -44,6 +37,7 @@ fun Javalin.handleKandidatNavn(livshendelseKlient: LivshendelseKlient, openSearc
         val request = ctx.bodyAsClass<KandidatNavnRequestDto>()
         AuditLogg.loggOppslagNavn(request.fodselsnummer, ctx.authenticatedUser().navIdent)
         if (livshendelseKlient.harAdressebeskyttelse(request.fodselsnummer, ctx.authenticatedUser().jwt)) {
+            log.info("403 fordi personen har adressebeskyttelse")
             ctx.status(403)
             return@post
         }
