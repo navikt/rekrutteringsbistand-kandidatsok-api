@@ -44,6 +44,7 @@ spec:
           cluster: {{foresporsel-om-deling-av-cv-api-cluster}}
     outbound:
       rules:
+        - application: toi-livshendelse
         - application: modiacontextholder
           namespace: personoversikt
       external:
