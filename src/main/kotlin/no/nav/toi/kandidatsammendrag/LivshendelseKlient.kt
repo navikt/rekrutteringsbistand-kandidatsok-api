@@ -19,7 +19,7 @@ class LivshendelseKlient(private val url: String, private val accessTokenClient:
             .jsonBody("""{"fnr": "$fodselsnummer"}""")
             .responseObject<ResponseAdressebeskyttelse>()
 
-        if(response.statusCode == 401) throw UnauthorizedResponse("Du har ikke tilgang")
+        if (response.statusCode == 401) throw UnauthorizedResponse("Du har ikke tilgang")
         if (response.statusCode == 500) throw InternalServerErrorResponse("Noe gikk galt")
 
         return result.get().harAdressebeskyttelse
