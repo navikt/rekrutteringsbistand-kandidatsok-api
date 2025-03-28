@@ -10,6 +10,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
 import no.nav.toi.RolleUuidSpesifikasjon
+import no.nav.toi.kandidatsøk.assertStatuscodeEquals
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
 import org.skyscreamer.jsonassert.JSONAssert
@@ -493,6 +494,17 @@ class KandidatTest {
         val (_, response) = gjørKallKandidatnummer("123", token)
 
         Assertions.assertThat(response.statusCode).isEqualTo(403)
+    }
+
+    @Test
+    fun `hvis person har adressebeskyttelse skal det returneres 403`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val token = lagToken()
+        mockAdressebeskyttelse(wireMock, true)
+
+        val (_, response, result) = gjørKallNavn("123", token)
+
+        assertStatuscodeEquals(response, result, 403)
     }
 
     private fun lagLokalApp() = App(
