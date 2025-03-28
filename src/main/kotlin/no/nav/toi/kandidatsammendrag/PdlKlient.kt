@@ -22,8 +22,6 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
             .jsonBody(graphql)
             .responseObject<Respons>()
 
-        if(response.statusCode == 404) return null
-
         when (result) {
             is Result.Success -> return result.get().data.hentPerson?.navn?.first()?.let {
                 it.fornavn + (it.mellomnavn?.let { " $it" } ?: "") to it.etternavn
