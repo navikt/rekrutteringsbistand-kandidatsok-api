@@ -26,6 +26,7 @@ import java.util.*
 
 
 private val noClassLogger = noClassLogger()
+val secureLog = LoggerFactory.getLogger("secureLog")!!
 
 /*
     Oppsett av applikasjon, som kan kjøres av både tester og main-metode.
@@ -144,8 +145,7 @@ private val fakedingsAuthenticationConfiguration = AuthenticationConfiguration(
 
 fun main() {
     noClassLogger.info("Starter app.")
-    LoggerFactory.getLogger("secureLog")!!
-        .info("Starter app. Dette er ment å logges til Securelogs. Hvis du ser dette i den ordinære apploggen er noe galt, og sensitive data kan havne i feil logg.")
+    secureLog.info("Starter app. Dette er ment å logges til Securelogs. Hvis du ser dette i den ordinære apploggen er noe galt, og sensitive data kan havne i feil logg.")
 
     App(
         authenticationConfigurations = listOfNotNull(

@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory
 
 
 object AuditLogg {
-    private val secureLog = LoggerFactory.getLogger("secureLog")!!
     private val auditLogger: AuditLogger = AuditLoggerImpl()
 
     fun loggOppslagCv(userid: String, navIdent: String, permit: Boolean) {

@@ -15,7 +15,6 @@ import io.javalin.http.*
 import no.nav.toi.kandidatsøk.Enhet
 import no.nav.toi.kandidatsøk.ModiaKlient
 import org.eclipse.jetty.http.HttpHeader
-import org.slf4j.LoggerFactory
 import java.net.URI
 import java.security.interfaces.RSAPublicKey
 import java.util.*
@@ -33,7 +32,6 @@ class AuthenticatedUser(
     val roller: Set<Rolle>,
     val jwt: String
 ) {
-    private val secureLog = LoggerFactory.getLogger("secureLog")!!
 
     fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle) {
         if(!erEnAvRollene(*gyldigeRoller)) {
