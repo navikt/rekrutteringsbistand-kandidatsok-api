@@ -10,6 +10,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
 import no.nav.toi.RolleUuidSpesifikasjon
+import no.nav.toi.kandidatsøk.assertStatuscodeEquals
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
 import org.skyscreamer.jsonassert.JSONAssert
@@ -123,6 +124,7 @@ class KandidatTest {
     @Test
     fun `map fødselsnummer til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12312312312"
         val fornavn = "Kjæreste"
         val etternavn = "Parodisk"
@@ -143,6 +145,7 @@ class KandidatTest {
     @Test
     fun `map fødselsnummer til navn fra PDL om det ikke finnes i ES`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12312312312"
         val fornavn = "Kjæreste"
         val mellomnavn: String? = "Mellom"
@@ -231,6 +234,7 @@ class KandidatTest {
     @Test
     fun `fødselsnummer som ikke eksisterer i hverken pdl eller ES returnerer 404`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12312312312"
         val fornavn = "Kjæreste"
         val mellomnavn: String? = "Mellom"
@@ -283,7 +287,25 @@ class KandidatTest {
                 """.trimIndent(), false, false
                     )
                 )
-                .willReturn(WireMock.notFound())
+                .willReturn(WireMock.ok(
+                    """
+                        {
+                          "errors": [
+                            {
+                              "message": "Fant ikke person",
+                              "locations": [],
+                              "path": [],
+                              "extensions": {
+                                "code": "not_found",
+                                "details": null,
+                                "classification": "ExecutionAborted"
+                              }
+                            }
+                          ],
+                          "data": {}
+                        }
+                    """.trimIndent()
+                ))
         )
         val (_, response, result) = Fuel.post("$endepunkt/navn")
             .body("""{"fodselsnummer":"$fødselsnummer"}""")
@@ -291,6 +313,86 @@ class KandidatTest {
             .responseObject<JsonNode>()
 
         Assertions.assertThat(response.statusCode).isEqualTo(404)
+    }
+
+    @Test
+    fun `skal feile om pdl returerer error-code som ikke er not_found`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val fødselsnummer = "12312312312"
+        wireMock.register(
+            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["fornavn","etternavn"]}}""",
+                        true,
+                        false
+                    )
+                )
+                .willReturn(
+                    WireMock.ok(
+                        """
+                    {
+                    	"took": 1,
+                    	"timed_out": false,
+                    	"_shards": {
+                    		"total": 3,
+                    		"successful": 3,
+                    		"skipped": 0,
+                    		"failed": 0
+                    	},
+                    	"hits": {
+                    		"total": {
+                    			"value": 0,
+                    			"relation": "eq"
+                    		},
+                    		"max_score": 3.2580965,
+                    		"hits": []
+                    	}
+                    }
+                """.trimIndent()
+                    )
+                )
+        )
+        wireMock.register(
+            WireMock.post("/pdl")
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """
+                    {
+                        "query": "query(${'$'}ident: ID!){ hentPerson(ident: ${'$'}ident) {navn(historikk: false) {fornavn mellomnavn etternavn}}}",
+                        "variables": {
+                            "ident":"$fødselsnummer"
+                        }
+                    }
+                """.trimIndent(), false, false
+                    )
+                )
+                .willReturn(WireMock.ok(
+                    """
+                        {
+                          "errors": [
+                            {
+                              "message": "Server error",
+                              "locations": [],
+                              "path": [],
+                              "extensions": {
+                                "code": "server_error",
+                                "details": null,
+                                "classification": "ExecutionAborted"
+                              }
+                            }
+                          ],
+                          "data": {}
+                        }
+                    """.trimIndent()
+                ))
+        )
+        val statusCode = Fuel.post("$endepunkt/navn")
+            .body("""{"fodselsnummer":"$fødselsnummer"}""")
+            .leggPåAutensiering()
+            .responseObject<JsonNode>().second.statusCode
+
+        Assertions.assertThat(statusCode).isEqualTo(500)
     }
 
     @Test
@@ -304,6 +406,7 @@ class KandidatTest {
     @Test
     fun `jobbsøkerrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(jobbsøkerrettet))
@@ -315,6 +418,7 @@ class KandidatTest {
     @Test
     fun `arbeidsgiverrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(arbeidsgiverrettet))
@@ -326,6 +430,7 @@ class KandidatTest {
     @Test
     fun `utvikler skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
+        mockAdressebeskyttelse(wireMock)
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(utvikler))
@@ -391,6 +496,17 @@ class KandidatTest {
         Assertions.assertThat(response.statusCode).isEqualTo(403)
     }
 
+    @Test
+    fun `hvis person har adressebeskyttelse skal det returneres 403`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        val token = lagToken()
+        mockAdressebeskyttelse(wireMock, true)
+
+        val (_, response, result) = gjørKallNavn("123", token)
+
+        assertStatuscodeEquals(response, result, 403)
+    }
+
     private fun lagLokalApp() = App(
         port = 8080,
         authenticationConfigurations = listOf(
@@ -411,10 +527,12 @@ class KandidatTest {
         pdlUrl = "http://localhost:10000/pdl",
         azureSecret = "secret",
         azureClientId = "1",
-        azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
         pdlScope = "http://localhost/.default",
+        azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
+        modiaContextHolderUrl = "http://localhost/modia",
         modiaContextHolderScope = "http://localhost/.default",
-        modiaContextHolderUrl = "http://localhost/modia"
+        toiLivshendelseScope = "http://localhost/.default",
+        toiLivshendelseUrl = "http://localhost:10000/livshendelse"
     )
 
     private fun lagToken(
@@ -435,6 +553,20 @@ class KandidatTest {
     private fun Request.leggPåAutensiering() =
         header("Authorization", "Bearer ${lagToken(navIdent = "A123456").serialize()}")
 
+    private fun mockAdressebeskyttelse(wireMock: WireMock, harAdressebeskyttelse: Boolean = false) {
+        wireMock.register(
+            WireMock.post("/livshendelse/adressebeskyttelse")
+                .willReturn(
+                    WireMock.ok(
+                        """
+                            {
+                                "harAdressebeskyttelse": $harAdressebeskyttelse
+                            }
+                        """.trimIndent()
+                    )
+                )
+        )
+    }
 
     private fun mockNavnSøk(
         wireMock: WireMock,

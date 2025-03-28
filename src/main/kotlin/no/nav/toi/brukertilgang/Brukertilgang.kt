@@ -9,7 +9,6 @@ import no.nav.toi.*
 import no.nav.toi.kandidatsøk.ModiaKlient
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
-import org.slf4j.LoggerFactory
 
 private const val endepunkt = "/api/brukertilgang"
 
@@ -18,8 +17,6 @@ private data class BrukertilgangRequestDto(
     val aktorid: String?,
     val kandidatnr: String?
 )
-
-private val secureLog = LoggerFactory.getLogger("secureLog")!!
 
 @OpenApi(
     summary = "Oppslag for å sjekke om en ident har tilgang til kandidatdata for en spesifikk bruker",

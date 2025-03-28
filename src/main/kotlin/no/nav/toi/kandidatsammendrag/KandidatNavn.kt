@@ -13,6 +13,7 @@ private const val endepunkt = "/api/navn"
 private data class KandidatNavnRequestDto(
     val fodselsnummer: String,
 )
+
 private enum class Kilde { REKRUTTERINGSBISTAND, PDL }
 
 private data class KandidatNavnResponsDto(
@@ -22,26 +23,46 @@ private data class KandidatNavnResponsDto(
 )
 
 @OpenApi(
-    summary = "Oppslag av navn for en enkelt person basert på fødselsnummer",
+    summary = "Oppslag av navn for en enkelt person basert på fødselsnummer.",
     operationId = endepunkt,
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(KandidatNavnRequestDto::class)]),
-    responses = [OpenApiResponse("200", [OpenApiContent(KandidatNavnResponsDto::class)])],
+    responses = [
+        OpenApiResponse("200", [OpenApiContent(KandidatNavnResponsDto::class)]),
+        OpenApiResponse(status = "403", description = "Personen har adressebeskyttelse"),
+        OpenApiResponse(status = "404", description = "Fant ikke personen")
+    ],
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKandidatNavn(openSearchClient: OpenSearchClient, pdlKlient: PdlKlient) {
+fun Javalin.handleKandidatNavn(
+    livshendelseKlient: LivshendelseKlient,
+    openSearchClient: OpenSearchClient,
+    pdlKlient: PdlKlient
+) {
     post(endepunkt) { ctx ->
         ctx.authenticatedUser().verifiserAutorisasjon(Rolle.UTVIKLER, Rolle.ARBEIDSGIVER_RETTET, Rolle.JOBBSØKER_RETTET)
 
         val request = ctx.bodyAsClass<KandidatNavnRequestDto>()
-        val result = openSearchClient.lookupKandidatNavn(request.fodselsnummer)
         AuditLogg.loggOppslagNavn(request.fodselsnummer, ctx.authenticatedUser().navIdent)
+        if (livshendelseKlient.harAdressebeskyttelse(request.fodselsnummer, ctx.authenticatedUser().jwt)) {
+            log.info("403 fordi personen har adressebeskyttelse")
+            ctx.status(403)
+            return@post
+        }
+        val result = openSearchClient.lookupKandidatNavn(request.fodselsnummer)
         result.hits().hits().firstOrNull()?.source()?.let {
-            ctx.json(KandidatNavnResponsDto(it["fornavn"]!!.asText(), it["etternavn"]!!.asText(), Kilde.REKRUTTERINGSBISTAND))
-        } ?: pdlKlient.hentFornavnOgEtternavn(request.fodselsnummer, ctx.authenticatedUser().jwt)?.let { (fornavn, etternavn) ->
-            ctx.json(KandidatNavnResponsDto(fornavn,etternavn, Kilde.PDL))
-        } ?: ctx.status(404)
+            ctx.json(
+                KandidatNavnResponsDto(
+                    it["fornavn"]!!.asText(),
+                    it["etternavn"]!!.asText(),
+                    Kilde.REKRUTTERINGSBISTAND
+                )
+            )
+        } ?: pdlKlient.hentFornavnOgEtternavn(request.fodselsnummer, ctx.authenticatedUser().jwt)
+            ?.let { (fornavn, etternavn) ->
+                ctx.json(KandidatNavnResponsDto(fornavn, etternavn, Kilde.PDL))
+            } ?: ctx.status(404)
     }
 }
 

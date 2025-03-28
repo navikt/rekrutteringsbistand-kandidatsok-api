@@ -9,5 +9,6 @@
   "modiaContextHolderUrl": "http://modiacontextholder.personoversikt",
   "modiaContextHolderScope": "api://prod-gcp.personoversikt.modiacontextholder/.default",
   "rekrutteringsbistand-kandidat-api-cluster": "prod-fss",
-  "foresporsel-om-deling-av-cv-api-cluster": "prod-fss"
+  "foresporsel-om-deling-av-cv-api-cluster": "prod-fss",
+  "toiLivshendelseScope": "api://prod-gcp.toi.toi-livshendelse/.default"
 }

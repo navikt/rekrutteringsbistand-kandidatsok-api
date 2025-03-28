@@ -9,10 +9,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
 import no.nav.toi.brukertilgang.handleBrukertilgang
 import no.nav.toi.brukertilgang.handleMinekandidatnummer
-import no.nav.toi.kandidatsammendrag.PdlKlient
-import no.nav.toi.kandidatsammendrag.handleKandidatKandidatnr
-import no.nav.toi.kandidatsammendrag.handleKandidatNavn
-import no.nav.toi.kandidatsammendrag.handleKandidatSammendrag
+import no.nav.toi.kandidatsammendrag.*
 import no.nav.toi.kandidatstillingsøk.handleLookupKandidatStillingssøk
 import no.nav.toi.kandidatsøk.ModiaKlient
 import no.nav.toi.kandidatsøk.handleKandidatSøk
@@ -29,6 +26,7 @@ import java.util.*
 
 
 private val noClassLogger = noClassLogger()
+val secureLog = LoggerFactory.getLogger("secureLog")!!
 
 /*
     Oppsett av applikasjon, som kan kjøres av både tester og main-metode.
@@ -46,7 +44,9 @@ class App(
     pdlScope: String,
     azureUrl: String,
     modiaContextHolderUrl: String,
-    modiaContextHolderScope: String
+    modiaContextHolderScope: String,
+    toiLivshendelseScope: String,
+    toiLivshendelseUrl: String
 ) {
 
     lateinit var javalin: Javalin
@@ -62,6 +62,8 @@ class App(
         modiaContextHolderUrl,
         AccessTokenClient(azureSecret, azureClientId, modiaContextHolderScope, azureUrl)
     )
+
+    private val livshendelseKlient = LivshendelseKlient(toiLivshendelseUrl, AccessTokenClient(azureSecret, azureClientId, toiLivshendelseScope, azureUrl))
 
     fun configureOpenApi(config: JavalinConfig) {
         val openApiConfiguration = OpenApiPlugin { openApiConfig ->
@@ -95,7 +97,7 @@ class App(
         javalin.handleSuggest(openSearchClient)
         javalin.handleStedSuggest(openSearchClient)
         javalin.handleKontorSuggest(openSearchClient)
-        javalin.handleKandidatNavn(openSearchClient, pdlKlient)
+        javalin.handleKandidatNavn(livshendelseKlient, openSearchClient, pdlKlient)
         javalin.handleKandidatKandidatnr(openSearchClient)
         javalin.handleBrukertilgang(openSearchClient, modiaClient)
         javalin.handleMinekandidatnummer(openSearchClient, modiaClient)
@@ -143,8 +145,7 @@ private val fakedingsAuthenticationConfiguration = AuthenticationConfiguration(
 
 fun main() {
     noClassLogger.info("Starter app.")
-    LoggerFactory.getLogger("secureLog")!!
-        .info("Starter app. Dette er ment å logges til Securelogs. Hvis du ser dette i den ordinære apploggen er noe galt, og sensitive data kan havne i feil logg.")
+    secureLog.info("Starter app. Dette er ment å logges til Securelogs. Hvis du ser dette i den ordinære apploggen er noe galt, og sensitive data kan havne i feil logg.")
 
     App(
         authenticationConfigurations = listOfNotNull(
@@ -173,6 +174,8 @@ fun main() {
         azureUrl = getenv("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
         modiaContextHolderUrl = getenv("MODIA_CONTEXT_HOLDER_URL"),
         modiaContextHolderScope = getenv("MODIA_CONTEXT_HOLDER_SCOPE"),
+        toiLivshendelseScope = getenv("TOI_LIVSHENDELSE_SCOPE"),
+        toiLivshendelseUrl = "http://toi-livshendelse",
     ).start()
 }
 

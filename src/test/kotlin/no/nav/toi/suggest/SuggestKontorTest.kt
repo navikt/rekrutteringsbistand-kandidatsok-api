@@ -148,10 +148,12 @@ class SuggestKontorTest {
         pdlUrl = "http://localhost:10000/pdl",
         azureSecret = "secret",
         azureClientId = "1",
-        azureUrl = "http://localhost:$authPort",
         pdlScope = "http://localhost/.default",
+        azureUrl = "http://localhost:$authPort",
+        modiaContextHolderUrl = "http://localhost:10000/modia",
         modiaContextHolderScope = "http://localhost/.default",
-        modiaContextHolderUrl = "http://localhost:10000/modia"
+        toiLivshendelseScope = "http://localhost/.default",
+        toiLivshendelseUrl = "http://localhost:10000/livshendelse"
     )
 
     private fun lagToken(

@@ -12,11 +12,9 @@ import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
 
-private val secureLog = LoggerFactory.getLogger("secureLog")!!
 
 class AccessTokenClient(
     private val secret: String,

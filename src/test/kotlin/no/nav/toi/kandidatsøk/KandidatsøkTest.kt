@@ -2,6 +2,9 @@ package no.nav.toi.kandidatsøk
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.result.Result
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.jackson.responseObject
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.*
@@ -12,6 +15,7 @@ import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
 import no.nav.toi.RolleUuidSpesifikasjon
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -65,7 +69,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
 
     }
@@ -83,7 +87,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -100,7 +104,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -117,7 +121,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -134,42 +138,42 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
     @ParameterizedTest
     @MethodSource("endepunktSomParameter")
     fun `Må ha token`(endepunkt: Endepunkt) {
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
             .body("""{}""")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        assertStatuscodeEquals(response, result, 401)
     }
 
     @ParameterizedTest
     @MethodSource("endepunktSomParameter")
     fun `Må ha gyldig token`(endepunkt: Endepunkt) {
         val token = lagToken(issuerId = "falskissuer")
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        assertStatuscodeEquals(response, result, 401)
     }
 
     @ParameterizedTest
     @MethodSource("endepunktSomParameter")
     fun `Må ha navIdent`(endepunkt: Endepunkt) {
         val token = lagToken(claims = mapOf("groups" to listOf(modiaGenerell)))
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        assertStatuscodeEquals(response, result, 401)
     }
 
     enum class Tilgang(val uuid: String) {
@@ -232,12 +236,12 @@ class KandidatsøkTest {
         mockES(wireMock, extraTerms = endepunkt.extraTerms)
         endepunkt.ekstraMocking(wireMock)
         val token = lagToken(navIdent = "A123456", groups = listOf(tilgang.uuid))
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
             .body("""{${endepunkt.bodyParameter(false)}}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(statusCode)
+        assertStatuscodeEquals(response, result, statusCode)
     }
 
     @ParameterizedTest
@@ -247,12 +251,12 @@ class KandidatsøkTest {
         wmRuntimeInfo: WireMockRuntimeInfo
     ) {
         val token = lagToken(groups = emptyList())
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
             .body("""{}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        assertStatuscodeEquals(response, result, 403)
     }
 
     @ParameterizedTest
@@ -277,7 +281,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(500)
+        assertStatuscodeEquals(response, result, 500)
     }
 
     @ParameterizedTest
@@ -299,7 +303,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -323,7 +327,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -340,7 +344,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -361,7 +365,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -382,7 +386,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -403,7 +407,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -424,7 +428,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -444,7 +448,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -461,7 +465,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -478,7 +482,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -495,7 +499,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -512,7 +516,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -529,7 +533,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -546,7 +550,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -563,7 +567,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -580,7 +584,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -597,7 +601,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -614,7 +618,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -631,7 +635,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -646,7 +650,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -661,7 +665,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -676,7 +680,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -691,7 +695,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -709,7 +713,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -743,7 +747,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        assertStatuscodeEquals(response, result, 401)
     }
 
     @ParameterizedTest
@@ -759,7 +763,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -779,7 +783,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -828,7 +832,7 @@ class KandidatsøkTest {
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        assertStatuscodeEquals(response, result, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
@@ -852,10 +856,12 @@ class KandidatsøkTest {
         pdlUrl = "http://localhost:10000/pdl",
         azureSecret = "secret",
         azureClientId = audience,
-        azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
         pdlScope = "http://localhost/.default",
+        azureUrl = "http://localhost:$authPort/rest/isso/oauth2/access_token",
+        modiaContextHolderUrl = "http://localhost:10000/modia",
         modiaContextHolderScope = "http://localhost/.default",
-        modiaContextHolderUrl = "http://localhost:10000/modia"
+        toiLivshendelseScope = "http://localhost/.default",
+        toiLivshendelseUrl = "http://localhost:10000/livshendelse"
     )
 
     private fun mockES(
@@ -939,4 +945,19 @@ private fun mockDecorator(wireMock: WireMock) {
                 )
             )
     )
+}
+
+fun assertStatuscodeEquals(
+    actualResponse: Response,
+    actualResult: Result<*, FuelError>,
+    expectedStatuscode: Int,
+) {
+    when (actualResult) {
+        is Result.Success -> assertThat(actualResponse.statusCode).isEqualTo(expectedStatuscode)
+        is Result.Failure -> if (actualResponse.statusCode == -1) {
+            throw actualResult.error
+        } else {
+            assertThat(actualResponse.statusCode).isEqualTo(expectedStatuscode)
+        }
+    }
 }

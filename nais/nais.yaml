@@ -44,6 +44,7 @@ spec:
           cluster: {{foresporsel-om-deling-av-cv-api-cluster}}
     outbound:
       rules:
+        - application: toi-livshendelse
         - application: modiacontextholder
           namespace: personoversikt
       external:
@@ -63,3 +64,5 @@ spec:
       value: {{modiaContextHolderUrl}}
     - name: MODIA_CONTEXT_HOLDER_SCOPE
       value: {{modiaContextHolderScope}}
+    - name: TOI_LIVSHENDELSE_SCOPE
+      value: {{toiLivshendelseScope}}
