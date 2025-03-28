@@ -6,6 +6,7 @@ import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
+import no.nav.toi.SecureLogLogger.Companion.secure
 import no.nav.toi.kandidatsøk.ModiaKlient
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
@@ -33,13 +34,18 @@ fun Javalin.handleBrukertilgang(openSearchClient: OpenSearchClient, modiaKlient:
         val request = ctx.bodyAsClass<BrukertilgangRequestDto>()
 
         log.info("Oppslag for brukertilgang")
-        secureLog.info("Brukertilgang-request: $request")
+        secure(log).info("Brukertilgang-request: $request")
         val result = when {
-            request.fodselsnummer != null -> openSearchClient.lookupBrukertilgang("fodselsnummer", request.fodselsnummer)
+            request.fodselsnummer != null -> openSearchClient.lookupBrukertilgang(
+                "fodselsnummer",
+                request.fodselsnummer
+            )
+
             request.aktorid != null -> openSearchClient.lookupBrukertilgang("aktorId", request.aktorid)
             request.kandidatnr != null -> openSearchClient.lookupBrukertilgang("kandidatnr", request.kandidatnr)
             else -> {
-                ctx.status(HttpStatus.BAD_REQUEST).result("Bad Request: minst en identifikator (fodselsnummer, aktorid, kandidatnr) must sendes med")
+                ctx.status(HttpStatus.BAD_REQUEST)
+                    .result("Bad Request: minst en identifikator (fodselsnummer, aktorid, kandidatnr) must sendes med")
                 return@post
             }
         }

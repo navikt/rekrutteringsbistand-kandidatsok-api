@@ -12,6 +12,7 @@ import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.RSAKeyProvider
 import io.javalin.Javalin
 import io.javalin.http.*
+import no.nav.toi.SecureLogLogger.Companion.secure
 import no.nav.toi.kandidatsøk.Enhet
 import no.nav.toi.kandidatsøk.ModiaKlient
 import org.eclipse.jetty.http.HttpHeader
@@ -34,16 +35,21 @@ class AuthenticatedUser(
 ) {
 
     fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle) {
-        if(!erEnAvRollene(*gyldigeRoller)) {
-            Thread.currentThread().stackTrace.map {  }
-            secureLog.info("403 $navIdent med roller $roller  har ikke tilgang som krever en av rollene $gyldigeRoller ${hentStackTrace()}")
+        if (!erEnAvRollene(*gyldigeRoller)) {
+            Thread.currentThread().stackTrace.map { }
+            secure(log).info("403 $navIdent med roller $roller  har ikke tilgang som krever en av rollene $gyldigeRoller ${hentStackTrace()}")
             throw ForbiddenResponse()
         }
     }
 
     fun erEnAvRollene(vararg gyldigeRoller: Rolle) = roller.any { it in gyldigeRoller }
 
-    fun verifiserTilgangTilBruker(orgEnhetKandidat: String?, veilederKandidat: String?, modiaKlient: ModiaKlient, auditLogFunksjon: AuditLogMedPermit) {
+    fun verifiserTilgangTilBruker(
+        orgEnhetKandidat: String?,
+        veilederKandidat: String?,
+        modiaKlient: ModiaKlient,
+        auditLogFunksjon: AuditLogMedPermit
+    ) {
         try {
             verifiserAutorisasjon(
                 Rolle.ARBEIDSGIVER_RETTET,
@@ -62,7 +68,7 @@ class AuthenticatedUser(
                     navIdent
                 )
             ) {
-                secureLog.info("403 $navIdent med roller $roller og orgEnheter ${modiaenheter} har ikke tilgang til bruker med orgEnhet $orgEnhetKandidat og veileder $veilederKandidat ${hentStackTrace()}")
+                secure(log).info("403 $navIdent med roller $roller og orgEnheter ${modiaenheter} har ikke tilgang til bruker med orgEnhet $orgEnhetKandidat og veileder $veilederKandidat ${hentStackTrace()}")
                 throw ForbiddenResponse()
             }
         } catch (e: ForbiddenResponse) {
@@ -141,7 +147,7 @@ fun Javalin.azureAdAuthentication(
             log.warn("Noen prøvde å aksessere endepunkt med en token signert med en falsk issuer")
             ctx.status(HttpStatus.UNAUTHORIZED).result("")
         }.exception(MissingClaimException::class.java) { e, ctx ->
-            if(e.claimName=="groups") {
+            if (e.claimName == "groups") {
                 ctx.status(HttpStatus.FORBIDDEN).result("")
             } else {
                 log.warn("Noen prøvde å aksessere endepunkt med en token med manglende claim", e)
