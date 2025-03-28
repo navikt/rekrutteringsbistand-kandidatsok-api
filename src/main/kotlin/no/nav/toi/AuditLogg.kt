@@ -5,7 +5,7 @@ import no.nav.common.audit_log.cef.CefMessage
 import no.nav.common.audit_log.cef.CefMessageEvent
 import no.nav.common.audit_log.log.AuditLogger
 import no.nav.common.audit_log.log.AuditLoggerImpl
-import org.slf4j.LoggerFactory
+import no.nav.toi.SecureLogLogger.Companion.secure
 
 
 object AuditLogg {
@@ -52,7 +52,7 @@ object AuditLogg {
         msg: String,
         authorizationDecision: AuthorizationDecision = AuthorizationDecision.PERMIT
     ) {
-        val message = CefMessage.builder()
+        val cefMessage = CefMessage.builder()
             .applicationName("Rekrutteringsbistand")
             .loggerName("rekrutteringsbistand-kandidatsok-api")
             .event(CefMessageEvent.ACCESS)
@@ -65,8 +65,9 @@ object AuditLogg {
             .build()
 
         val ekstraSpaceSidenAuditloggerInnimellomKutterSisteTegn = " "
-        auditLogger.log("$message" + ekstraSpaceSidenAuditloggerInnimellomKutterSisteTegn)
-        secureLog.info("auditlogger: {}", "$message" + ekstraSpaceSidenAuditloggerInnimellomKutterSisteTegn)
+        val auditLogMessage = "$cefMessage" + ekstraSpaceSidenAuditloggerInnimellomKutterSisteTegn
+        auditLogger.log(auditLogMessage)
+        secure(log).info("auditlogger: $auditLogMessage")
     }
 
     fun loggSpesifiktKandidatsøk(userid: String, navIdent: String, fikkTreff: Boolean) {
