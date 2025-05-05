@@ -5,7 +5,7 @@ import java.time.LocalDate
 object KandidatsøkRespons {
     fun query(vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS"]}}""", from: Int = 0) = (extraTerms.toList() + innsatsgruppeTerm)
         .let { terms ->
-            """{"_source":{"includes":["fodselsnummer","fornavn","etternavn","arenaKandidatnr","innsatsgruppe","yrkeJobbonskerObj","geografiJobbonsker","kommuneNavn","postnummer"]},"from":$from,"query":{"bool":{"must":$terms}},"size":25,"track_total_hits":true${if(sortering)""","sort":[{"tidsstempel":{"order":"desc"}}]""" else ""}}"""
+            """{"_source":{"includes":["fodselsnummer","fornavn","etternavn","arenaKandidatnr","innsatsgruppe","yrkeJobbonskerObj","geografiJobbonsker","kommuneNavn","postnummer","poststed"]},"from":$from,"query":{"bool":{"must":$terms}},"size":25,"track_total_hits":true${if(sortering)""","sort":[{"tidsstempel":{"order":"desc"}}]""" else ""}}"""
         }
     fun navigeringQuery(vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS"]}}""", from: Int = 0) = (extraTerms.toList() + innsatsgruppeTerm)
         .let { terms ->
