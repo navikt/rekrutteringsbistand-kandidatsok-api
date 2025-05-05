@@ -238,7 +238,8 @@ private fun OpenSearchClient.kandidatSøk(
                 "yrkeJobbonskerObj",
                 "geografiJobbonsker",
                 "kommuneNavn",
-                "postnummer"
+                "postnummer",
+                "poststed"
             )
         }
         trackTotalHits(true)
