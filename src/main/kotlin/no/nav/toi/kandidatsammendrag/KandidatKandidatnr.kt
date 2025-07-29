@@ -22,8 +22,19 @@ private data class KandidatKandidatnrResponsDto(
     summary = "Oppslag av kandidatnummer for en enkelt person basert på fødselsnummer",
     operationId = endepunkt,
     tags = [],
-    requestBody = OpenApiRequestBody([OpenApiContent(KandidatKandidatnrRequestDto::class)]),
-    responses = [OpenApiResponse("200", [OpenApiContent(KandidatKandidatnrResponsDto::class)])],
+    requestBody = OpenApiRequestBody(
+        [OpenApiContent(
+            from = KandidatKandidatnrRequestDto::class,
+            example = """{ "fodselsnummer": "12345678901" }"""
+        )]
+    ),
+    responses = [OpenApiResponse(
+        status = "200",
+        content = [OpenApiContent(
+            from = KandidatKandidatnrResponsDto::class,
+            example = """{ "arenaKandidatnr": "ARENA123456" }"""
+        )]
+    )],
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
