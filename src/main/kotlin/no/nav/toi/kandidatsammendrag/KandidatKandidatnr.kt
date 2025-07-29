@@ -19,7 +19,7 @@ private data class KandidatKandidatnrResponsDto(
 )
 
 @OpenApi(
-    summary = "Oppslag av navn for en enkelt person basert på fødselsnummer",
+    summary = "Oppslag av kandidatnummer for en enkelt person basert på fødselsnummer",
     operationId = endepunkt,
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(KandidatKandidatnrRequestDto::class)]),
