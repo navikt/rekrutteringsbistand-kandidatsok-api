@@ -42,6 +42,7 @@ spec:
         - application: foresporsel-om-deling-av-cv-api
           namespace: toi
           cluster: {{foresporsel-om-deling-av-cv-api-cluster}}
+        - application: rekrutteringstreff-api
     outbound:
       rules:
         - application: toi-livshendelse
