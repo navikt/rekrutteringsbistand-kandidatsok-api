@@ -23,6 +23,9 @@ og så legge på svaret som
 Authorization: Bearer <token>
 ```
 
+# Kode generert av GitHub Copilot
+Dette repoet bruker GitHub Copilot til å generere kode.
+
 ## Henvendelser
 
 ### For Nav-ansatte

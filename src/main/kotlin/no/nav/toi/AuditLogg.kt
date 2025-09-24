@@ -5,7 +5,6 @@ import no.nav.common.audit_log.cef.CefMessage
 import no.nav.common.audit_log.cef.CefMessageEvent
 import no.nav.common.audit_log.log.AuditLogger
 import no.nav.common.audit_log.log.AuditLoggerImpl
-import org.slf4j.LoggerFactory
 
 
 object AuditLogg {
@@ -66,7 +65,6 @@ object AuditLogg {
 
         val ekstraSpaceSidenAuditloggerInnimellomKutterSisteTegn = " "
         auditLogger.log("$message" + ekstraSpaceSidenAuditloggerInnimellomKutterSisteTegn)
-        secureLog.info("auditlogger: {}", "$message" + ekstraSpaceSidenAuditloggerInnimellomKutterSisteTegn)
     }
 
     fun loggSpesifiktKandidatsøk(userid: String, navIdent: String, fikkTreff: Boolean) {
