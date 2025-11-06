@@ -30,7 +30,7 @@ spec:
           - id: {{adGruppeUtvikler}}
   openSearch:
     access: read
-    instance: kandidat
+    instance: toi-kandidat
   accessPolicy:
     inbound:
       rules:
