@@ -267,7 +267,7 @@ class KandidatsøkTest {
     ) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson(KandidatsøkRespons.query(), true, false))
                 .willReturn(
                     notFound()
@@ -872,7 +872,7 @@ class KandidatsøkTest {
         from: Int = 0
     ) {
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     equalToJson(
                         KandidatsøkRespons.query(extraTerms = extraTerms, sortering, innsatsgruppeTerm, from),
@@ -885,7 +885,7 @@ class KandidatsøkTest {
                 )
         )
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     equalToJson(
                         KandidatsøkRespons.navigeringQuery(

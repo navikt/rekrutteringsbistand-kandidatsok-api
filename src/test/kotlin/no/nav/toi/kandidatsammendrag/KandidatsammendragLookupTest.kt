@@ -45,7 +45,7 @@ class KandidatsammendragLookupTest {
     fun `Finner ikke kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""
                     {
                       "_source": {
@@ -94,7 +94,7 @@ class KandidatsammendragLookupTest {
     fun `Om kall feiler under henting av kandidatsammendrag fra elasticsearch, får vi HTTP 500`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     notFound()
@@ -240,7 +240,7 @@ class KandidatsammendragLookupTest {
 
     private fun mockKandidatSammendrag(wireMock: WireMock, veileder: String? = "A100000") {
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     equalToJson(
                         """

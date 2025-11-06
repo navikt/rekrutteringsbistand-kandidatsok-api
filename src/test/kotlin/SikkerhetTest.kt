@@ -110,7 +110,7 @@ class SikkerhetTest {
     fun `opensearch-biblioteket takler forsøk på json-injection`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(WireMock.equalToJson("""{"query":{"term":{"kandidatnr":{"value":"\",!xz" }}}}"""))
                 .willReturn(
                     WireMock.ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))

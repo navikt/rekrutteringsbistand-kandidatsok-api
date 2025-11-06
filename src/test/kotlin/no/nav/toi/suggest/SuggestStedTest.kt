@@ -65,7 +65,7 @@ class SuggestStedTest {
     private fun mockSuggest(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(WireMock.equalToJson(esStedRequest, true, false))
                 .willReturn(WireMock.ok(esStedSvar))
         )

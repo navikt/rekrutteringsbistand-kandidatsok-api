@@ -142,7 +142,7 @@ class BrukerTilgangTest {
 
     private fun mockES(wireMock: WireMock, orgEnhet: String, veilederIdent: String, mockESFelt: String) {
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         """{"_source":{"includes":["veilederIdent","orgenhet"]},"query":{"term":{"$mockESFelt":{"value":"12345678910"}}}}""".trimIndent()

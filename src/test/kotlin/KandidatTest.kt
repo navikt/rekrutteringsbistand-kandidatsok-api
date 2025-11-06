@@ -59,7 +59,7 @@ class KandidatTest {
         val fødselsnummer = "12312312312"
         val kandidatnummer = "PAM123456789"
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["arenaKandidatnr"]}}""",
@@ -151,7 +151,7 @@ class KandidatTest {
         val mellomnavn: String? = "Mellom"
         val etternavn = "Parodisk"
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["fornavn","etternavn"]}}""",
@@ -240,7 +240,7 @@ class KandidatTest {
         val mellomnavn: String? = "Mellom"
         val etternavn = "Parodisk"
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["fornavn","etternavn"]}}""",
@@ -320,7 +320,7 @@ class KandidatTest {
         val wireMock = wmRuntimeInfo.wireMock
         val fødselsnummer = "12312312312"
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["fornavn","etternavn"]}}""",
@@ -575,7 +575,7 @@ class KandidatTest {
         etternavn: String,
     ) {
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["fornavn","etternavn"]}}""",
@@ -637,7 +637,7 @@ class KandidatTest {
         kandidatnummer: String
     ) =
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         """{"query":{"term":{"fodselsnummer":{"value":"$fødselsnummer"}}},"_source":{"includes":["arenaKandidatnr"]}}""",
