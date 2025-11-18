@@ -16,6 +16,7 @@ import no.nav.toi.kandidatsøk.handleKandidatSøk
 import no.nav.toi.kompetanseforslag.handleKompetanseforslag
 import no.nav.toi.kuberneteshealth.handleHealth
 import no.nav.toi.lookupcv.handleLookupCv
+import no.nav.toi.lookupcv.handleMultipleLookupCv
 import no.nav.toi.me.handleMe
 import no.nav.toi.suggest.handleKontorSuggest
 import no.nav.toi.suggest.handleStedSuggest
@@ -90,6 +91,7 @@ class App(
         javalin.handleHealth()
         javalin.handleMe()
         javalin.handleLookupCv(openSearchClient, modiaClient)
+        javalin.handleMultipleLookupCv(openSearchClient, modiaClient)
         javalin.handleKandidatSammendrag(openSearchClient, modiaClient)
         javalin.handleKompetanseforslag(openSearchClient)
         javalin.handleLookupKandidatStillingssøk(openSearchClient, modiaClient)
