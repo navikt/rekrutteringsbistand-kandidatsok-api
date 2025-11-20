@@ -9,6 +9,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
 import no.nav.toi.brukertilgang.handleBrukertilgang
 import no.nav.toi.brukertilgang.handleMinekandidatnummer
+import no.nav.toi.hullicv.handleHullICv
 import no.nav.toi.kandidatsammendrag.*
 import no.nav.toi.kandidatstillingsøk.handleLookupKandidatStillingssøk
 import no.nav.toi.kandidatsøk.ModiaKlient
@@ -103,7 +104,7 @@ class App(
         javalin.handleKandidatKandidatnr(openSearchClient)
         javalin.handleBrukertilgang(openSearchClient, modiaClient)
         javalin.handleMinekandidatnummer(openSearchClient, modiaClient)
-
+        javalin.handleHullICv(openSearchClient, modiaClient)
 
         javalin.azureAdAuthentication(
             path = "/api/*",

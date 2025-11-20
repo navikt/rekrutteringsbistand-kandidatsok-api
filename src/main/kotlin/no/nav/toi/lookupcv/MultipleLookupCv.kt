@@ -20,7 +20,7 @@ private data class MultipleLookupCvRequestDto(
 )
 
 @OpenApi(
-    summary = "Oppslag av hele CVen til en enkelt person basert på kandidatnummer",
+    summary = "Oppslag av hele CVene til personer basert på kandidatnummer",
     operationId = endepunkt,
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(MultipleLookupCvRequestDto::class)]),
