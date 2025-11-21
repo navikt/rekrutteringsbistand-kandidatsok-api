@@ -86,4 +86,13 @@ object AuditLogg {
         )
     }
 
+    fun loggOppslagHullICv(userid: String, navIdent: String, permit: Boolean) {
+        logCefMessage(
+            navIdent = navIdent,
+            userid = userid,
+            msg = "NAV-ansatt har sjekket om bruker har hull i CV",
+            authorizationDecision = if (permit) AuthorizationDecision.PERMIT else AuthorizationDecision.DENY
+        )
+    }
+
 }

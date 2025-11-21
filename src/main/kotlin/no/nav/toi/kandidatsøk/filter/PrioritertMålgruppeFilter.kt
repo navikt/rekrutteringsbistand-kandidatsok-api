@@ -1,6 +1,7 @@
 package no.nav.toi.kandidatsøk.filter
 
 import no.nav.toi.*
+import no.nav.toi.hullicv.hullICvEsFunksjon
 import no.nav.toi.kandidatsøk.FilterParametre
 import java.time.LocalDate
 
@@ -36,121 +37,7 @@ private object Senior: Målgruppe {
 }
 private object HullICv: Målgruppe {
     override fun harKode(kode: String) = kode == "hullICv"
-    override fun lagESFilterFunksjon(): FilterFunksjon = {
-        should_ {
-            bool_ {
-                must_ {
-                    bool_ {
-                        should_ {
-                            nested_ {
-                                path("yrkeserfaring")
-                                query_ {
-                                    bool_ {
-                                        must_ {
-                                            exists_ {
-                                                field("yrkeserfaring")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        should_ {
-                            nested_ {
-                                path("utdanning")
-                                query_ {
-                                    bool_ {
-                                        must_ {
-                                            exists_ {
-                                                field("utdanning")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        should_ {
-                            nested_ {
-                                path("forerkort")
-                                query_ {
-                                    bool_ {
-                                        must_ {
-                                            exists_ {
-                                                field("forerkort")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        should_ {
-                            exists_ {
-                                field("kursObj")
-                            }
-                        }
-                        should_ {
-                            exists_ {
-                                field("fagdokumentasjon")
-                            }
-                        }
-                        should_ {
-                            exists_ {
-                                field("annenerfaringObj")
-                            }
-                        }
-                        should_ {
-                            exists_ {
-                                field("godkjenninger")
-                            }
-                        }
-                    }
-                }
-                must_ {
-                    bool_ {
-                        should_ {
-                            bool_ {
-                                mustNot_ {
-                                    exists_ {
-                                        field("perioderMedInaktivitet.startdatoForInnevarendeInaktivePeriode")
-                                    }
-                                }
-                                mustNot_ {
-                                    exists_ {
-                                        field("perioderMedInaktivitet.sluttdatoerForInaktivePerioderPaToArEllerMer")
-                                    }
-                                }
-                            }
-                        }
-                        should_ {
-                            bool_ {
-                                must_ {
-                                    exists_ {
-                                        field("perioderMedInaktivitet.startdatoForInnevarendeInaktivePeriode")
-                                    }
-                                }
-                                must_ {
-                                    bool_ {
-                                        should_ {
-                                            range_ {
-                                                field("perioderMedInaktivitet.startdatoForInnevarendeInaktivePeriode")
-                                                lte(LocalDate.now().minusYears(2))
-                                            }
-                                        }
-                                        should_ {
-                                            range_ {
-                                                field("perioderMedInaktivitet.sluttdatoerForInaktivePerioderPaToArEllerMer")
-                                                gte(LocalDate.now().minusYears(3))
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    override fun lagESFilterFunksjon(): FilterFunksjon = hullICvEsFunksjon(LocalDate.now())
 }
 
 private fun String.tilMålgruppe() = listOf(Unge, Senior, HullICv).firstOrNull { it.harKode(this) } ?: throw Valideringsfeil("$this er en ukjent målgruppe")
