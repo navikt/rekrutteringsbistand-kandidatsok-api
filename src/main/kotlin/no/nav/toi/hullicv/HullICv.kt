@@ -33,7 +33,7 @@ private const val endepunkt = "/api/har-hull-i-cv"
 
 private data class RequestDto(
     val aktorId: String,
-    val dato: LocalDate
+    val dato: String
 )
 
 @OpenApi(
@@ -61,7 +61,7 @@ fun Javalin.handleHullICv(openSearchClient: OpenSearchClient, modiaKlient: Modia
             authenticatedUser.verifiserTilgangTilBruker(orgEnhet, veileder, modiaKlient) { permit ->
                 AuditLogg.loggOppslagHullICv(request.aktorId, authenticatedUser.navIdent, permit)
             }
-            val hullICvResponse = openSearchClient.harHullICv(request.aktorId, request.dato)
+            val hullICvResponse = openSearchClient.harHullICv(request.aktorId, LocalDate.parse(request.dato))
             val harHullICv = hullICvResponse.hits().total().value() > 0
             ctx.json(harHullICv)
         }
