@@ -15,7 +15,6 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
@@ -39,7 +38,7 @@ class MultipleCvLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}}}"""))
+                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*CvTestRespons.sourceMultipleCvLookup.toTypedArray()))
                 )
@@ -57,7 +56,7 @@ class MultipleCvLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM000000000"]}}}"""))
+                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM000000000"]}},"size":1}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpensearchIngenTreff)
                 )
@@ -84,7 +83,7 @@ class MultipleCvLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}}}"""))
+                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     notFound()
                 )
@@ -101,7 +100,7 @@ class MultipleCvLookupTest {
         val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
         wmRuntimeInfo.wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}}}"""))
+                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*CvTestRespons.sourceMultipleCvLookup.toTypedArray()))
                 )
@@ -116,7 +115,7 @@ class MultipleCvLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}}}"""))
+                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*CvTestRespons.sourceMultipleCvLookup.toTypedArray()))
                 )
@@ -127,7 +126,6 @@ class MultipleCvLookupTest {
         Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
 
-    @Disabled
     @Test
     fun `jobbsøkerrettet skal ha tilgang til cver dersom hen er kandidatens veileder`(wmRuntimeInfo: WireMockRuntimeInfo) {
 
@@ -163,7 +161,7 @@ class MultipleCvLookupTest {
 
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}}}"""))
+                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*returMedRiktigVeilederFeilKontor.toTypedArray()))
                 )
@@ -179,7 +177,6 @@ class MultipleCvLookupTest {
         assertThat(jsonNode.first()["_source"]["kandidatnr"].asText()).isEqualTo("PAM0123456789")
     }
 
-    @Disabled
     @Test
     fun `jobbsøkerrettet skal ha tilgang til cv dersom hen er tilknyttet kandidatens kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
 
@@ -220,7 +217,7 @@ class MultipleCvLookupTest {
 
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}}}"""))
+                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*returMedRiktigVeilederFeilKontor.toTypedArray()))
                 )
@@ -236,7 +233,6 @@ class MultipleCvLookupTest {
         assertThat(jsonNode.first()["_source"]["kandidatnr"].asText()).isEqualTo("PAM0987654321")
     }
 
-    @Disabled
     @Test
     fun `jobbsøkerrettet skal ha tilgang til cver dersom hen ikke er kandidatens veileder og ikke er tilknyttet kandidatens kontor, men har også arbeidsgiverrettet rolle`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val veiledersIdent = "A000001"
@@ -271,7 +267,7 @@ class MultipleCvLookupTest {
 
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}}}"""))
+                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*returMedRiktigVeilederFeilKontor.toTypedArray()))
                 )
@@ -293,7 +289,7 @@ class MultipleCvLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}}}"""))
+                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*CvTestRespons.sourceMultipleCvLookup.toTypedArray()))
                 )
@@ -309,7 +305,7 @@ class MultipleCvLookupTest {
         val token = app.lagToken(groups = emptyList())
         wmRuntimeInfo.wireMock.register(
             post("/veilederkandidat_current/_search?typed_keys=true")
-                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}}}"""))
+                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*CvTestRespons.sourceMultipleCvLookup.toTypedArray()))
                 )

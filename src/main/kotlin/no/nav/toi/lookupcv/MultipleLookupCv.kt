@@ -35,12 +35,12 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
 
         val navIdent = authenticatedUser.navIdent
         val result = openSearchClient.multipleLookupCv(ctx.bodyAsClass<MultipleLookupCvRequestDto>())
-        val filtrerteKandidater = result.hits().hits()/*.filter { kandidat ->
+        val filtrerteKandidater = result.hits().hits().filter { kandidat ->
             val fodselsnummer = kandidat?.source()?.get("fodselsnummer")?.asText()
             val orgEnhet = kandidat?.source()?.get("orgenhet")?.asText()
             val veileder = kandidat?.source()?.get("veilederIdent")?.asText()
             authenticatedUser.harTilgangTilBruker(orgEnhet, veileder, modiaKlient)
-        }*/
+        }
 
         val filtrertSearchResponse = SearchResponse.Builder<JsonNode>()
             .took(result.took())
@@ -68,6 +68,7 @@ private fun OpenSearchClient.multipleLookupCv(params: MultipleLookupCvRequestDto
         query_ {
             terms_("kandidatnr" to params.kandidatnr)
         }
+        size(params.kandidatnr.size)
     }
 
 
