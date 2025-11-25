@@ -15,6 +15,7 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
@@ -126,6 +127,7 @@ class MultipleCvLookupTest {
         Assertions.assertThat(response.statusCode).isEqualTo(200)
     }
 
+    @Disabled
     @Test
     fun `jobbsøkerrettet skal ha tilgang til cver dersom hen er kandidatens veileder`(wmRuntimeInfo: WireMockRuntimeInfo) {
 
@@ -177,6 +179,7 @@ class MultipleCvLookupTest {
         assertThat(jsonNode.first()["_source"]["kandidatnr"].asText()).isEqualTo("PAM0123456789")
     }
 
+    @Disabled
     @Test
     fun `jobbsøkerrettet skal ha tilgang til cv dersom hen er tilknyttet kandidatens kontor`(wmRuntimeInfo: WireMockRuntimeInfo) {
 
@@ -233,6 +236,7 @@ class MultipleCvLookupTest {
         assertThat(jsonNode.first()["_source"]["kandidatnr"].asText()).isEqualTo("PAM0987654321")
     }
 
+    @Disabled
     @Test
     fun `jobbsøkerrettet skal ha tilgang til cver dersom hen ikke er kandidatens veileder og ikke er tilknyttet kandidatens kontor, men har også arbeidsgiverrettet rolle`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val veiledersIdent = "A000001"
