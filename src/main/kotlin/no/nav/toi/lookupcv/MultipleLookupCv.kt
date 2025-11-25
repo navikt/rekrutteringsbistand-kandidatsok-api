@@ -50,13 +50,6 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
             .aggregations(result.aggregations())
             .build()
 
-        filtrerteKandidater.forEach { kandidat ->
-            val fodselsnummer = kandidat?.source()?.get("fodselsnummer")?.asText()
-            if(fodselsnummer != null) {
-                AuditLogg.loggOppslagCv(fodselsnummer, authenticatedUser.navIdent, true)
-            }
-        }
-
         ctx.json(filtrertSearchResponse.toResponseJson())
     }
 }
