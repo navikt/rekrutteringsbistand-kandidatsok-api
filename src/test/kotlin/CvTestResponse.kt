@@ -1,6 +1,9 @@
 object CvTestRespons {
 
-    val sourceCvLookup = """
+    val sourceCvLookup = cv()
+    val sourceMultipleCvLookup = listOf(cv(),cv("PAM0123456789"),cv("PAM0987654321"))
+
+    private fun cv(kandidatnr: String = "PAM0xtfrwli5") = """
         {
           "aktorId": "2177336243360",
           "fodselsnummer": "07858597719",
@@ -14,7 +17,7 @@ object CvTestRespons {
           "harKontaktinformasjon": false,
           "telefon": null,
           "statsborgerskap": null,
-          "kandidatnr": "PAM0xtfrwli5",
+          "kandidatnr": "$kandidatnr",
           "arenaKandidatnr": null,
           "beskrivelse": "",
           "samtykkeStatus": "G",
@@ -537,6 +540,21 @@ object CvTestRespons {
         }
     """.trimIndent()
 
+    val multipleResponseCvLookup: String = """
+        {
+          "hits": {
+            "hits":
+                ${sourceMultipleCvLookup.joinToString(prefix = "[", postfix = "]") {
+                    """
+                        {
+                            "_source": $it
+                        }
+                    """.trimIndent()
+                }}
+          }
+        }
+    """.trimIndent()
+
     fun sourceKandidatsammendragLookup(veileder: String? = "A100000") =
         """
             {
@@ -642,7 +660,7 @@ object CvTestRespons {
         }
     """.trimIndent()
 
-    fun responseOpenSearch(source: String): String = """
+    fun responseOpenSearch(vararg source: String): String = """
         {
           "took": 0,
           "timed_out": false,
@@ -658,15 +676,16 @@ object CvTestRespons {
               "relation": "eq"
             },
             "max_score": 3.5457783,
-            "hits": [
-              {
-                "_index": "veilederkandidat_os4",
-                "_type": "_doc",
-                "_id": "GjI2Q4wBTrJ2jfiJLCtm",
-                "_score": 3.5457783,
-                "_source": $source
-              }
-            ]
+            "hits":${source.joinToString(separator = ",", prefix = "[", postfix = "]") {
+                """
+                  {
+                    "_index": "veilederkandidat_os4",
+                    "_type": "_doc",
+                    "_id": "GjI2Q4wBTrJ2jfiJLCtm",
+                    "_score": 3.5457783,
+                    "_source": $it
+                  }""".trimIndent()
+            }}
           }
         }
     """.trimIndent()

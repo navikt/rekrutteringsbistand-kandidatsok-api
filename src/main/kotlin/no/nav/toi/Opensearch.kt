@@ -94,6 +94,14 @@ fun Query.Builder.term_(
 ): ObjectBuilder<Query> =
     term { it.body() }
 
+fun Query.Builder.terms_(
+    fieldAndValue: Pair<String, List<String>>
+): ObjectBuilder<Query> = terms { termsQuery ->
+    val (field, value) = fieldAndValue
+    termsQuery.field(field)
+    termsQuery.terms { it.value(value.map(FieldValue::of)) }
+}
+
 fun Query.Builder.multiMatch_(
     body: MultiMatchQuery.Builder.() -> ObjectBuilder<MultiMatchQuery>
 ): ObjectBuilder<Query> =

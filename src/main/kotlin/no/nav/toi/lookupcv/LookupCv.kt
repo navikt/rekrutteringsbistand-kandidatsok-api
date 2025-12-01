@@ -54,3 +54,4 @@ private fun OpenSearchClient.lookupCv(params: RequestDto): SearchResponse<JsonNo
             }
         }
     }
+

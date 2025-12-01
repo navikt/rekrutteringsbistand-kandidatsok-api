@@ -51,17 +51,9 @@ class AuthenticatedUser(
                 Rolle.JOBBSØKER_RETTET
             )
 
-            val modiaenheter = modiaKlient.hentModiaEnheter(jwt).map(Enhet::enhetId)
+            val modiaenheter = hentModiaEnheter(modiaKlient)
 
-            if (Rolle.ARBEIDSGIVER_RETTET !in roller &&
-                Rolle.UTVIKLER !in roller &&
-                !erEgenBrukerEllerKontorenesBruker(
-                    orgEnhetKandidat,
-                    veilederKandidat,
-                    modiaenheter,
-                    navIdent
-                )
-            ) {
+            if (!harTilgangTilBruker(orgEnhetKandidat, veilederKandidat, modiaenheter)) {
                 secureLog.info("403 $navIdent med roller $roller og orgEnheter ${modiaenheter} har ikke tilgang til bruker med orgEnhet $orgEnhetKandidat og veileder $veilederKandidat ${hentStackTrace()}")
                 throw ForbiddenResponse()
             }
@@ -71,6 +63,20 @@ class AuthenticatedUser(
         }
         auditLogFunksjon(true)
     }
+
+    private fun hentModiaEnheter(modiaKlient: ModiaKlient): List<String> = modiaKlient.hentModiaEnheter(jwt).map(Enhet::enhetId)
+
+    fun harTilgangTilBruker(orgEnhetKandidat: String?, veilederKandidat: String?, modiaKlient: ModiaKlient): Boolean = harTilgangTilBruker(orgEnhetKandidat, veilederKandidat, hentModiaEnheter(modiaKlient))
+
+    private fun harTilgangTilBruker(orgEnhetKandidat: String?, veilederKandidat: String?, modiaenheter: List<String>): Boolean =
+        Rolle.ARBEIDSGIVER_RETTET in roller ||
+                Rolle.UTVIKLER in roller ||
+                erEgenBrukerEllerKontorenesBruker(
+                    orgEnhetKandidat,
+                    veilederKandidat,
+                    modiaenheter,
+                    navIdent
+                )
 
     private fun hentStackTrace() =
         Thread.currentThread().stackTrace

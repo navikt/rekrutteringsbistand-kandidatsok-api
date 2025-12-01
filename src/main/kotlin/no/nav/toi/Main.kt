@@ -9,6 +9,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.validation.ValidationException
 import no.nav.toi.brukertilgang.handleBrukertilgang
 import no.nav.toi.brukertilgang.handleMinekandidatnummer
+import no.nav.toi.hullicv.handleHullICv
 import no.nav.toi.kandidatsammendrag.*
 import no.nav.toi.kandidatstillingsøk.handleLookupKandidatStillingssøk
 import no.nav.toi.kandidatsøk.ModiaKlient
@@ -16,6 +17,7 @@ import no.nav.toi.kandidatsøk.handleKandidatSøk
 import no.nav.toi.kompetanseforslag.handleKompetanseforslag
 import no.nav.toi.kuberneteshealth.handleHealth
 import no.nav.toi.lookupcv.handleLookupCv
+import no.nav.toi.lookupcv.handleMultipleLookupCv
 import no.nav.toi.me.handleMe
 import no.nav.toi.suggest.handleKontorSuggest
 import no.nav.toi.suggest.handleStedSuggest
@@ -90,6 +92,7 @@ class App(
         javalin.handleHealth()
         javalin.handleMe()
         javalin.handleLookupCv(openSearchClient, modiaClient)
+        javalin.handleMultipleLookupCv(openSearchClient, modiaClient)
         javalin.handleKandidatSammendrag(openSearchClient, modiaClient)
         javalin.handleKompetanseforslag(openSearchClient)
         javalin.handleLookupKandidatStillingssøk(openSearchClient, modiaClient)
@@ -101,7 +104,7 @@ class App(
         javalin.handleKandidatKandidatnr(openSearchClient)
         javalin.handleBrukertilgang(openSearchClient, modiaClient)
         javalin.handleMinekandidatnummer(openSearchClient, modiaClient)
-
+        javalin.handleHullICv(openSearchClient, modiaClient)
 
         javalin.azureAdAuthentication(
             path = "/api/*",
