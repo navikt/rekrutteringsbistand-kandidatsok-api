@@ -36,7 +36,7 @@ fun Javalin.handleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: Modi
         val veileder = kandidat?.get("veilederIdent")?.asText()
 
         authenticatedUser.verifiserTilgangTilBruker(orgEnhet, veileder, modiaKlient) { permit ->
-            if (fodselsnummer != null) {
+            if (fodselsnummer != null) { // Personen finnes ikke i opensearch
                 AuditLogg.loggOppslagCv(fodselsnummer, navIdent, permit)
             }
         }
