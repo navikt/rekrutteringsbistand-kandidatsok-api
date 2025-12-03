@@ -49,7 +49,7 @@ class SuggestTest {
     fun `Svar på ønsket yrke`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         val register = wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         esRequest("kok", "yrkeJobbonskerObj.styrkBeskrivelse.completion"),
@@ -75,7 +75,7 @@ class SuggestTest {
     fun `Svar på kompetanse`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         esRequest("prog", "samletKompetanseObj.samletKompetanseTekst.completion"),
@@ -101,7 +101,7 @@ class SuggestTest {
     fun `Svar på arbeidserfaring`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         esRequest("keln", "yrkeserfaring.stillingstitlerForTypeahead"),
@@ -127,7 +127,7 @@ class SuggestTest {
     fun `Svar på språk`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         esRequest("nor", "sprak.sprakKodeTekst.completion"),
@@ -561,7 +561,7 @@ class SuggestTest {
 
     private fun mockSuggest(wireMock: WireMock) {
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         esRequest("kok", "yrkeJobbonskerObj.styrkBeskrivelse.completion"),

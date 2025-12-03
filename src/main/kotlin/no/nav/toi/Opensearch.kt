@@ -22,7 +22,7 @@ import org.opensearch.client.util.ObjectBuilder
 import java.net.URI
 import java.time.LocalDate
 
-const val DEFAULT_INDEX = "veilederkandidat_current"
+const val DEFAULT_INDEX = "kandidater"
 
 fun createOpenSearchClient(
     openSearchUsername: String = System.getenv("OPEN_SEARCH_USERNAME")!!,

@@ -37,7 +37,7 @@ class MultipleCvLookupTest {
     fun `Kan hente cver`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*CvTestRespons.sourceMultipleCvLookup.toTypedArray()))
@@ -55,7 +55,7 @@ class MultipleCvLookupTest {
     fun `Finner ikke enkelt cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM000000000"]}},"size":1}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpensearchIngenTreff)
@@ -82,7 +82,7 @@ class MultipleCvLookupTest {
     fun `Om kall feiler under henting av cver fra elasticsearch, får vi HTTP 500`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     notFound()
@@ -99,7 +99,7 @@ class MultipleCvLookupTest {
     fun `modia generell skal ikke ha tilgang til multiplecver`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
         wmRuntimeInfo.wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*CvTestRespons.sourceMultipleCvLookup.toTypedArray()))
@@ -114,7 +114,7 @@ class MultipleCvLookupTest {
     fun `arbeidsgiverrettet skal ha tilgang til cver`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*CvTestRespons.sourceMultipleCvLookup.toTypedArray()))
@@ -160,7 +160,7 @@ class MultipleCvLookupTest {
         val returMedRiktigVeilederFeilKontor = byttVeilederOgKontorForKandidatEsResponse(listOf(annenIdent, veiledersIdent, null), (1..3).map { feilVeiledersOrgenhet })
 
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*returMedRiktigVeilederFeilKontor.toTypedArray()))
@@ -216,7 +216,7 @@ class MultipleCvLookupTest {
         val returMedRiktigVeilederFeilKontor = byttVeilederOgKontorForKandidatEsResponse((1..3).map { feilVeilederIdent }, listOf(null, feilVeiledersOrgenhet, veiledersOrgenhet))
 
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*returMedRiktigVeilederFeilKontor.toTypedArray()))
@@ -266,7 +266,7 @@ class MultipleCvLookupTest {
         val returMedRiktigVeilederFeilKontor = byttVeilederOgKontorForKandidatEsResponse((1..3).map { feilVeiledersIdent }, (1..3).map { feilVeiledersOrgenhet })
 
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*returMedRiktigVeilederFeilKontor.toTypedArray()))
@@ -288,7 +288,7 @@ class MultipleCvLookupTest {
     fun `utvikler skal ha tilgang til cver`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*CvTestRespons.sourceMultipleCvLookup.toTypedArray()))
@@ -304,7 +304,7 @@ class MultipleCvLookupTest {
     fun `om man ikke har gruppetilhørighet skal man ikke få cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = app.lagToken(groups = emptyList())
         wmRuntimeInfo.wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}},"size":3}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(*CvTestRespons.sourceMultipleCvLookup.toTypedArray()))

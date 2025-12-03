@@ -120,7 +120,7 @@ class MineKandidatnummerTest {
         wireMock: WireMock,
     ) {
         wireMock.register(
-            WireMock.post("/veilederkandidat_current/_search?typed_keys=true")
+            WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
                         KandidatsøkRespons.mineKandidatnummerValideringQuery(KandidatsøkRespons.mineKontorerTerm, KandidatsøkRespons.mineBrukereTerm),
