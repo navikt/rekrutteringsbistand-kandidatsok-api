@@ -6,7 +6,7 @@ jobs:
     uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-deploy.yaml@v2
     with:
       java-version: '21'
-      deploy-to-dev-if-branch-name-is: 'multiple-cv-lookup'
+      deploy-to-dev-if-branch-name-is: 'hentPersonInfoLeggTilKandidat'
     permissions:
       contents: read
       id-token: write
