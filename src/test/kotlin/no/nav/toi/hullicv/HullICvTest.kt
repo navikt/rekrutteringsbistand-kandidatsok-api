@@ -45,7 +45,7 @@ class HullICvTest {
         orgenhet: String = "5432"
     ) {
         register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     equalToJson(
                     """
@@ -219,7 +219,7 @@ class HullICvTest {
                 )
         )
         register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     equalToJson(
                     """
@@ -289,7 +289,7 @@ class HullICvTest {
         val aktorId = "1234567890123"
         val nå = LocalDate.now()
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     equalToJson(
                         """

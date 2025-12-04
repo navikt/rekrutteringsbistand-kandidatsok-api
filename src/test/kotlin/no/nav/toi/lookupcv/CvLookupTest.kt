@@ -36,7 +36,7 @@ class CvLookupTest {
     fun `Kan hente cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
@@ -54,7 +54,7 @@ class CvLookupTest {
     fun `Finner ikke cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM000000000" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpensearchIngenTreff)
@@ -81,7 +81,7 @@ class CvLookupTest {
     fun `Om kall feiler under henting av cv fra elasticsearch, får vi HTTP 500`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     notFound()
@@ -98,7 +98,7 @@ class CvLookupTest {
     fun `modia generell skal ikke ha tilgang til cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
         wmRuntimeInfo.wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
@@ -113,7 +113,7 @@ class CvLookupTest {
     fun `arbeidsgiverrettet skal ha tilgang til cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
@@ -158,7 +158,7 @@ class CvLookupTest {
         val returMedRiktigVeilederFeilKontor = byttVeilederOgKontorForKandidatEsResponse(veiledersIdent, feilVeiledersOrgenhet)
 
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
@@ -204,7 +204,7 @@ class CvLookupTest {
         val returUtenVeilederEllerKontor = byttVeilederOgKontorForKandidatEsResponse(null, null)
 
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(returUtenVeilederEllerKontor))
@@ -256,7 +256,7 @@ class CvLookupTest {
         val returMedRiktigVeilederFeilKontor = byttVeilederOgKontorForKandidatEsResponse(feilVeilederIdent, veiledersOrgenhet)
 
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
@@ -303,7 +303,7 @@ class CvLookupTest {
         val returMedRiktigVeilederFeilKontor = byttVeilederOgKontorForKandidatEsResponse(feilVeiledersIdent, feilVeiledersOrgenhet)
 
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
@@ -349,7 +349,7 @@ class CvLookupTest {
         val returMedRiktigVeilederFeilKontor = byttVeilederOgKontorForKandidatEsResponse(feilVeiledersIdent, feilVeiledersOrgenhet)
 
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(returMedRiktigVeilederFeilKontor))
@@ -367,7 +367,7 @@ class CvLookupTest {
     fun `utvikler skal ha tilgang til cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
@@ -383,7 +383,7 @@ class CvLookupTest {
     fun `om man ikke har gruppetilhørighet skal man ikke få cv`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = app.lagToken(groups = emptyList())
         wmRuntimeInfo.wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""{"query":{"term":{"kandidatnr":{"value":"PAM0xtfrwli5" }}}}"""))
                 .willReturn(
                     ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))

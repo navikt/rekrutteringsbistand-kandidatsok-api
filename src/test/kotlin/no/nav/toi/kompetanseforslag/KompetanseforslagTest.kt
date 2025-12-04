@@ -112,7 +112,7 @@ class KompetanseforslagTest {
         """.trimIndent()
 
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""
                   {
                       "aggregations": {
@@ -256,7 +256,7 @@ class KompetanseforslagTest {
         """.trimIndent()
 
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""
                   {
                       "aggregations": {
@@ -325,7 +325,7 @@ class KompetanseforslagTest {
 
 
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""
                   {
                       "aggregations": {
@@ -522,7 +522,7 @@ class KompetanseforslagTest {
             }
         """.trimIndent()
         wireMock.register(
-            post("/veilederkandidat_current/_search?typed_keys=true")
+            post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(equalToJson("""
                   {
                       "aggregations": {
