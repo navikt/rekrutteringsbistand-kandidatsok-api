@@ -60,7 +60,7 @@ class LookupPersonControllerTest {
     @Test
     fun `Skal få 404 hvis personen ikke finnes i opensearch`() {
         stubFor(
-            post(urlEqualTo("/veilederkandidat_current/_search?typed_keys=true"))
+            post(urlEqualTo("/kandidater/_search?typed_keys=true"))
                 .withRequestBody(equalToJson("""
                     {"query":{"term":{"kandidatnr":{"value":"1234" }
                     }}
@@ -126,7 +126,7 @@ class LookupPersonControllerTest {
 
     private fun stubKandidatFinnes() {
         stubFor(
-            post(urlEqualTo("/veilederkandidat_current/_search?typed_keys=true"))
+            post(urlEqualTo("/kandidater/_search?typed_keys=true"))
                 .withRequestBody(equalToJson("""
                     {"query":{"term":{"kandidatnr":{"value":"1234" }
                     }}
