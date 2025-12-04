@@ -124,7 +124,7 @@ class LookupPersonControllerTest {
         assertEquals("1990-01-01", personInfo.fodselsdato)
     }
 
-    fun stubKandidatFinnes() {
+    private fun stubKandidatFinnes() {
         stubFor(
             post(urlEqualTo("/veilederkandidat_current/_search?typed_keys=true"))
                 .withRequestBody(equalToJson("""

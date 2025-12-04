@@ -40,7 +40,7 @@ class LookupPersonController(
         operationId = endepunkt,
         tags = [],
         requestBody = OpenApiRequestBody([OpenApiContent(KandidatnrRequestDto::class)]),
-        responses = [OpenApiResponse("200", [OpenApiContent(OpensearchResponse::class)])],
+        responses = [OpenApiResponse("200", [OpenApiContent(PersonInfoDto::class)])],
         path = endepunkt,
         methods = [HttpMethod.POST]
     )
