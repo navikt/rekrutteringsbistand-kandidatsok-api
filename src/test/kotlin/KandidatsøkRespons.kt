@@ -40,6 +40,9 @@ object KandidatsøkRespons {
     val mittKontorTerm = """{"term": {"orgenhet": {"value":"1234"}}}"""
     val mittKontorUtenValgtTerm = """{"term": {"orgenhet": {"value":""}}}"""
     val mineKontorerTerm = """{"bool":{"should":[{"term":{"navkontor":{"value":"NAV Hamar"}}},{"term":{"navkontor":{"value":"NAV Kristiansand"}}}]}}"""
+    val omfangKodeBådeDeltidOgHeltidTerm = """{"bool":{"must":[{"term":{"omfangJobbonskerObj.omfangKode":{"value":"DELTID"}}},{"term":{"omfangJobbonskerObj.omfangKode":{"value":"HELTID"}}}]}}"""
+    val omfangKodeBareDeltidTerm = """{"bool":{"must":[{"term":{"omfangJobbonskerObj.omfangKode":{"value":"DELTID"}}}],"must_not":[{"term":{"omfangJobbonskerObj.omfangKode":{"value":"HELTID"}}}]}}"""
+    val omfangKodeBareHeltidTerm = """{"bool":{"must":[{"term":{"omfangJobbonskerObj.omfangKode":{"value":"HELTID"}}}],"must_not":[{"term":{"omfangJobbonskerObj.omfangKode":{"value":"DELTID"}}}]}}"""
     val kandidatsøkHits = """[
                     {
                         "_index": "veilederkandidat_os4",

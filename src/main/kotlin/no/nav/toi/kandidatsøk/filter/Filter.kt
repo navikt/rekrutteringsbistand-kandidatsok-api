@@ -28,5 +28,6 @@ fun søkeFilter(authenticatedUser: AuthenticatedUser, modiaKlient: ModiaKlient, 
     .medUtdanningFilter(filterParametre)
     .medPrioritertMålgruppeFilter(filterParametre)
     .medFritekstFilter(filterParametre)
+    .medOmfangFilter(filterParametre)
 
 class Valideringsfeil(msg: String): Exception(msg)
