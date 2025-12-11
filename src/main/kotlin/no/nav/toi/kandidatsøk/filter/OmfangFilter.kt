@@ -12,7 +12,7 @@ import org.opensearch.client.util.ObjectBuilder
 fun List<Filter>.medOmfangFilter(filterParametre: FilterParametre) = this + OmfangFilter(filterParametre)
 
 private class OmfangFilter(parametre: FilterParametre): Filter {
-    private val omfang = parametre.omfang ?: emptyList()
+    private val omfang = parametre.omfang?.flatMap { if(it == "HELTID_OG_DELTID") listOf("HELTID","DELTID") else listOf(it) } ?: emptyList()
 
     override fun erAktiv() = omfang.isNotEmpty()
 

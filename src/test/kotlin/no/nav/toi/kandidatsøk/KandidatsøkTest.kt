@@ -690,6 +690,23 @@ class KandidatsøkTest {
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
     }
 
+    @ParameterizedTest
+    @MethodSource("endepunktSomParameter")
+    fun `Kan søke kandidat med omfangkode både heltid og deltid 2`(endepunkt: Endepunkt, wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + KandidatsøkRespons.omfangKodeBådeDeltidOgHeltidTerm)
+        endepunkt.ekstraMocking(wireMock)
+        val navIdent = "A123456"
+        val token = lagToken(navIdent = navIdent)
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
+            .body("""{"omfang":["HELTID_OG_DELTID"]${endepunkt.bodyParameter(true)}}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        assertStatuscodeEquals(response, result, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+    }
+
     @Test
     fun `Kan søke mine kandidater`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
