@@ -40,7 +40,8 @@ data class FilterParametre(
     val arbeidserfaring: List<String>?,
     val ferskhet: Int?,
     val språk: List<String>?,
-    val orgenhet: String?
+    val orgenhet: String?,
+    val omfang: List<String>?
 )
 
 fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
