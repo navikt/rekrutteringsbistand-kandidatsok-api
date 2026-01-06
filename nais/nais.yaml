@@ -17,6 +17,13 @@ spec:
     path: /internal/ready
   secureLogs:
     enabled: true
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2048Mi
+    requests:
+      cpu: 200m
+      memory: 1024Mi
   azure:
     application:
       enabled: true
