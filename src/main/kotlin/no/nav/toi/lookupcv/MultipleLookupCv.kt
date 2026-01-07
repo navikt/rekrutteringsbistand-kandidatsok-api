@@ -50,10 +50,10 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
             .aggregations(result.aggregations())
             .build()
 
-        log.info("Tid brukt på multipleLookupCv 1: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+        log.info("Tid brukt på multipleLookupCv 2: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
 
         ctx.json(filtrertSearchResponse.toResponseJson())
-        log.info("Tid brukt på multipleLookupCv 1: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+        log.info("Tid brukt på multipleLookupCv 3: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
     }
 }
 
