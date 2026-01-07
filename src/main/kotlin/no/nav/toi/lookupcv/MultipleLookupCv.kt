@@ -40,7 +40,9 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
             authenticatedUser.harTilgangTilBruker(orgEnhet, veileder, modiaKlient)
         }
 
-        log.info("Tid brukt på multipleLookupCv 1: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+        if(authenticatedUser.erEnAvRollene(Rolle.UTVIKLER)) {
+            log.info("Tid brukt på multipleLookupCv 1: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+        }
 
         val filtrertSearchResponse = SearchResponse.Builder<JsonNode>()
             .took(result.took())
@@ -50,10 +52,14 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
             .aggregations(result.aggregations())
             .build()
 
-        log.info("Tid brukt på multipleLookupCv 2: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+        if(authenticatedUser.erEnAvRollene(Rolle.UTVIKLER)) {
+            log.info("Tid brukt på multipleLookupCv 2: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+        }
 
         ctx.json(filtrertSearchResponse.toResponseJson())
-        log.info("Tid brukt på multipleLookupCv 3: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+        if(authenticatedUser.erEnAvRollene(Rolle.UTVIKLER)) {
+            log.info("Tid brukt på multipleLookupCv 3: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+        }
     }
 }
 
