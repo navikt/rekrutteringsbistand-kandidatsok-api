@@ -32,7 +32,15 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
         authenticatedUser.verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
 
         val navIdent = authenticatedUser.navIdent
+
+        if(authenticatedUser.erEnAvRollene(Rolle.UTVIKLER)) {
+            log.info("Tid brukt på multipleLookupCv 1: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+        }
         val result = openSearchClient.multipleLookupCv(ctx.bodyAsClass<MultipleLookupCvRequestDto>())
+
+        if(authenticatedUser.erEnAvRollene(Rolle.UTVIKLER)) {
+            log.info("Tid brukt på multipleLookupCv 2: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+        }
         val filtrerteKandidater = result.hits().hits().filter { kandidat ->
             val fodselsnummer = kandidat?.source()?.get("fodselsnummer")?.asText()
             val orgEnhet = kandidat?.source()?.get("orgenhet")?.asText()
@@ -41,7 +49,7 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
         }
 
         if(authenticatedUser.erEnAvRollene(Rolle.UTVIKLER)) {
-            log.info("Tid brukt på multipleLookupCv 1: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+            log.info("Tid brukt på multipleLookupCv 3: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
         }
 
         val filtrertSearchResponse = SearchResponse.Builder<JsonNode>()
@@ -53,12 +61,12 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
             .build()
 
         if(authenticatedUser.erEnAvRollene(Rolle.UTVIKLER)) {
-            log.info("Tid brukt på multipleLookupCv 2: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+            log.info("Tid brukt på multipleLookupCv 4: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
         }
 
         ctx.json(filtrertSearchResponse.toResponseJson())
         if(authenticatedUser.erEnAvRollene(Rolle.UTVIKLER)) {
-            log.info("Tid brukt på multipleLookupCv 3: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+            log.info("Tid brukt på multipleLookupCv 5: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
         }
     }
 }
