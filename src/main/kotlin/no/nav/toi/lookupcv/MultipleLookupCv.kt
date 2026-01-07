@@ -2,16 +2,13 @@ package no.nav.toi.lookupcv
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.javalin.Javalin
-import io.javalin.http.ForbiddenResponse
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.ModiaKlient
 import org.opensearch.client.opensearch.OpenSearchClient
-import org.opensearch.client.opensearch._types.aggregations.TermsAggregation
-import org.opensearch.client.opensearch._types.query_dsl.Query
 import org.opensearch.client.opensearch.core.SearchResponse
-import org.opensearch.client.util.ObjectBuilder
+import java.time.LocalDateTime
 
 private const val endepunkt = "/api/multiple-lookup-cv"
 
@@ -30,6 +27,7 @@ private data class MultipleLookupCvRequestDto(
 )
 fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
+        val startTime = LocalDateTime.now()
         val authenticatedUser = ctx.authenticatedUser()
         authenticatedUser.verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
 
@@ -42,6 +40,8 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
             authenticatedUser.harTilgangTilBruker(orgEnhet, veileder, modiaKlient)
         }
 
+        log.info("Tid brukt på multipleLookupCv 1: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+
         val filtrertSearchResponse = SearchResponse.Builder<JsonNode>()
             .took(result.took())
             .timedOut(result.timedOut())
@@ -50,7 +50,10 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
             .aggregations(result.aggregations())
             .build()
 
+        log.info("Tid brukt på multipleLookupCv 1: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
+
         ctx.json(filtrertSearchResponse.toResponseJson())
+        log.info("Tid brukt på multipleLookupCv 1: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
     }
 }
 
