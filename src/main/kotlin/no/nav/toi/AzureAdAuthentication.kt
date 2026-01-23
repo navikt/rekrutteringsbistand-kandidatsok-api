@@ -32,6 +32,7 @@ class AuthenticatedUser(
     val roller: Set<Rolle>,
     val jwt: String
 ) {
+    private val secureLog = SecureLog(log)
 
     fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle) {
         if(!erEnAvRollene(*gyldigeRoller)) {

@@ -22,6 +22,7 @@ class AccessTokenClient(
     private val scope: String,
     private val azureUrl: String,
 ) {
+    private val secureLog = SecureLog(log)
     private val cache = CacheHjelper().lagCache { fetchAccessToken(it).tilEntry() }
     fun hentAccessToken(innkommendeToken: String) = cache.invoke(innkommendeToken).access_token
 

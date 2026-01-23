@@ -29,6 +29,7 @@ private data class BrukertilgangRequestDto(
 )
 fun Javalin.handleBrukertilgang(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
+        val secureLog = SecureLog(log)
         val authenticatedUser = ctx.authenticatedUser()
         val request = ctx.bodyAsClass<BrukertilgangRequestDto>()
 
