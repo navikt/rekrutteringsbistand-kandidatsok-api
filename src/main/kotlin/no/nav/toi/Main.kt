@@ -29,7 +29,7 @@ import java.util.*
 
 
 private val noClassLogger = noClassLogger()
-val secureLog = LoggerFactory.getLogger("secureLog")!!
+private val secureLog = SecureLog(noClassLogger)
 
 /*
     Oppsett av applikasjon, som kan kjøres av både tester og main-metode.

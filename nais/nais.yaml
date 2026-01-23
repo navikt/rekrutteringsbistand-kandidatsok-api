@@ -15,8 +15,6 @@ spec:
     path: /internal/alive
   readiness:
     path: /internal/ready
-  secureLogs:
-    enabled: true
   resources:
     limits:
       cpu: 1000m
@@ -41,7 +39,6 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: rekrutteringsbistand
         - application: rekrutteringsbistand-frontend
         - application: rekrutteringsbistand-kandidatvarsel-api
         - application: rekrutteringsbistand-kandidat-api
@@ -55,6 +52,8 @@ spec:
         - application: toi-livshendelse
         - application: modiacontextholder
           namespace: personoversikt
+        - application: logging
+          namespace: nais-system
       external:
         - host: {{pdlHost}}
   env:

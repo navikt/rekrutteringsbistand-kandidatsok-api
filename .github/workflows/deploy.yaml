@@ -6,7 +6,7 @@ jobs:
     uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-deploy.yaml@v2
     with:
       java-version: '21'
-      deploy-to-dev-if-branch-name-is: 'hentPersonInfoLeggTilKandidat'
+      deploy-to-dev-if-branch-name-is: 'fiks_alert_og_securelog'
     permissions:
       contents: read
       id-token: write
