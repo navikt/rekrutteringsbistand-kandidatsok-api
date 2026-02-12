@@ -40,6 +40,7 @@ spec:
     inbound:
       rules:
         - application: rekrutteringsbistand-frontend
+        - application: rekrutteringsbistand-frontend2
         - application: rekrutteringsbistand-kandidatvarsel-api
         - application: rekrutteringsbistand-kandidat-api
           cluster: {{rekrutteringsbistand-kandidat-api-cluster}}
