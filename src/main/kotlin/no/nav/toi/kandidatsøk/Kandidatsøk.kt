@@ -236,6 +236,8 @@ private fun OpenSearchClient.kandidatSøk(
                 "etternavn",
                 "arenaKandidatnr",
                 "innsatsgruppe",
+                "telefon",
+                "mobiltelefon",
                 "yrkeJobbonskerObj",
                 "geografiJobbonsker",
                 "kommuneNavn",
