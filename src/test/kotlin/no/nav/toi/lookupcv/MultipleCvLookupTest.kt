@@ -327,6 +327,60 @@ class MultipleCvLookupTest {
         return jsonNodes.map ( mapper::writeValueAsString )
     }
 
+    @Test
+    fun `Kan hente cver med kandidatnr`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/kandidater/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""{"query":{"terms":{"kandidatnr":["PAM0xtfrwli5"]}},"size":1}"""))
+                .willReturn(
+                    ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
+                )
+        )
+        val token = app.lagToken(navIdent = "A123456", groups = listOf(LokalApp.arbeidsgiverrettet))
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/multiple-lookup-cv")
+            .body("""{"kandidatnr": ["PAM0xtfrwli5"]}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        val hits = result.get().path("hits").path("hits")
+        assertThat(hits).hasSize(1)
+        assertThat(hits.first()["_source"]["kandidatnr"].asText()).isEqualTo("PAM0xtfrwli5")
+    }
+
+    @Test
+    fun `Kan hente cver med fodselsnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val wireMock = wmRuntimeInfo.wireMock
+        wireMock.register(
+            post("/kandidater/_search?typed_keys=true")
+                .withRequestBody(equalToJson("""{"query":{"terms":{"fodselsnummer":["07858597719"]}},"size":1}"""))
+                .willReturn(
+                    ok(CvTestRespons.responseOpenSearch(CvTestRespons.sourceCvLookup))
+                )
+        )
+        val token = app.lagToken(navIdent = "A123456", groups = listOf(LokalApp.arbeidsgiverrettet))
+        val (_, response, result) = Fuel.post("http://localhost:8080/api/multiple-lookup-cv")
+            .body("""{"fodselsnummer": ["07858597719"]}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        val hits = result.get().path("hits").path("hits")
+        assertThat(hits).hasSize(1)
+        assertThat(hits.first()["_source"]["fodselsnummer"].asText()).isEqualTo("07858597719")
+    }
+
+    @Test
+    fun `Returnerer 400 hvis verken kandidatnr eller fodselsnummer er oppgitt`() {
+        val token = app.lagToken(navIdent = "A123456", groups = listOf(LokalApp.arbeidsgiverrettet))
+        val (_, response, _) = Fuel.post("http://localhost:8080/api/multiple-lookup-cv")
+            .body("""{}""")
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .responseObject<JsonNode>()
+
+        Assertions.assertThat(response.statusCode).isEqualTo(400)
+    }
 
     private fun gjørKall(token: SignedJWT) = Fuel.post("http://localhost:8080/api/multiple-lookup-cv")
         .body("""{"kandidatnr": ["PAM0xtfrwli5","PAM0123456789","PAM0987654321"]}""")

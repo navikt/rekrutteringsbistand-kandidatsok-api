@@ -13,11 +13,12 @@ import java.time.LocalDateTime
 private const val endepunkt = "/api/multiple-lookup-cv"
 
 private data class MultipleLookupCvRequestDto(
-    val kandidatnr: List<String>,
+    val kandidatnr: List<String>? = null,
+    val fodselsnummer: List<String>? = null,
 )
 
 @OpenApi(
-    summary = "Oppslag av hele CVene til personer basert på kandidatnummer",
+    summary = "Oppslag av hele CVene til personer basert på kandidatnummer eller fødselsnummer",
     operationId = endepunkt,
     tags = [],
     requestBody = OpenApiRequestBody([OpenApiContent(MultipleLookupCvRequestDto::class)]),
@@ -32,11 +33,12 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
         authenticatedUser.verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
 
         val navIdent = authenticatedUser.navIdent
+        val params = ctx.bodyAsClass<MultipleLookupCvRequestDto>()
 
         if(authenticatedUser.erEnAvRollene(Rolle.UTVIKLER)) {
             log.info("Tid brukt på multipleLookupCv 1: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
         }
-        val result = openSearchClient.multipleLookupCv(ctx.bodyAsClass<MultipleLookupCvRequestDto>())
+        val result = openSearchClient.multipleLookupCv(params)
 
         if(authenticatedUser.erEnAvRollene(Rolle.UTVIKLER)) {
             log.info("Tid brukt på multipleLookupCv 2: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
@@ -72,14 +74,21 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
 }
 
 
-private fun OpenSearchClient.multipleLookupCv(params: MultipleLookupCvRequestDto): SearchResponse<JsonNode> =
-    search<JsonNode> {
+private fun OpenSearchClient.multipleLookupCv(params: MultipleLookupCvRequestDto): SearchResponse<JsonNode> {
+    val (field, values) = when {
+        !params.kandidatnr.isNullOrEmpty() -> "kandidatnr" to params.kandidatnr
+        !params.fodselsnummer.isNullOrEmpty() -> "fodselsnummer" to params.fodselsnummer
+        else -> throw io.javalin.http.BadRequestResponse("Enten kandidatnr eller fodselsnummer må oppgis")
+    }
+
+    return search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {
-            terms_("kandidatnr" to params.kandidatnr)
+            terms_(field to values)
         }
-        size(params.kandidatnr.size)
+        size(values.size)
     }
+}
 
 
 
