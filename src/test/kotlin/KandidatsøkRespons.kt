@@ -3,11 +3,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
 
 object KandidatsøkRespons {
-    fun query(vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS"]}}""", from: Int = 0) = (extraTerms.toList() + innsatsgruppeTerm)
+    fun query(vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS", "HAR_IKKE_GJELDENDE_14A_VEDTAK"]}}""", from: Int = 0) = (extraTerms.toList() + innsatsgruppeTerm)
         .let { terms ->
             """{"_source":{"includes":["fodselsnummer","fornavn","etternavn","arenaKandidatnr","innsatsgruppe","telefon","mobiltelefon","yrkeJobbonskerObj","geografiJobbonsker","kommuneNavn","postnummer","poststed"]},"from":$from,"query":{"bool":{"must":$terms}},"size":25,"track_total_hits":true${if(sortering)""","sort":[{"tidsstempel":{"order":"desc"}}]""" else ""}}"""
         }
-    fun navigeringQuery(vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS"]}}""", from: Int = 0) = (extraTerms.toList() + innsatsgruppeTerm)
+    fun navigeringQuery(vararg extraTerms: String, sortering: Boolean = true, innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS", "HAR_IKKE_GJELDENDE_14A_VEDTAK"]}}""", from: Int = 0) = (extraTerms.toList() + innsatsgruppeTerm)
         .let { terms ->
             """{"_source":false,"from":$from,"query":{"bool":{"must":$terms}},"size":500,"track_total_hits":true${if(sortering)""","sort":[{"tidsstempel":{"order":"desc"}}]""" else ""}}"""
         }
