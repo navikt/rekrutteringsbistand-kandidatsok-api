@@ -6,7 +6,7 @@ jobs:
     uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-deploy.yaml@v2
     with:
       java-version: '21'
-      deploy-to-dev-if-branch-name-is: 'fiks_alert_og_securelog'
+      deploy-to-dev-if-branch-name-is: 'ikke-vurdert-default-filter'
     permissions:
       contents: read
       id-token: write

@@ -14,7 +14,6 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
 import no.nav.toi.RolleUuidSpesifikasjon
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -936,7 +935,7 @@ class KandidatsøkTest {
         wireMock: WireMock,
         vararg extraTerms: String,
         sortering: Boolean = true,
-        innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS"]}}""",
+        innsatsgruppeTerm: String = """{"terms":{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS", "GRADERT_VARIG_TILPASSET_INNSATS", "HAR_IKKE_GJELDENDE_14A_VEDTAK"]}}""",
         from: Int = 0
     ) {
         wireMock.register(
