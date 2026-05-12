@@ -51,7 +51,7 @@ fun Javalin.handleKompetanseforslag(openSearchClient: OpenSearchClient) {
         ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
         val request = ctx.bodyAsClass<RequestDto>()
         val result = openSearchClient.lookupKompetanseforslag(request)
-        ctx.json(result.toAggregationResponseJson() ?: throw RuntimeException("No aggregations found in response"))
+        ctx.json(result.toAggregationResponseJson())
     }
 }
 
@@ -75,7 +75,7 @@ private fun OpenSearchClient.lookupKompetanseforslag(params: RequestDto): Search
 
         size(0)
         aggregations("kompetanse") {
-            it.terms {agg ->
+            it.terms { agg ->
                 agg.field("kompetanseObj.kompKodeNavn.keyword")
                 agg.size(12)
             }
@@ -86,7 +86,7 @@ private fun OpenSearchClient.lookupKompetanseforslag(params: RequestDto): Search
 fun SearchResponse<JsonNode>.toAggregationResponseJson(): KompetanseAggregationResponse {
     val buckets = this.aggregations()["kompetanse"]?.sterms()?.buckets()?.array()
 
-   return KompetanseAggregationResponse(
+    return KompetanseAggregationResponse(
         KompetanseAggregations(
             KompetanseAggregation(
                 buckets?.map {

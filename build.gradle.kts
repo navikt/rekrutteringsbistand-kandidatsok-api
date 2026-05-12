@@ -1,8 +1,7 @@
 plugins {
     application
-    kotlin("jvm") version "1.9.21"
-    kotlin("kapt") version "1.9.22"
-    `jvm-test-suite` // JvmTestSuite is marked unstable with @Incubating, but will be the recommended way to run tests from version 9 of Gradle
+    kotlin("jvm") version "2.3.21"
+    kotlin("kapt") version "2.3.21"
 }
 
 group = "no.nav"
@@ -44,24 +43,19 @@ dependencies {
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.assertj:assertj-core:3.23.1")
-    testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$jupiterVersion")
     testImplementation("org.wiremock:wiremock:3.3.1")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
+    testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
     testImplementation("org.skyscreamer:jsonassert:1.5.1")
+}
 
-    kotlin {
-        jvmToolchain(21)
-    }
+kotlin {
+    jvmToolchain(25)
+}
 
-    testing { // JvmTestSuite is marked unstable with @Incubating, but will be the recommended way to run tests from version 9 of Gradle
-        suites {
-            val test by getting(JvmTestSuite::class) {
-                useJUnitJupiter()
-                dependencies {
-                    implementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
-                    runtimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
-                }
-            }
-        }
-    }
+tasks.test {
+    useJUnitPlatform()
 }

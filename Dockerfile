@@ -1,4 +1,5 @@
-FROM gcr.io/distroless/java21:nonroot
+FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-25
+ENV TZ="Europe/Oslo"
 ADD build/distributions/rekrutteringsbistand-kandidatsok-api-1.0-SNAPSHOT.tar /
 
 # Asume that logback.xml is located in the project/app root dir.

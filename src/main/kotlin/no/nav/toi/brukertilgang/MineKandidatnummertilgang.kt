@@ -6,9 +6,6 @@ import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
 import no.nav.toi.kandidatsøk.ModiaKlient
-import no.nav.toi.kandidatsøk.filter.Filter
-import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMineBrukereFilter
-import no.nav.toi.kandidatsøk.filter.porteføljefilter.medMineKontorerFilter
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
 import org.opensearch.client.opensearch.core.search.Hit
@@ -31,7 +28,9 @@ fun Javalin.handleMinekandidatnummer(openSearchClient: OpenSearchClient, modiaKl
 
         val request = ctx.bodyAsClass<List<String>>()
         log.info("Oppslag for minekandidatnummer")
-        val result = openSearchClient.kandidatSøk(authenticatedUser, kontorer = modiaKlient.hentModiaEnheter(authenticatedUser.jwt).map { it.navn })
+        val result = openSearchClient.kandidatSøk(
+            authenticatedUser,
+            kontorer = modiaKlient.hentModiaEnheter(authenticatedUser.jwt).map { it.navn })
 
         val kandidaterBrukerKanSe = result.hits().hits().map(Hit<JsonNode>::id)
 
@@ -39,7 +38,10 @@ fun Javalin.handleMinekandidatnummer(openSearchClient: OpenSearchClient, modiaKl
     }
 }
 
-private fun OpenSearchClient.kandidatSøk(authenticatedUser: AuthenticatedUser, kontorer: List<String>): SearchResponse<JsonNode> {
+private fun OpenSearchClient.kandidatSøk(
+    authenticatedUser: AuthenticatedUser,
+    kontorer: List<String>
+): SearchResponse<JsonNode> {
     return search<JsonNode> {
         index(DEFAULT_INDEX)
         query_ {
@@ -47,7 +49,7 @@ private fun OpenSearchClient.kandidatSøk(authenticatedUser: AuthenticatedUser, 
                 should_ {
                     term_ {
                         field("veileder")
-                        value(authenticatedUser!!.navIdent)
+                        value(authenticatedUser.navIdent)
                         caseInsensitive(true)
                     }
                 }
