@@ -1,7 +1,7 @@
 plugins {
     application
-    kotlin("jvm") version "1.9.21"
-    kotlin("kapt") version "1.9.22"
+    kotlin("jvm") version "2.3.21"
+    kotlin("kapt") version "2.3.21"
     `jvm-test-suite` // JvmTestSuite is marked unstable with @Incubating, but will be the recommended way to run tests from version 9 of Gradle
 }
 
@@ -46,11 +46,11 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
     testImplementation("org.wiremock:wiremock:3.3.1")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
     testImplementation("org.skyscreamer:jsonassert:1.5.1")
 
     kotlin {
-        jvmToolchain(21)
+        jvmToolchain(25)
     }
 
     testing { // JvmTestSuite is marked unstable with @Incubating, but will be the recommended way to run tests from version 9 of Gradle

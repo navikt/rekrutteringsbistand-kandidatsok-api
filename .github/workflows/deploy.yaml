@@ -5,8 +5,8 @@ jobs:
   call-build-and-deploy:
     uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-deploy.yaml@v2
     with:
-      java-version: '21'
-      deploy-to-dev-if-branch-name-is: 'ikke-vurdert-default-filter'
+      java-version: '25'
+      deploy-to-dev-if-branch-name-is: 'oppdater-diverse'
     permissions:
       contents: read
       id-token: write
