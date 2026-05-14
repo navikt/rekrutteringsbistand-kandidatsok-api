@@ -1,7 +1,7 @@
 package no.nav.toi.kandidatsammendrag
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
@@ -38,7 +38,7 @@ private data class KandidatKandidatnrResponsDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKandidatKandidatnr(openSearchClient: OpenSearchClient) {
+fun JavalinDefaultRoutingApi.handleKandidatKandidatnr(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
         ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
         val request = ctx.bodyAsClass<KandidatKandidatnrRequestDto>()

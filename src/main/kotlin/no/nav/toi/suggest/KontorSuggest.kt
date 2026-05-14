@@ -2,9 +2,9 @@ package no.nav.toi.suggest
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
+import io.javalin.router.JavalinDefaultRoutingApi
 import no.nav.toi.*
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.aggregations.StringTermsBucket
@@ -26,9 +26,9 @@ private data class KontorRequest(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKontorSuggest(openSearchClient: OpenSearchClient) {
+fun JavalinDefaultRoutingApi.handleKontorSuggest(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
-        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
+        ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
 
         val request = ctx.bodyAsClass<KontorRequest>()
         val result = openSearchClient.suggest(request.query)

@@ -1,7 +1,7 @@
 package no.nav.toi.lookupperson
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.Context
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.HttpMethod
@@ -10,7 +10,6 @@ import io.javalin.openapi.OpenApiContent
 import io.javalin.openapi.OpenApiRequestBody
 import io.javalin.openapi.OpenApiResponse
 import no.nav.toi.DEFAULT_INDEX
-import no.nav.toi.OpensearchResponse
 import no.nav.toi.Rolle
 import no.nav.toi.authenticatedUser
 import no.nav.toi.includes
@@ -25,14 +24,13 @@ import org.opensearch.client.opensearch.core.SearchResponse
 
 class LookupPersonController(
     private val openSearchClient: OpenSearchClient,
-    javalin: Javalin,
 ) {
     companion object {
         private const val endepunkt = "/api/lookup-person"
     }
 
-    init {
-        javalin.post(endepunkt, handleLookupPersonFraOpensearch())
+    fun registerRoutes(routes: JavalinDefaultRoutingApi) {
+        routes.post(endepunkt, handleLookupPersonFraOpensearch())
     }
 
     @OpenApi(

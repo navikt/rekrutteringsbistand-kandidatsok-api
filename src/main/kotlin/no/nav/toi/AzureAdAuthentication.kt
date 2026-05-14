@@ -10,7 +10,7 @@ import com.auth0.jwt.exceptions.MissingClaimException
 import com.auth0.jwt.exceptions.TokenExpiredException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.RSAKeyProvider
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.*
 import no.nav.toi.kandidatsøk.Enhet
 import no.nav.toi.kandidatsøk.ModiaKlient
@@ -36,8 +36,7 @@ class AuthenticatedUser(
 
     fun verifiserAutorisasjon(vararg gyldigeRoller: Rolle) {
         if(!erEnAvRollene(*gyldigeRoller)) {
-            Thread.currentThread().stackTrace.map {  }
-            secureLog.info("403 $navIdent med roller $roller  har ikke tilgang som krever en av rollene $gyldigeRoller ${hentStackTrace()}")
+            secureLog.info("403 $navIdent med roller $roller  har ikke tilgang som krever en av rollene ${gyldigeRoller.contentToString()} ${hentStackTrace()}")
             throw ForbiddenResponse()
         }
     }
@@ -127,13 +126,13 @@ data class AuthenticationConfiguration(
 /**
  * Setter opp token-verifisering på en path på Javalin-serveren
  */
-fun Javalin.azureAdAuthentication(
+fun JavalinDefaultRoutingApi.azureAdAuthentication(
     path: String,
     authenticationConfigurations: List<AuthenticationConfiguration>,
     rolleUuidSpesifikasjon: RolleUuidSpesifikasjon,
-): Javalin? {
+){
     val verifiers = authenticationConfigurations.map { jwtVerifier(it) }
-    return before(path) { ctx ->
+    before(path) { ctx ->
         val jwt = verifyJwt(verifiers, ctx.hentToken())
 
         ctx.attribute("authenticatedUser", AuthenticatedUser.fromJwt(jwt, rolleUuidSpesifikasjon))
@@ -164,7 +163,7 @@ private fun verifyJwt(
     for (verifier in verifiers) {
         try {
             return verifier.verify(token)
-        } catch (e: SigningKeyNotFoundException) {
+        } catch (_: SigningKeyNotFoundException) {
             // Token ikke utstedt for denne verifieren, prøv neste
         } catch (e: JWTVerificationException) {
             throw e

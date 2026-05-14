@@ -9,7 +9,7 @@ version = "1.0-SNAPSHOT"
 
 val mockOAuth2ServerVersion = "2.1.0"
 val fuelVersion = "2.3.1"
-val javalinVersion = "6.3.0"
+val javalinVersion = "7.0.1"
 val jupiterVersion = "5.10.2"
 val resilience4jVersion = "2.2.0"
 
@@ -45,9 +45,10 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$jupiterVersion")
-    testImplementation("org.wiremock:wiremock:3.3.1")
+    testImplementation("org.wiremock:wiremock-standalone:3.3.1")
     testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
     testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
+    testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
     testImplementation("org.skyscreamer:jsonassert:1.5.1")
 }

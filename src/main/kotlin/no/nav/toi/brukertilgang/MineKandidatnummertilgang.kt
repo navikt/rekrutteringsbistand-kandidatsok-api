@@ -1,7 +1,7 @@
 package no.nav.toi.brukertilgang
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
@@ -21,7 +21,7 @@ private const val endepunkt = "/api/minekandidatnummer"
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleMinekandidatnummer(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun JavalinDefaultRoutingApi.handleMinekandidatnummer(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
         val authenticatedUser = ctx.authenticatedUser()
         authenticatedUser.verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)

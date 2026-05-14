@@ -1,12 +1,13 @@
 package no.nav.toi.hullicv
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.HttpMethod
 import io.javalin.openapi.OpenApi
 import io.javalin.openapi.OpenApiContent
+import io.javalin.openapi.OpenApiName
 import io.javalin.openapi.OpenApiRequestBody
 import io.javalin.openapi.OpenApiResponse
 import no.nav.toi.AuditLogg
@@ -19,7 +20,6 @@ import no.nav.toi.kandidatsøk.ModiaKlient
 import no.nav.toi.must_
 import no.nav.toi.query_
 import no.nav.toi.search
-import no.nav.toi.should_
 import no.nav.toi.source_
 import no.nav.toi.term_
 import no.nav.toi.trackTotalHits
@@ -31,6 +31,7 @@ import java.time.LocalDate
 private const val endepunkt = "/api/har-hull-i-cv"
 
 
+@OpenApiName("HullICvRequestDto")
 private data class RequestDto(
     val aktorId: String,
     val dato: String
@@ -45,7 +46,7 @@ private data class RequestDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleHullICv(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun JavalinDefaultRoutingApi.handleHullICv(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
         val authenticatedUser = ctx.authenticatedUser()
         val request = ctx.bodyAsClass<RequestDto>()

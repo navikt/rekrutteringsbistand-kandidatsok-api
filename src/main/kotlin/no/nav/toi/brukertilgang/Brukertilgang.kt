@@ -1,7 +1,7 @@
 package no.nav.toi.brukertilgang
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
@@ -27,7 +27,7 @@ private data class BrukertilgangRequestDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleBrukertilgang(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun JavalinDefaultRoutingApi.handleBrukertilgang(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
         val secureLog = SecureLog(log)
         val authenticatedUser = ctx.authenticatedUser()

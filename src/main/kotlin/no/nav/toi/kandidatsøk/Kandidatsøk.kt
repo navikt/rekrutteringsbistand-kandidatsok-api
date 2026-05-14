@@ -2,7 +2,7 @@ package no.nav.toi.kandidatsøk
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.Context
 import io.javalin.http.Handler
 import io.javalin.http.bodyAsClass
@@ -44,7 +44,7 @@ data class FilterParametre(
     val omfang: List<String>?
 )
 
-fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun JavalinDefaultRoutingApi.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     handleMineBrukere(openSearchClient, modiaKlient)
     handleValgteKontorer(openSearchClient, modiaKlient)
     handleMineKontorer(openSearchClient, modiaKlient)
@@ -61,7 +61,7 @@ fun Javalin.handleKandidatSøk(openSearchClient: OpenSearchClient, modiaKlient: 
     path = "$endepunkt/minebrukere",
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleMineBrukere(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun JavalinDefaultRoutingApi.handleMineBrukere(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(
         "$endepunkt/minebrukere",
         håndterEndepunkt(
@@ -84,7 +84,7 @@ fun Javalin.handleMineBrukere(openSearchClient: OpenSearchClient, modiaKlient: M
     path = "$endepunkt/valgtekontorer",
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleValgteKontorer(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun JavalinDefaultRoutingApi.handleValgteKontorer(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(
         "$endepunkt/valgtekontorer",
         håndterEndepunkt(
@@ -106,7 +106,7 @@ fun Javalin.handleValgteKontorer(openSearchClient: OpenSearchClient, modiaKlient
     path = "$endepunkt/minekontorer",
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleMineKontorer(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun JavalinDefaultRoutingApi.handleMineKontorer(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(
         "$endepunkt/minekontorer",
         håndterEndepunkt(
@@ -129,7 +129,7 @@ fun Javalin.handleMineKontorer(openSearchClient: OpenSearchClient, modiaKlient: 
     path = "$endepunkt/mittkontor",
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleMittKontor(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun JavalinDefaultRoutingApi.handleMittKontor(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(
         "$endepunkt/mittkontor",
         håndterEndepunkt(
@@ -152,7 +152,7 @@ fun Javalin.handleMittKontor(openSearchClient: OpenSearchClient, modiaKlient: Mo
     path = "$endepunkt/alle",
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleAlleKandidater(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun JavalinDefaultRoutingApi.handleAlleKandidater(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(
         "$endepunkt/alle",
         håndterEndepunkt(modiaKlient, openSearchClient, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER) { _, _ ->
@@ -200,21 +200,18 @@ private fun hentProblematiskQueryParamSideMedLogging(ctx: Context): Int {
     /* Dette førte til mange errors i apploggen i 2024, men vi regner med at problemet forsvinner når vi erstatter eksisterende app
     "rekrutteringsbistand" med ny, next.js-basert "rekrutteringsbistand-frontend", som er planlagt prodsatt i løpet av
     januar 2025. Når det er gjort kan vi sikkert slette denne feilhånteringskoden. */
-    var side: Int = -1
-    try {
-        side = ctx.queryParam("side")?.toInt() ?: 1
+    return try {
+        ctx.queryParam("side")?.toInt() ?: 1
     } catch (e: java.lang.NumberFormatException) {
         val actualSideParam: String? = ctx.queryParam("side")
         val requestUrl: String = ctx.req().requestURL.toString()
-        val endpointHandlerPath: String = ctx.endpointHandlerPath()
+        val endpointHandlerPath: String = ctx.endpoint().path
         val httpMethod: String = ctx.req().method
         val msg =
             "URL query parameter 'side' sin verdi lar seg ikke gjøre om til en Int. Fallback til '1'. side=[$actualSideParam], requestUrl=[$requestUrl], httpMethod=[$httpMethod], endpointHandlerPath=[$endpointHandlerPath]"
         log.info(msg, e)
-        side =
-            1 // Bedre å hardkode et sidetall enn å kaste exception og returnere HTTP 500 server error, selv om vi strengt tatt ikke vet om dette fører til det resultatet brukerene våre ønsker.
+        1 // Bedre å hardkode et sidetall enn å kaste exception og returnere HTTP 500 server error, selv om vi strengt tatt ikke vet om dette fører til det resultatet brukerene våre ønsker.
     }
-    return side
 }
 
 private fun OpenSearchClient.kandidatSøk(
