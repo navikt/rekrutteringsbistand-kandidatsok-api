@@ -1,7 +1,7 @@
 package no.nav.toi.lookupcv
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
@@ -25,13 +25,11 @@ private data class MultipleLookupCvRequestDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun JavalinDefaultRoutingApi.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
         val startTime = LocalDateTime.now()
         val authenticatedUser = ctx.authenticatedUser()
         authenticatedUser.verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET, Rolle.UTVIKLER)
-
-        val navIdent = authenticatedUser.navIdent
 
         if(authenticatedUser.erEnAvRollene(Rolle.UTVIKLER)) {
             log.info("Tid brukt på multipleLookupCv 1: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
@@ -42,7 +40,6 @@ fun Javalin.handleMultipleLookupCv(openSearchClient: OpenSearchClient, modiaKlie
             log.info("Tid brukt på multipleLookupCv 2: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
         }
         val filtrerteKandidater = result.hits().hits().filter { kandidat ->
-            val fodselsnummer = kandidat?.source()?.get("fodselsnummer")?.asText()
             val orgEnhet = kandidat?.source()?.get("orgenhet")?.asText()
             val veileder = kandidat?.source()?.get("veilederIdent")?.asText()
             authenticatedUser.harTilgangTilBruker(orgEnhet, veileder, modiaKlient)

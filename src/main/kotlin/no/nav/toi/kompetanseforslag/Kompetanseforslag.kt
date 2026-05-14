@@ -1,11 +1,12 @@
 package no.nav.toi.kompetanseforslag
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.HttpMethod
 import io.javalin.openapi.OpenApi
 import io.javalin.openapi.OpenApiContent
+import io.javalin.openapi.OpenApiName
 import io.javalin.openapi.OpenApiRequestBody
 import no.nav.toi.*
 import org.opensearch.client.opensearch.OpenSearchClient
@@ -18,6 +19,7 @@ private data class Yrke(
     val yrke: String,
 )
 
+@OpenApiName("KompetanseforslagRequestDto")
 private data class RequestDto(
     val yrker: List<Yrke>
 )
@@ -46,7 +48,7 @@ data class Bucket(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKompetanseforslag(openSearchClient: OpenSearchClient) {
+fun JavalinDefaultRoutingApi.handleKompetanseforslag(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
         ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
         val request = ctx.bodyAsClass<RequestDto>()

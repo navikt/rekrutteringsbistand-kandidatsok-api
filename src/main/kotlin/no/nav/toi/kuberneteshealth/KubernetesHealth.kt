@@ -1,11 +1,11 @@
 package no.nav.toi.kuberneteshealth
 
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 
 private const val endepunktReady = "/internal/ready"
 private const val endepunktAlive = "/internal/alive"
 
-fun Javalin.handleHealth() {
+fun JavalinDefaultRoutingApi.handleHealth() {
     get(endepunktReady) { ctx->
         ctx.result("isReady")
     }

@@ -1,7 +1,8 @@
 package no.nav.toi.suggest
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.javalin.Javalin
+import com.fasterxml.jackson.databind.JsonNode
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
@@ -25,7 +26,7 @@ private data class StedRequest(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleStedSuggest(openSearchClient: OpenSearchClient) {
+fun JavalinDefaultRoutingApi.handleStedSuggest(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
         ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
 
@@ -35,18 +36,13 @@ fun Javalin.handleStedSuggest(openSearchClient: OpenSearchClient) {
     }
 }
 
-private class StedSvar {
-    lateinit var geografiKodeTekst: String
-    lateinit var geografiKode: String
-}
-
-private fun SearchResponse<StedSvar>.tilResponsJson() = suggest()
+private fun SearchResponse<JsonNode>.tilResponsJson() = suggest()
     .flatMap { it.value }
     .map { it.completion() }
     .flatMap { it.options() }
     .map { it.source() }
 
-private fun OpenSearchClient.suggest(query: String) = search<StedSvar> {
+private fun OpenSearchClient.suggest(query: String) = search<JsonNode> {
     index(DEFAULT_INDEX)
     suggest_ {
         suggesters_("forslag") {

@@ -1,7 +1,7 @@
 package no.nav.toi.kandidatsammendrag
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
@@ -35,7 +35,7 @@ private data class KandidatNavnResponsDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKandidatNavn(
+fun JavalinDefaultRoutingApi.handleKandidatNavn(
     livshendelseKlient: LivshendelseKlient,
     openSearchClient: OpenSearchClient,
     pdlKlient: PdlKlient
