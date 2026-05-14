@@ -70,7 +70,11 @@ class App(
 
     fun configureOpenApi(config: JavalinConfig) {
         val openApiConfiguration = OpenApiPlugin { openApiConfig ->
-            openApiConfig.withDefinitionConfiguration { _, _ -> }
+            openApiConfig.withDefinitionConfiguration { _, definition ->
+                definition.info {
+                    it.title("Kandidatsøk API")
+                }
+            }
         }
         config.registerPlugin(openApiConfiguration)
         config.registerPlugin(SwaggerPlugin { swaggerConfiguration ->
