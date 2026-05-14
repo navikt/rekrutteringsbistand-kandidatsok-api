@@ -6,8 +6,6 @@ import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
 import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder
 import org.apache.hc.core5.http.HttpHost
-import org.opensearch.client.RestClient
-import org.opensearch.client.RestClientBuilder
 import org.opensearch.client.json.JsonData
 import org.opensearch.client.json.jackson.JacksonJsonpMapper
 import org.opensearch.client.opensearch.OpenSearchClient
@@ -19,7 +17,7 @@ import org.opensearch.client.opensearch._types.query_dsl.*
 import org.opensearch.client.opensearch.core.SearchRequest
 import org.opensearch.client.opensearch.core.SearchResponse
 import org.opensearch.client.opensearch.core.search.*
-import org.opensearch.client.transport.rest_client.RestClientTransport
+import org.opensearch.client.transport.httpclient5.ApacheHttpClient5TransportBuilder
 import org.opensearch.client.util.ObjectBuilder
 import java.net.URI
 import java.time.LocalDate
@@ -40,15 +38,15 @@ fun createOpenSearchClient(
         setCredentials(AuthScope(httpHost), UsernamePasswordCredentials(openSearchUsername, openSearchPassword.toCharArray()))
     }
 
-    val restClient = RestClient.builder(httpHost)
-        .setHttpClientConfigCallback(object : RestClientBuilder.HttpClientConfigCallback {
+    val transport = ApacheHttpClient5TransportBuilder.builder(httpHost)
+        .setMapper(JacksonJsonpMapper())
+        .setHttpClientConfigCallback(object : ApacheHttpClient5TransportBuilder.HttpClientConfigCallback {
             override fun customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder {
                 return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
             }
         })
         .build()
 
-    val transport = RestClientTransport(restClient, JacksonJsonpMapper())
     return OpenSearchClient(transport)
 }
 
