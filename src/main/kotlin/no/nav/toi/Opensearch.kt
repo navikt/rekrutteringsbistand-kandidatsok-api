@@ -1,11 +1,13 @@
 package no.nav.toi
 
 import com.fasterxml.jackson.databind.JsonNode
-import org.apache.http.HttpHost
-import org.apache.http.auth.AuthScope
-import org.apache.http.auth.UsernamePasswordCredentials
-import org.apache.http.impl.client.BasicCredentialsProvider
+import org.apache.hc.client5.http.auth.AuthScope
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
+import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder
+import org.apache.hc.core5.http.HttpHost
 import org.opensearch.client.RestClient
+import org.opensearch.client.RestClientBuilder
 import org.opensearch.client.json.JsonData
 import org.opensearch.client.json.jackson.JacksonJsonpMapper
 import org.opensearch.client.opensearch.OpenSearchClient
@@ -30,17 +32,20 @@ fun createOpenSearchClient(
     openSearchUri: String = System.getenv("OPEN_SEARCH_URI")!!,
 ): OpenSearchClient {
     val httpHost = URI(openSearchUri).run {
-        HttpHost(host, port, scheme)
+        val resolvedPort = if (port == -1) if (scheme == "https") 443 else 80 else port
+        HttpHost(scheme, host, resolvedPort)
     }
 
     val credentialsProvider = BasicCredentialsProvider().apply {
-        setCredentials(AuthScope(httpHost), UsernamePasswordCredentials(openSearchUsername, openSearchPassword))
+        setCredentials(AuthScope(httpHost), UsernamePasswordCredentials(openSearchUsername, openSearchPassword.toCharArray()))
     }
 
     val restClient = RestClient.builder(httpHost)
-        .setHttpClientConfigCallback { httpClientBuilder ->
-            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
-        }
+        .setHttpClientConfigCallback(object : RestClientBuilder.HttpClientConfigCallback {
+            override fun customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder {
+                return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+            }
+        })
         .build()
 
     val transport = RestClientTransport(restClient, JacksonJsonpMapper())

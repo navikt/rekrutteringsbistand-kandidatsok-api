@@ -272,7 +272,7 @@ private data class Total(
 private fun SearchResponse<JsonNode>.toResponseJson(): KandidatSøkOpensearchResponse =
     KandidatSøkOpensearchResponse(
         hits = KandidatSøkHits(
-            total = Total(hits().total().value()),
+            total = Total(hits().total()?.value() ?: 0),
             hits = hits().hits().mapNotNull {
                 it.source()?.let { Hit(it) }
             }
@@ -284,7 +284,7 @@ private data class NavigeringRespons(
 )
 
 private fun SearchResponse<JsonNode>.hentUtKandidatnumre() = NavigeringRespons(
-    hits().hits().map(org.opensearch.client.opensearch.core.search.Hit<JsonNode>::id)
+    hits().hits().mapNotNull(org.opensearch.client.opensearch.core.search.Hit<JsonNode>::id)
 )
 
 private fun OpenSearchClient.kandidatSøkNavigering(

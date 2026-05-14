@@ -63,7 +63,7 @@ fun JavalinDefaultRoutingApi.handleHullICv(openSearchClient: OpenSearchClient, m
                 AuditLogg.loggOppslagHullICv(request.aktorId, authenticatedUser.navIdent, permit)
             }
             val hullICvResponse = openSearchClient.harHullICv(request.aktorId, LocalDate.parse(request.dato))
-            val harHullICv = hullICvResponse.hits().total().value() > 0
+            val harHullICv = (hullICvResponse.hits().total()?.value() ?: 0) > 0
             ctx.json(harHullICv)
         }
     }
