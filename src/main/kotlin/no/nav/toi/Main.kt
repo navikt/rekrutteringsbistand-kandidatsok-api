@@ -18,7 +18,7 @@ import no.nav.toi.kompetanseforslag.handleKompetanseforslag
 import no.nav.toi.kuberneteshealth.handleHealth
 import no.nav.toi.lookupcv.handleLookupCv
 import no.nav.toi.lookupcv.handleMultipleLookupCv
-import no.nav.toi.lookupperson.LookupPersonController
+import no.nav.toi.lookupperson.handleLookupPerson
 import no.nav.toi.me.handleMe
 import no.nav.toi.suggest.handleKontorSuggest
 import no.nav.toi.suggest.handleStedSuggest
@@ -83,10 +83,9 @@ class App(
         javalin = Javalin.create { config ->
             configureOpenApi(config)
             config.routes.apply {
-                LookupPersonController(openSearchClient = openSearchClient).registerRoutes(this)
-
                 handleHealth()
                 handleMe()
+                handleLookupPerson(openSearchClient)
                 handleLookupCv(openSearchClient, modiaClient)
                 handleMultipleLookupCv(openSearchClient, modiaClient)
                 handleKandidatSammendrag(openSearchClient, modiaClient)
