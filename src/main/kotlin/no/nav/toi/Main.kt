@@ -23,6 +23,7 @@ import no.nav.toi.me.handleMe
 import no.nav.toi.suggest.handleKontorSuggest
 import no.nav.toi.suggest.handleStedSuggest
 import no.nav.toi.suggest.handleSuggest
+import no.nav.toi.jobbsokerinfo.handleJobbsokerInfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -105,6 +106,7 @@ class App(
         javalin.handleKontorSuggest(openSearchClient)
         javalin.handleKandidatNavn(livshendelseKlient, openSearchClient, pdlKlient)
         javalin.handleKandidatKandidatnr(openSearchClient)
+        javalin.handleJobbsokerInfo(openSearchClient)
         javalin.handleBrukertilgang(openSearchClient, modiaClient)
         javalin.handleMinekandidatnummer(openSearchClient, modiaClient)
         javalin.handleHullICv(openSearchClient, modiaClient)
