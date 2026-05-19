@@ -1,12 +1,12 @@
 name: Build and deploy
-on: [ push, workflow_dispatch ]
+on: [push, workflow_dispatch]
 
 jobs:
   call-build-and-deploy:
     uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-deploy.yaml@v2
     with:
-      java-version: '25'
-      deploy-to-dev-if-branch-name-is: 'are-oppgraderer-avhengigheter'
+      java-version: "25"
+      deploy-to-dev-if-branch-name-is: "kandidatsok-backfill"
     permissions:
       contents: read
       id-token: write
