@@ -89,16 +89,17 @@ fun Javalin.handleJobbsokerInfo(openSearchClient: OpenSearchClient) {
             .hits().hits().mapNotNull { it.source() }
             .associateBy { it.get("fodselsnummer").asText() }
 
-        val jobbsokerInfo = fodselsnumre.map { fnr ->
-            val source = treff[fnr]
-            JobbsokerInfoDto(
-                fodselsnummer = fnr,
-                navkontor = source?.get("navkontor")?.takeIf { !it.isNull }?.asText(),
-                veilederNavn = source?.get("veilederVisningsnavn")?.takeIf { !it.isNull }?.asText(),
-                veilederNavIdent = source?.get("veilederIdent")?.takeIf { !it.isNull }?.asText(),
-                alder = source?.get("fodselsdato")?.takeIf { !it.isNull }?.asText()?.let(::beregnAlder),
-                innsatsgruppe = source?.get("innsatsgruppe")?.takeIf { !it.isNull }?.asText(),
-            )
+        val jobbsokerInfo = fodselsnumre.mapNotNull { fnr ->
+            treff[fnr]?.let { source ->
+                JobbsokerInfoDto(
+                    fodselsnummer = fnr,
+                    navkontor = source.get("navkontor")?.takeIf { !it.isNull }?.asText(),
+                    veilederNavn = source.get("veilederVisningsnavn")?.takeIf { !it.isNull }?.asText(),
+                    veilederNavIdent = source.get("veilederIdent")?.takeIf { !it.isNull }?.asText(),
+                    alder = source.get("fodselsdato")?.takeIf { !it.isNull }?.asText()?.let(::beregnAlder),
+                    innsatsgruppe = source.get("innsatsgruppe")?.takeIf { !it.isNull }?.asText(),
+                )
+            }
         }
 
         ctx.json(JobbsokerInfoResponsDto(jobbsokerInfo))

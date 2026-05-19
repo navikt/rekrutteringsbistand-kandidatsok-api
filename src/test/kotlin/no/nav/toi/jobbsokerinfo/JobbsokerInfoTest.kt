@@ -114,21 +114,14 @@ class JobbsokerInfoTest {
     }
 
     @Test
-    fun `manglende fnr gir rad med null-felter`() {
+    fun `manglende fnr gir ingen rad`() {
         stubOpensearch(tomtOpensearchSvar())
 
         val response = post("""{"fodselsnumre":["22222222222"]}""")
         assertEquals(HTTP_OK, response.statusCode())
 
         val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
-        assertEquals(1, body.jobbsokerInfo.size)
-        val info = body.jobbsokerInfo.single()
-        assertEquals("22222222222", info.fodselsnummer)
-        assertNull(info.navkontor)
-        assertNull(info.veilederNavn)
-        assertNull(info.veilederNavIdent)
-        assertNull(info.alder)
-        assertNull(info.innsatsgruppe)
+        assertEquals(0, body.jobbsokerInfo.size)
     }
 
     @Test
