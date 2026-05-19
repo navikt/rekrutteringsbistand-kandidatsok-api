@@ -1,9 +1,10 @@
 package no.nav.toi.jobbsokerinfo
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.http.Context
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
+import io.javalin.router.JavalinDefaultRoutingApi
 import no.nav.toi.*
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
@@ -30,6 +31,10 @@ private data class JobbsokerInfoDto(
 private data class JobbsokerInfoResponsDto(
     val jobbsokerInfo: List<JobbsokerInfoDto>,
 )
+
+fun JavalinDefaultRoutingApi.handleJobbsokerInfo(openSearchClient: OpenSearchClient) {
+    post(endepunkt, handleJobbsokerInfoFraOpensearch(openSearchClient))
+}
 
 @OpenApi(
     summary = "Bulk-oppslag av jobbsøkerinfo for en liste fødselsnummer",
@@ -66,44 +71,42 @@ private data class JobbsokerInfoResponsDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleJobbsokerInfo(openSearchClient: OpenSearchClient) {
-    post(endepunkt) { ctx ->
-        ctx.authenticatedUser().verifiserAutorisasjon(
-            Rolle.JOBBSØKER_RETTET,
-            Rolle.ARBEIDSGIVER_RETTET,
-            Rolle.UTVIKLER,
-        )
+fun handleJobbsokerInfoFraOpensearch(openSearchClient: OpenSearchClient): (Context) -> Unit = handler@{ ctx ->
+    ctx.authenticatedUser().verifiserAutorisasjon(
+        Rolle.JOBBSØKER_RETTET,
+        Rolle.ARBEIDSGIVER_RETTET,
+        Rolle.UTVIKLER,
+    )
 
-        val request = ctx.bodyAsClass<JobbsokerInfoRequestDto>()
-        val fodselsnumre = request.fodselsnumre.distinct()
+    val request = ctx.bodyAsClass<JobbsokerInfoRequestDto>()
+    val fodselsnumre = request.fodselsnumre.distinct()
 
-        if (fodselsnumre.isEmpty()) {
-            ctx.json(JobbsokerInfoResponsDto(emptyList()))
-            return@post
-        }
-        if (fodselsnumre.size > MAKS_FNR_PER_KALL) {
-            throw IllegalArgumentException("Maks $MAKS_FNR_PER_KALL fødselsnumre per kall (mottok ${fodselsnumre.size}).")
-        }
-
-        val treff = openSearchClient.hentJobbsokerInfo(fodselsnumre)
-            .hits().hits().mapNotNull { it.source() }
-            .associateBy { it.get("fodselsnummer").asText() }
-
-        val jobbsokerInfo = fodselsnumre.mapNotNull { fnr ->
-            treff[fnr]?.let { source ->
-                JobbsokerInfoDto(
-                    fodselsnummer = fnr,
-                    navkontor = source.get("navkontor")?.takeIf { !it.isNull }?.asText(),
-                    veilederNavn = source.get("veilederVisningsnavn")?.takeIf { !it.isNull }?.asText(),
-                    veilederNavIdent = source.get("veilederIdent")?.takeIf { !it.isNull }?.asText(),
-                    alder = source.get("fodselsdato")?.takeIf { !it.isNull }?.asText()?.let(::beregnAlder),
-                    innsatsgruppe = source.get("innsatsgruppe")?.takeIf { !it.isNull }?.asText(),
-                )
-            }
-        }
-
-        ctx.json(JobbsokerInfoResponsDto(jobbsokerInfo))
+    if (fodselsnumre.isEmpty()) {
+        ctx.json(JobbsokerInfoResponsDto(emptyList()))
+        return@handler
     }
+    if (fodselsnumre.size > MAKS_FNR_PER_KALL) {
+        throw IllegalArgumentException("Maks $MAKS_FNR_PER_KALL fødselsnumre per kall (mottok ${fodselsnumre.size}).")
+    }
+
+    val treff = openSearchClient.hentJobbsokerInfo(fodselsnumre)
+        .hits().hits().mapNotNull { it.source() }
+        .associateBy { it.get("fodselsnummer").asText() }
+
+    val jobbsokerInfo = fodselsnumre.mapNotNull { fnr ->
+        treff[fnr]?.let { source ->
+            JobbsokerInfoDto(
+                fodselsnummer = fnr,
+                navkontor = source.get("navkontor")?.takeIf { !it.isNull }?.asText(),
+                veilederNavn = source.get("veilederVisningsnavn")?.takeIf { !it.isNull }?.asText(),
+                veilederNavIdent = source.get("veilederIdent")?.takeIf { !it.isNull }?.asText(),
+                alder = source.get("fodselsdato")?.takeIf { !it.isNull }?.asText()?.let(::beregnAlder),
+                innsatsgruppe = source.get("innsatsgruppe")?.takeIf { !it.isNull }?.asText(),
+            )
+        }
+    }
+
+    ctx.json(JobbsokerInfoResponsDto(jobbsokerInfo))
 }
 
 private fun OpenSearchClient.hentJobbsokerInfo(fodselsnumre: List<String>): SearchResponse<JsonNode> =
