@@ -12,7 +12,7 @@ import java.time.Period
 import java.time.format.DateTimeParseException
 
 private const val endepunkt = "/api/jobbsoker-info"
-private const val MAKS_FNR_PER_KALL = 200
+private const val MAKS_FNR_PER_KALL = 500
 
 private data class JobbsokerInfoRequestDto(
     val fodselsnumre: List<String>,
