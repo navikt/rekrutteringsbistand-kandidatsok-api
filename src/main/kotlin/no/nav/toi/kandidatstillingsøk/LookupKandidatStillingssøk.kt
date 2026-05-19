@@ -1,7 +1,7 @@
 package no.nav.toi.kandidatstillingsøk
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import no.nav.toi.*
@@ -11,6 +11,7 @@ import org.opensearch.client.opensearch.core.SearchResponse
 
 private const val endepunkt = "/api/kandidat-stillingssok"
 
+@OpenApiName("LookupKandidatStillingssokRequestDto")
 private data class RequestDto(
     val kandidatnr: String,
 )
@@ -24,7 +25,7 @@ private data class RequestDto(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleLookupKandidatStillingssøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
+fun JavalinDefaultRoutingApi.handleLookupKandidatStillingssøk(openSearchClient: OpenSearchClient, modiaKlient: ModiaKlient) {
     post(endepunkt) { ctx ->
         val authenticatedUser = ctx.authenticatedUser()
 

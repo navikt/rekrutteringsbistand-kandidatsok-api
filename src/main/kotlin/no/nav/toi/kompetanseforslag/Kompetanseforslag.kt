@@ -1,11 +1,12 @@
 package no.nav.toi.kompetanseforslag
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.HttpMethod
 import io.javalin.openapi.OpenApi
 import io.javalin.openapi.OpenApiContent
+import io.javalin.openapi.OpenApiName
 import io.javalin.openapi.OpenApiRequestBody
 import no.nav.toi.*
 import org.opensearch.client.opensearch.OpenSearchClient
@@ -18,6 +19,7 @@ private data class Yrke(
     val yrke: String,
 )
 
+@OpenApiName("KompetanseforslagRequestDto")
 private data class RequestDto(
     val yrker: List<Yrke>
 )
@@ -46,12 +48,12 @@ data class Bucket(
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun Javalin.handleKompetanseforslag(openSearchClient: OpenSearchClient) {
+fun JavalinDefaultRoutingApi.handleKompetanseforslag(openSearchClient: OpenSearchClient) {
     post(endepunkt) { ctx ->
         ctx.authenticatedUser().verifiserAutorisasjon(Rolle.JOBBSØKER_RETTET, Rolle.ARBEIDSGIVER_RETTET,  Rolle.UTVIKLER)
         val request = ctx.bodyAsClass<RequestDto>()
         val result = openSearchClient.lookupKompetanseforslag(request)
-        ctx.json(result.toAggregationResponseJson() ?: throw RuntimeException("No aggregations found in response"))
+        ctx.json(result.toAggregationResponseJson())
     }
 }
 
@@ -75,7 +77,7 @@ private fun OpenSearchClient.lookupKompetanseforslag(params: RequestDto): Search
 
         size(0)
         aggregations("kompetanse") {
-            it.terms {agg ->
+            it.terms { agg ->
                 agg.field("kompetanseObj.kompKodeNavn.keyword")
                 agg.size(12)
             }
@@ -86,7 +88,7 @@ private fun OpenSearchClient.lookupKompetanseforslag(params: RequestDto): Search
 fun SearchResponse<JsonNode>.toAggregationResponseJson(): KompetanseAggregationResponse {
     val buckets = this.aggregations()["kompetanse"]?.sterms()?.buckets()?.array()
 
-   return KompetanseAggregationResponse(
+    return KompetanseAggregationResponse(
         KompetanseAggregations(
             KompetanseAggregation(
                 buckets?.map {

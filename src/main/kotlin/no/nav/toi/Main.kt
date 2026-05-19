@@ -18,7 +18,7 @@ import no.nav.toi.kompetanseforslag.handleKompetanseforslag
 import no.nav.toi.kuberneteshealth.handleHealth
 import no.nav.toi.lookupcv.handleLookupCv
 import no.nav.toi.lookupcv.handleMultipleLookupCv
-import no.nav.toi.lookupperson.LookupPersonController
+import no.nav.toi.lookupperson.handleLookupPerson
 import no.nav.toi.me.handleMe
 import no.nav.toi.suggest.handleKontorSuggest
 import no.nav.toi.suggest.handleStedSuggest
@@ -72,10 +72,8 @@ class App(
     fun configureOpenApi(config: JavalinConfig) {
         val openApiConfiguration = OpenApiPlugin { openApiConfig ->
             openApiConfig.withDefinitionConfiguration { _, definition ->
-                definition.apply {
-                    withInfo {
-                        it.title = "Kandidatsøk API"
-                    }
+                definition.info {
+                    it.title("Kandidatsøk API")
                 }
             }
         }
@@ -89,55 +87,55 @@ class App(
     fun start() {
         javalin = Javalin.create { config ->
             configureOpenApi(config)
+            config.routes.apply {
+                handleHealth()
+                handleMe()
+                handleLookupPerson(openSearchClient)
+                handleLookupCv(openSearchClient, modiaClient)
+                handleMultipleLookupCv(openSearchClient, modiaClient)
+                handleKandidatSammendrag(openSearchClient, modiaClient)
+                handleKompetanseforslag(openSearchClient)
+                handleLookupKandidatStillingssøk(openSearchClient, modiaClient)
+                handleKandidatSøk(openSearchClient, modiaClient)
+                handleSuggest(openSearchClient)
+                handleStedSuggest(openSearchClient)
+                handleKontorSuggest(openSearchClient)
+                handleKandidatNavn(livshendelseKlient, openSearchClient, pdlKlient)
+                handleKandidatKandidatnr(openSearchClient)
+                handleBrukertilgang(openSearchClient, modiaClient)
+                handleMinekandidatnummer(openSearchClient, modiaClient)
+                handleHullICv(openSearchClient, modiaClient)
+
+                azureAdAuthentication(
+                    path = "/api/*",
+                    authenticationConfigurations = authenticationConfigurations,
+                    rolleUuidSpesifikasjon = rolleUuidSpesifikasjon,
+                )
+
+                exception(ValidationException::class.java) { e, ctx ->
+                    val httpStatus = BAD_REQUEST
+                    val requestUrl: String = ctx.req().requestURL.toString()
+                    val endpointPath: String = ctx.endpoint().path
+                    val httpMethod: String = ctx.req().method
+                    val msg =
+                        "Returnerer HTTP respons status $httpStatus. requestUrl=[$requestUrl], httpMethod=[$httpMethod], endpointPath=[$endpointPath]"
+                    log.info(msg, e)
+                    ctx.status(httpStatus)
+                }
+                exception(Exception::class.java) { e, ctx ->
+                    val httpStatus = INTERNAL_SERVER_ERROR
+                    val requestUrl: String = ctx.req().requestURL.toString()
+                    val endpointPath: String = ctx.endpoint().path
+                    val httpMethod: String = ctx.req().method
+                    val msg =
+                        "Returnerer HTTP respons status $httpStatus. requestUrl=[$requestUrl], httpMethod=[$httpMethod], endpointPath=[$endpointPath]"
+                    log.error(msg, e)
+                    ctx.status(httpStatus)
+                }
+            }
         }
 
-        LookupPersonController(openSearchClient = openSearchClient, javalin = javalin)
-
-        javalin.handleHealth()
-        javalin.handleMe()
-        javalin.handleLookupCv(openSearchClient, modiaClient)
-        javalin.handleMultipleLookupCv(openSearchClient, modiaClient)
-        javalin.handleKandidatSammendrag(openSearchClient, modiaClient)
-        javalin.handleKompetanseforslag(openSearchClient)
-        javalin.handleLookupKandidatStillingssøk(openSearchClient, modiaClient)
-        javalin.handleKandidatSøk(openSearchClient, modiaClient)
-        javalin.handleSuggest(openSearchClient)
-        javalin.handleStedSuggest(openSearchClient)
-        javalin.handleKontorSuggest(openSearchClient)
-        javalin.handleKandidatNavn(livshendelseKlient, openSearchClient, pdlKlient)
-        javalin.handleKandidatKandidatnr(openSearchClient)
-        javalin.handleJobbsokerInfo(openSearchClient)
-        javalin.handleBrukertilgang(openSearchClient, modiaClient)
-        javalin.handleMinekandidatnummer(openSearchClient, modiaClient)
-        javalin.handleHullICv(openSearchClient, modiaClient)
-
-        javalin.azureAdAuthentication(
-            path = "/api/*",
-            authenticationConfigurations = authenticationConfigurations,
-            rolleUuidSpesifikasjon = rolleUuidSpesifikasjon,
-        )
-
-        val app = javalin.start(port)
-        app.exception(ValidationException::class.java) { e, ctx ->
-            val httpStatus = BAD_REQUEST
-            val requestUrl: String = ctx.req().requestURL.toString()
-            val endpointHandlerPath: String = ctx.endpointHandlerPath()
-            val httpMethod: String = ctx.req().method
-            val msg =
-                "Returnerer HTTP respons status $httpStatus. requestUrl=[$requestUrl], httpMethod=[$httpMethod], endpointHandlerPath=[$endpointHandlerPath]"
-            log.info(msg, e)
-            ctx.status(httpStatus)
-        }
-        app.exception(Exception::class.java) { e, ctx ->
-            val httpStatus = INTERNAL_SERVER_ERROR
-            val requestUrl: String = ctx.req().requestURL.toString()
-            val endpointHandlerPath: String = ctx.endpointHandlerPath()
-            val httpMethod: String = ctx.req().method
-            val msg =
-                "Returnerer HTTP respons status $httpStatus. requestUrl=[$requestUrl], httpMethod=[$httpMethod], endpointHandlerPath=[$endpointHandlerPath]"
-            log.error(msg, e)
-            ctx.status(httpStatus)
-        }
+        javalin.start(port)
     }
 
     fun close() {

@@ -1,11 +1,11 @@
 package no.nav.toi
 
 import com.fasterxml.jackson.databind.JsonNode
-import org.apache.http.HttpHost
-import org.apache.http.auth.AuthScope
-import org.apache.http.auth.UsernamePasswordCredentials
-import org.apache.http.impl.client.BasicCredentialsProvider
-import org.opensearch.client.RestClient
+import org.apache.hc.client5.http.auth.AuthScope
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
+import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder
+import org.apache.hc.core5.http.HttpHost
 import org.opensearch.client.json.JsonData
 import org.opensearch.client.json.jackson.JacksonJsonpMapper
 import org.opensearch.client.opensearch.OpenSearchClient
@@ -17,7 +17,7 @@ import org.opensearch.client.opensearch._types.query_dsl.*
 import org.opensearch.client.opensearch.core.SearchRequest
 import org.opensearch.client.opensearch.core.SearchResponse
 import org.opensearch.client.opensearch.core.search.*
-import org.opensearch.client.transport.rest_client.RestClientTransport
+import org.opensearch.client.transport.httpclient5.ApacheHttpClient5TransportBuilder
 import org.opensearch.client.util.ObjectBuilder
 import java.net.URI
 import java.time.LocalDate
@@ -30,20 +30,23 @@ fun createOpenSearchClient(
     openSearchUri: String = System.getenv("OPEN_SEARCH_URI")!!,
 ): OpenSearchClient {
     val httpHost = URI(openSearchUri).run {
-        HttpHost(host, port, scheme)
+        val resolvedPort = if (port == -1) if (scheme == "https") 443 else 80 else port
+        HttpHost(scheme, host, resolvedPort)
     }
 
     val credentialsProvider = BasicCredentialsProvider().apply {
-        setCredentials(AuthScope(httpHost), UsernamePasswordCredentials(openSearchUsername, openSearchPassword))
+        setCredentials(AuthScope(httpHost), UsernamePasswordCredentials(openSearchUsername, openSearchPassword.toCharArray()))
     }
 
-    val restClient = RestClient.builder(httpHost)
-        .setHttpClientConfigCallback { httpClientBuilder ->
-            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
-        }
+    val transport = ApacheHttpClient5TransportBuilder.builder(httpHost)
+        .setMapper(JacksonJsonpMapper())
+        .setHttpClientConfigCallback(object : ApacheHttpClient5TransportBuilder.HttpClientConfigCallback {
+            override fun customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder {
+                return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+            }
+        })
         .build()
 
-    val transport = RestClientTransport(restClient, JacksonJsonpMapper())
     return OpenSearchClient(transport)
 }
 

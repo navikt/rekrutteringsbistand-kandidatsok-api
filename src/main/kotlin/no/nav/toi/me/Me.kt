@@ -1,6 +1,6 @@
 package no.nav.toi.me
 
-import io.javalin.Javalin
+import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.openapi.*
 import no.nav.toi.authenticatedUser
 
@@ -21,7 +21,7 @@ private const val endepunktMe = "/api/me"
     path = endepunktMe,
     methods = [HttpMethod.GET]
 )
-fun Javalin.handleMe() {
+fun JavalinDefaultRoutingApi.handleMe() {
     get(endepunktMe) { ctx ->
         ctx.json(mapOf<String, Any?>(
             "navIdent" to ctx.authenticatedUser().navIdent,
