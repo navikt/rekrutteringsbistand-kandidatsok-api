@@ -104,7 +104,7 @@ class App(
                 handleKontorSuggest(openSearchClient)
                 handleKandidatNavn(livshendelseKlient, openSearchClient, pdlKlient)
                 handleKandidatKandidatnr(openSearchClient)
-                handleJobbsokerInfo(openSearchClient, rekrutteringstreffApiClientId)
+                handleJobbsokerInfo(openSearchClient, modiaClient, rekrutteringstreffApiClientId)
                 handleBrukertilgang(openSearchClient, modiaClient)
                 handleMinekandidatnummer(openSearchClient, modiaClient)
                 handleHullICv(openSearchClient, modiaClient)

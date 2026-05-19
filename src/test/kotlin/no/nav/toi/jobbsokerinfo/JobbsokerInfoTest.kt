@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
@@ -102,7 +103,7 @@ class JobbsokerInfoTest {
             """.trimIndent()
         )
 
-        val response = post("""{"fodselsnumre":["11111111111"]}""")
+        val response = post("""{"fodselsnumre":["11111111111"]}""", gruppe = Gruppe.Arbeidsgiverrettet)
         assertEquals(HTTP_OK, response.statusCode())
 
         val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
@@ -156,7 +157,7 @@ class JobbsokerInfoTest {
             """.trimIndent()
         )
 
-        val response = post("""{"fodselsnumre":["33333333333"]}""")
+        val response = post("""{"fodselsnumre":["33333333333"]}""", gruppe = Gruppe.Arbeidsgiverrettet)
         assertEquals(HTTP_OK, response.statusCode())
 
         val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
@@ -194,6 +195,116 @@ class JobbsokerInfoTest {
         assertEquals(HTTP_FORBIDDEN, response.statusCode())
     }
 
+    @Test
+    fun `jobbsokerrettet får jobbsokerinfo når kandidaten er egen bruker`() {
+        stubOpensearch(
+            opensearchSvar(
+                """
+                {
+                  "fodselsnummer": "44444444444",
+                  "navkontor": "Nav Trondheim",
+                  "veilederVisningsnavn": "Test Veileder",
+                  "veilederIdent": "A000001",
+                  "orgenhet": "9999",
+                  "fodselsdato": "1991-02-03",
+                  "innsatsgruppe": "STANDARD_INNSATS"
+                }
+                """.trimIndent()
+            )
+        )
+
+        val response = post("""{"fodselsnumre":["44444444444"]}""", gruppe = Gruppe.Jobbsøkerrettet, navIdent = "A000001")
+
+        assertEquals(HTTP_OK, response.statusCode())
+        val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
+        assertEquals(listOf("44444444444"), body.jobbsokerInfo.map { it.fodselsnummer })
+    }
+
+    @Test
+    fun `jobbsokerrettet får jobbsokerinfo når kandidaten er på eget kontor`() {
+        stubModiaDecorator(enheter = listOf("1234"))
+        stubOpensearch(
+            opensearchSvar(
+                """
+                {
+                  "fodselsnummer": "55555555555",
+                  "navkontor": "Nav Tromsø",
+                  "veilederVisningsnavn": "Annen Veileder",
+                  "veilederIdent": "Z999999",
+                  "orgenhet": "1234",
+                  "fodselsdato": "1988-02-03",
+                  "innsatsgruppe": "STANDARD_INNSATS"
+                }
+                """.trimIndent()
+            )
+        )
+
+        val response = post("""{"fodselsnumre":["55555555555"]}""", gruppe = Gruppe.Jobbsøkerrettet)
+
+        assertEquals(HTTP_OK, response.statusCode())
+        val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
+        assertEquals(listOf("55555555555"), body.jobbsokerInfo.map { it.fodselsnummer })
+    }
+
+    @Test
+    fun `nekter jobbsokerrettet når kandidaten er utenfor egen tilgang`() {
+        stubModiaDecorator(enheter = listOf("1234"))
+        stubOpensearch(
+            opensearchSvar(
+                """
+                {
+                  "fodselsnummer": "66666666666",
+                  "navkontor": "Nav Stavanger",
+                  "veilederVisningsnavn": "Annen Veileder",
+                  "veilederIdent": "Z999999",
+                  "orgenhet": "9999",
+                  "fodselsdato": "1988-02-03",
+                  "innsatsgruppe": "STANDARD_INNSATS"
+                }
+                """.trimIndent()
+            )
+        )
+
+        val response = post("""{"fodselsnumre":["66666666666"]}""", gruppe = Gruppe.Jobbsøkerrettet)
+
+        assertEquals(HTTP_FORBIDDEN, response.statusCode())
+    }
+
+    @Test
+    fun `nekter hele batchen når en kandidat er utenfor egen tilgang`() {
+        stubModiaDecorator(enheter = listOf("1234"))
+        stubOpensearch(
+            opensearchSvar(
+                """
+                {
+                  "fodselsnummer": "77777777777",
+                  "navkontor": "Nav Trondheim",
+                  "veilederVisningsnavn": "Test Veileder",
+                  "veilederIdent": "A000001",
+                  "orgenhet": "9999",
+                  "fodselsdato": "1991-02-03",
+                  "innsatsgruppe": "STANDARD_INNSATS"
+                }
+                """.trimIndent(),
+                """
+                {
+                  "fodselsnummer": "88888888888",
+                  "navkontor": "Nav Stavanger",
+                  "veilederVisningsnavn": "Annen Veileder",
+                  "veilederIdent": "Z999999",
+                  "orgenhet": "9999",
+                  "fodselsdato": "1988-02-03",
+                  "innsatsgruppe": "STANDARD_INNSATS"
+                }
+                """.trimIndent()
+            )
+        )
+
+        val response = post("""{"fodselsnumre":["77777777777","88888888888"]}""", gruppe = Gruppe.Jobbsøkerrettet)
+
+        assertEquals(HTTP_FORBIDDEN, response.statusCode())
+    }
+
     private fun autorisasjonsCaser() = listOf(
         Arguments.of(Gruppe.Utvikler, HTTP_OK),
         Arguments.of(Gruppe.Arbeidsgiverrettet, HTTP_OK),
@@ -220,12 +331,14 @@ class JobbsokerInfoTest {
     private fun post(
         body: String,
         clientId: String = rekrutteringstreffApiClientId,
+        gruppe: Gruppe = Gruppe.Jobbsøkerrettet,
+        navIdent: String = "A000001",
     ): HttpResponse<String> {
         val request = HttpRequest.newBuilder()
             .uri(URI(endepunkt))
             .header(
                 "Authorization",
-                "Bearer ${app.lagToken(groups = Gruppe.Jobbsøkerrettet.somStringListe, claims = tokenClaims(Gruppe.Jobbsøkerrettet.somStringListe), clientId = clientId).serialize()}"
+                "Bearer ${app.lagToken(groups = gruppe.somStringListe, claims = tokenClaims(gruppe.somStringListe, navIdent), clientId = clientId).serialize()}"
             )
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(body))
@@ -233,10 +346,32 @@ class JobbsokerInfoTest {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString())
     }
 
-    private fun tokenClaims(groups: List<String>) = mapOf(
-        "NAVident" to "A000001",
+    private fun tokenClaims(groups: List<String>, navIdent: String = "A000001") = mapOf(
+        "NAVident" to navIdent,
         "groups" to groups,
     )
+
+    private fun stubModiaDecorator(enheter: List<String>) {
+        val enheterJson = enheter.joinToString(",") { """{"enhetId":"$it","navn":"Nav Test"}""" }
+        stubFor(
+            get(urlEqualTo("/modia/api/decorator"))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(
+                            """
+                            {
+                              "ident": "A000001",
+                              "fornavn": "Test",
+                              "etternavn": "Veileder",
+                              "enheter": [$enheterJson]
+                            }
+                            """.trimIndent()
+                        )
+                )
+        )
+    }
 
     private fun stubOpensearch(body: String) {
         stubFor(
@@ -248,6 +383,19 @@ class JobbsokerInfoTest {
                 )
         )
     }
+
+        private fun opensearchSvar(vararg kilder: String) = """
+                {
+                    "took": 1,
+                    "timed_out": false,
+                    "_shards": { "total": 1, "successful": 1, "skipped": 0, "failed": 0 },
+                    "hits": {
+                        "total": { "value": ${kilder.size}, "relation": "eq" },
+                        "max_score": null,
+                        "hits": [${kilder.mapIndexed { indeks, kilde -> """{"_index":"kandidater","_id":"$indeks","_score":1.0,"_source":$kilde}""" }.joinToString(",")}]
+                    }
+                }
+        """.trimIndent()
 
     private fun tomtOpensearchSvar() = """
         {

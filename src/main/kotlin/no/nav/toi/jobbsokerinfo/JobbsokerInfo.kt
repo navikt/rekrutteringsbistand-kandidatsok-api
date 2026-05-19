@@ -8,6 +8,7 @@ import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import io.javalin.router.JavalinDefaultRoutingApi
 import no.nav.toi.*
+import no.nav.toi.kandidatsøk.ModiaKlient
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch.core.SearchResponse
 import java.time.LocalDate
@@ -36,9 +37,10 @@ private data class JobbsokerInfoResponsDto(
 
 fun JavalinDefaultRoutingApi.handleJobbsokerInfo(
     openSearchClient: OpenSearchClient,
+    modiaKlient: ModiaKlient,
     rekrutteringstreffApiClientId: String,
 ) {
-    post(endepunkt, handleJobbsokerInfoFraOpensearch(openSearchClient, rekrutteringstreffApiClientId))
+    post(endepunkt, handleJobbsokerInfoFraOpensearch(openSearchClient, modiaKlient, rekrutteringstreffApiClientId))
 }
 
 @OpenApi(
@@ -80,6 +82,7 @@ fun JavalinDefaultRoutingApi.handleJobbsokerInfo(
 )
 fun handleJobbsokerInfoFraOpensearch(
     openSearchClient: OpenSearchClient,
+    modiaKlient: ModiaKlient,
     rekrutteringstreffApiClientId: String,
 ): (Context) -> Unit = handler@{ ctx ->
     val authenticatedUser = ctx.authenticatedUser()
@@ -103,8 +106,19 @@ fun handleJobbsokerInfoFraOpensearch(
         throw BadRequestResponse("Maks $MAKS_FNR_PER_KALL fødselsnumre per kall (mottok ${fodselsnumre.size}).")
     }
 
-    val treff = openSearchClient.hentJobbsokerInfo(fodselsnumre)
+    val treffFraOpensearch = openSearchClient.hentJobbsokerInfo(fodselsnumre)
         .hits().hits().mapNotNull { it.source() }
+
+    val utilgjengeligJobbsoker = treffFraOpensearch.firstOrNull { source ->
+        val orgEnhet = source.get("orgenhet")?.takeIf { !it.isNull }?.asText()
+        val veileder = source.get("veilederIdent")?.takeIf { !it.isNull }?.asText()
+        !authenticatedUser.harTilgangTilBruker(orgEnhet, veileder, modiaKlient)
+    }
+    if (utilgjengeligJobbsoker != null) {
+        throw ForbiddenResponse()
+    }
+
+    val treff = treffFraOpensearch
         .associateBy { it.get("fodselsnummer").asText() }
 
     val jobbsokerInfo = fodselsnumre.mapNotNull { fnr ->
@@ -141,6 +155,7 @@ private fun OpenSearchClient.hentJobbsokerInfo(fodselsnumre: List<String>): Sear
                 "navkontor",
                 "veilederVisningsnavn",
                 "veilederIdent",
+                "orgenhet",
                 "fodselsdato",
                 "innsatsgruppe",
             )
