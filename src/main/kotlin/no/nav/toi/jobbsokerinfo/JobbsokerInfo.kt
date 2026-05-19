@@ -1,7 +1,9 @@
 package no.nav.toi.jobbsokerinfo
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
+import io.javalin.http.ForbiddenResponse
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
 import io.javalin.router.JavalinDefaultRoutingApi
@@ -32,8 +34,11 @@ private data class JobbsokerInfoResponsDto(
     val jobbsokerInfo: List<JobbsokerInfoDto>,
 )
 
-fun JavalinDefaultRoutingApi.handleJobbsokerInfo(openSearchClient: OpenSearchClient) {
-    post(endepunkt, handleJobbsokerInfoFraOpensearch(openSearchClient))
+fun JavalinDefaultRoutingApi.handleJobbsokerInfo(
+    openSearchClient: OpenSearchClient,
+    rekrutteringstreffApiClientId: String,
+) {
+    post(endepunkt, handleJobbsokerInfoFraOpensearch(openSearchClient, rekrutteringstreffApiClientId))
 }
 
 @OpenApi(
@@ -66,17 +71,26 @@ fun JavalinDefaultRoutingApi.handleJobbsokerInfo(openSearchClient: OpenSearchCli
                 }
                 """
             )]
-        )
+        ),
+        OpenApiResponse(status = "400", description = "For mange fødselsnumre i request"),
+        OpenApiResponse(status = "403", description = "Kan bare kalles fra rekrutteringstreff-api")
     ],
     path = endepunkt,
     methods = [HttpMethod.POST]
 )
-fun handleJobbsokerInfoFraOpensearch(openSearchClient: OpenSearchClient): (Context) -> Unit = handler@{ ctx ->
-    ctx.authenticatedUser().verifiserAutorisasjon(
+fun handleJobbsokerInfoFraOpensearch(
+    openSearchClient: OpenSearchClient,
+    rekrutteringstreffApiClientId: String,
+): (Context) -> Unit = handler@{ ctx ->
+    val authenticatedUser = ctx.authenticatedUser()
+    authenticatedUser.verifiserAutorisasjon(
         Rolle.JOBBSØKER_RETTET,
         Rolle.ARBEIDSGIVER_RETTET,
         Rolle.UTVIKLER,
     )
+
+    // Siden vi ikke har auditlogg her, verifiser at det bare er rekrutteringstreff-api som kaller apiet.
+    authenticatedUser.verifiserKallFraRekrutteringstreffApi(rekrutteringstreffApiClientId)
 
     val request = ctx.bodyAsClass<JobbsokerInfoRequestDto>()
     val fodselsnumre = request.fodselsnumre.distinct()
@@ -86,7 +100,7 @@ fun handleJobbsokerInfoFraOpensearch(openSearchClient: OpenSearchClient): (Conte
         return@handler
     }
     if (fodselsnumre.size > MAKS_FNR_PER_KALL) {
-        throw IllegalArgumentException("Maks $MAKS_FNR_PER_KALL fødselsnumre per kall (mottok ${fodselsnumre.size}).")
+        throw BadRequestResponse("Maks $MAKS_FNR_PER_KALL fødselsnumre per kall (mottok ${fodselsnumre.size}).")
     }
 
     val treff = openSearchClient.hentJobbsokerInfo(fodselsnumre)
@@ -107,6 +121,12 @@ fun handleJobbsokerInfoFraOpensearch(openSearchClient: OpenSearchClient): (Conte
     }
 
     ctx.json(JobbsokerInfoResponsDto(jobbsokerInfo))
+}
+
+private fun AuthenticatedUser.verifiserKallFraRekrutteringstreffApi(rekrutteringstreffApiClientId: String) {
+    if (kallendeApplikasjonClientId != rekrutteringstreffApiClientId) {
+        throw ForbiddenResponse()
+    }
 }
 
 private fun OpenSearchClient.hentJobbsokerInfo(fodselsnumre: List<String>): SearchResponse<JsonNode> =

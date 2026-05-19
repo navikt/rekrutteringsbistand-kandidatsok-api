@@ -18,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.net.HttpURLConnection.HTTP_FORBIDDEN
+import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import java.net.HttpURLConnection.HTTP_OK
 import java.net.URI
 import java.net.http.HttpClient
@@ -32,6 +33,8 @@ import kotlin.test.assertNull
 @WireMockTest(httpPort = 10000)
 class JobbsokerInfoTest {
     private val endepunkt = "http://localhost:8080/api/jobbsoker-info"
+    private val rekrutteringstreffApiClientId = "rekrutteringstreff-api-client-id"
+    private val frontendClientId = "frontend-client-id"
     private val authServer = MockOAuth2Server()
     private val app = LokalApp()
 
@@ -173,6 +176,24 @@ class JobbsokerInfoTest {
         assertEquals(0, body.jobbsokerInfo.size)
     }
 
+    @Test
+    fun `returnerer bad request ved for mange fodselsnumre`() {
+        val fodselsnumre = (1..501).joinToString(",") { "\"${it.toString().padStart(11, '0')}\"" }
+        val response = post("""{"fodselsnumre":[$fodselsnumre]}""")
+
+        assertEquals(HTTP_BAD_REQUEST, response.statusCode())
+    }
+
+    @Test
+    fun `nekter kall som ikke kommer fra rekrutteringstreff-api`() {
+        val response = post(
+            body = """{"fodselsnumre":["11111111111"]}""",
+            clientId = frontendClientId,
+        )
+
+        assertEquals(HTTP_FORBIDDEN, response.statusCode())
+    }
+
     private fun autorisasjonsCaser() = listOf(
         Arguments.of(Gruppe.Utvikler, HTTP_OK),
         Arguments.of(Gruppe.Arbeidsgiverrettet, HTTP_OK),
@@ -187,7 +208,7 @@ class JobbsokerInfoTest {
 
         val request = HttpRequest.newBuilder()
             .uri(URI(endepunkt))
-            .header("Authorization", "Bearer ${app.lagToken(groups = gruppe.somStringListe).serialize()}")
+            .header("Authorization", "Bearer ${app.lagToken(groups = gruppe.somStringListe, claims = tokenClaims(gruppe.somStringListe), clientId = rekrutteringstreffApiClientId).serialize()}")
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString("""{"fodselsnumre":["99999999999"]}"""))
             .build()
@@ -196,15 +217,26 @@ class JobbsokerInfoTest {
         assertEquals(forventetStatuskode, response.statusCode())
     }
 
-    private fun post(body: String): HttpResponse<String> {
+    private fun post(
+        body: String,
+        clientId: String = rekrutteringstreffApiClientId,
+    ): HttpResponse<String> {
         val request = HttpRequest.newBuilder()
             .uri(URI(endepunkt))
-            .header("Authorization", "Bearer ${app.lagToken(groups = Gruppe.Jobbsøkerrettet.somStringListe).serialize()}")
+            .header(
+                "Authorization",
+                "Bearer ${app.lagToken(groups = Gruppe.Jobbsøkerrettet.somStringListe, claims = tokenClaims(Gruppe.Jobbsøkerrettet.somStringListe), clientId = clientId).serialize()}"
+            )
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(body))
             .build()
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString())
     }
+
+    private fun tokenClaims(groups: List<String>) = mapOf(
+        "NAVident" to "A000001",
+        "groups" to groups,
+    )
 
     private fun stubOpensearch(body: String) {
         stubFor(
