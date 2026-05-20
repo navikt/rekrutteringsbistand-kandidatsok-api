@@ -52,7 +52,7 @@ class App(
     modiaContextHolderScope: String,
     toiLivshendelseScope: String,
     toiLivshendelseUrl: String,
-    private val rekrutteringstreffApiClientId: String = "rekrutteringstreff-api-client-id",
+    private val rekrutteringstreffApiClientId: String 
 ) {
 
     lateinit var javalin: Javalin
