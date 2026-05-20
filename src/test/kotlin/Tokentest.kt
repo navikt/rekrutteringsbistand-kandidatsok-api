@@ -162,6 +162,7 @@ class Tokentest {
         modiaContextHolderUrl = "http://localhost:10000/modia",
         modiaContextHolderScope = "http://localhost/.default",
         toiLivshendelseScope = "http://localhost/.default",
-        toiLivshendelseUrl = "http://localhost:10000/livshendelse"
+        toiLivshendelseUrl = "http://localhost:10000/livshendelse",
+        rekrutteringstreffApiClientId = "rekrutteringstreff-api-client-id"
     )
 }

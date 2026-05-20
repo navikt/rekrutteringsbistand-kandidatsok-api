@@ -1,6 +1,7 @@
 package no.nav.toi
 
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import java.util.*
 
 
@@ -34,13 +35,18 @@ class LokalApp {
         navIdent: String = "A000001",
         groups: List<String> = listOf(arbeidsgiverrettet),
         claims: Map<String, Any> = mapOf("NAVident" to navIdent, "groups" to groups),
+        clientId: String = "test-client-id",
         expiry: Long = 3600
     ) = authServer.issueToken(
-        issuerId = issuerId,
-        subject = "subject",
-        audience = aud,
-        claims = claims,
-        expiry = expiry
+        issuerId,
+        clientId,
+        DefaultOAuth2TokenCallback(
+            issuerId = issuerId,
+            subject = "subject",
+            audience = listOf(aud),
+            claims = claims,
+            expiry = expiry,
+        )
     )
 }
 
@@ -69,5 +75,6 @@ private fun lagLokalApp() = App(
     modiaContextHolderUrl = "http://localhost:10000/modia",
     modiaContextHolderScope = "http://localhost/.default",
     toiLivshendelseScope = "http://localhost/.default",
-    toiLivshendelseUrl = "http://localhost:10000/livshendelse"
+    toiLivshendelseUrl = "http://localhost:10000/livshendelse",
+    rekrutteringstreffApiClientId = "rekrutteringstreff-api-client-id",
 )

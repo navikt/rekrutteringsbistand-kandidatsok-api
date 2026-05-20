@@ -1,5 +1,6 @@
 package no.nav.toi
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.javalin.Javalin
 import io.javalin.config.JavalinConfig
 import io.javalin.http.HttpStatus.BAD_REQUEST
@@ -23,6 +24,7 @@ import no.nav.toi.me.handleMe
 import no.nav.toi.suggest.handleKontorSuggest
 import no.nav.toi.suggest.handleStedSuggest
 import no.nav.toi.suggest.handleSuggest
+import no.nav.toi.jobbsokerinfo.handleJobbsokerInfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -49,7 +51,8 @@ class App(
     modiaContextHolderUrl: String,
     modiaContextHolderScope: String,
     toiLivshendelseScope: String,
-    toiLivshendelseUrl: String
+    toiLivshendelseUrl: String,
+    private val rekrutteringstreffApiClientId: String 
 ) {
 
     lateinit var javalin: Javalin
@@ -101,6 +104,7 @@ class App(
                 handleKontorSuggest(openSearchClient)
                 handleKandidatNavn(livshendelseKlient, openSearchClient, pdlKlient)
                 handleKandidatKandidatnr(openSearchClient)
+                handleJobbsokerInfo(openSearchClient, modiaClient, rekrutteringstreffApiClientId)
                 handleBrukertilgang(openSearchClient, modiaClient)
                 handleMinekandidatnummer(openSearchClient, modiaClient)
                 handleHullICv(openSearchClient, modiaClient)
@@ -181,8 +185,21 @@ fun main() {
         modiaContextHolderScope = getenv("MODIA_CONTEXT_HOLDER_SCOPE"),
         toiLivshendelseScope = getenv("TOI_LIVSHENDELSE_SCOPE"),
         toiLivshendelseUrl = "http://toi-livshendelse",
+        rekrutteringstreffApiClientId = hentClientIdForPreAuthorizedApp("${getenv("NAIS_CLUSTER_NAME")}:toi:rekrutteringstreff-api"),
     ).start()
 }
+
+private data class PreAuthorizedApp(
+    val name: String,
+    val clientId: String,
+)
+
+private fun hentClientIdForPreAuthorizedApp(applicationName: String): String =
+    jacksonObjectMapper()
+        .readValue(getenv("AZURE_APP_PRE_AUTHORIZED_APPS"), Array<PreAuthorizedApp>::class.java)
+        .singleOrNull { it.name == applicationName }
+        ?.clientId
+        ?: throw IllegalArgumentException("Fant ikke pre-authorized app med navn $applicationName")
 
 private fun getenv(key: String) =
     System.getenv(key) ?: throw IllegalArgumentException("Det finnes ingen system-variabel ved navn $key")

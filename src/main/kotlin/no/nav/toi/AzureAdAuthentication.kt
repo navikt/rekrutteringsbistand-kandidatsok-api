@@ -30,7 +30,8 @@ typealias AuditLogMedPermit = (Boolean) -> Unit
 class AuthenticatedUser(
     val navIdent: String,
     val roller: Set<Rolle>,
-    val jwt: String
+    val jwt: String,
+    val kallendeApplikasjonClientId: String?,
 ) {
     private val secureLog = SecureLog(log)
 
@@ -104,6 +105,7 @@ class AuthenticatedUser(
                     .asList(UUID::class.java)
                     .let { rolleUuidSpesifikasjon.rollerForUuider(it) },
                 jwt = jwt.token,
+                kallendeApplikasjonClientId = jwt.getClaim("azp").asString(),
             )
     }
 }
