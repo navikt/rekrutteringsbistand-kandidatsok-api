@@ -29,6 +29,7 @@ private data class JobbsokerInfoDto(
     val veilederNavIdent: String?,
     val alder: Int?,
     val innsatsgruppe: String?,
+    val orgenhet: String?,
 )
 
 private data class JobbsokerInfoResponsDto(
@@ -130,6 +131,7 @@ fun handleJobbsokerInfoFraOpensearch(
                 veilederNavIdent = source.get("veilederIdent")?.takeIf { !it.isNull }?.asText(),
                 alder = source.get("fodselsdato")?.takeIf { !it.isNull }?.asText()?.let(::beregnAlder),
                 innsatsgruppe = source.get("innsatsgruppe")?.takeIf { !it.isNull }?.asText(),
+                orgenhet = source.get("orgenhet")?.takeIf { !it.isNull }?.asText(),
             )
         }
     }

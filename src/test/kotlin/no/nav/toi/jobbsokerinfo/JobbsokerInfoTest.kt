@@ -56,6 +56,7 @@ class JobbsokerInfoTest {
         val veilederNavIdent: String?,
         val alder: Int?,
         val innsatsgruppe: String?,
+        val orgenhet: String?,
     )
 
     private data class JobbsokerInfoResponsSvar(
@@ -94,6 +95,7 @@ class JobbsokerInfoTest {
                     "navkontor": "Nav Oslo",
                     "veilederVisningsnavn": "Kari Veileder",
                     "veilederIdent": "Z111111",
+                    "orgenhet": "0314",
                     "fodselsdato": "1990-05-17",
                     "innsatsgruppe": "SITUASJONSBESTEMT_INNSATS"
                   }
@@ -115,6 +117,7 @@ class JobbsokerInfoTest {
         assertEquals("Z111111", info.veilederNavIdent)
         assertEquals(forventetAlder("1990-05-17"), info.alder)
         assertEquals("SITUASJONSBESTEMT_INNSATS", info.innsatsgruppe)
+        assertEquals("0314", info.orgenhet)
     }
 
     @Test
@@ -167,6 +170,7 @@ class JobbsokerInfoTest {
         assertNull(info.veilederNavIdent)
         assertEquals(forventetAlder("1985-01-01"), info.alder)
         assertNull(info.innsatsgruppe)
+        assertNull(info.orgenhet)
     }
 
     @Test
