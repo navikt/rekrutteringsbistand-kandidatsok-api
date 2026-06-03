@@ -93,8 +93,9 @@ class AuthenticatedUser(
         kontorer: List<String>,
         navIdent: String
     ): Boolean {
-        return if (orgEnhetForKandidat == null || veilederForKandidat == null) false
-        else veilederForKandidat.lowercase() == navIdent.lowercase() || orgEnhetForKandidat in kontorer
+        val erEgenBruker = veilederForKandidat != null && veilederForKandidat.lowercase() == navIdent.lowercase()
+        val erKontorenesBruker = orgEnhetForKandidat != null && orgEnhetForKandidat in kontorer
+        return erEgenBruker || erKontorenesBruker
     }
 
     companion object {

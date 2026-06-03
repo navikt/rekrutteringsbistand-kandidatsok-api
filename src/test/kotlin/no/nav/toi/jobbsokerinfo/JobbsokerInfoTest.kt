@@ -251,6 +251,32 @@ class JobbsokerInfoTest {
     }
 
     @Test
+    fun `jobbsokerrettet får jobbsokerinfo når kandidaten er på eget kontor men mangler veileder`() {
+        stubModiaDecorator(enheter = listOf("1234"))
+        stubOpensearch(
+            opensearchSvar(
+                """
+                {
+                  "fodselsnummer": "44444444444",
+                  "navkontor": "Nav Tromsø",
+                  "veilederVisningsnavn": null,
+                  "veilederIdent": null,
+                  "orgenhet": "1234",
+                  "fodselsdato": "1988-02-03",
+                  "innsatsgruppe": "STANDARD_INNSATS"
+                }
+                """.trimIndent()
+            )
+        )
+
+        val response = post("""{"fodselsnumre":["44444444444"]}""", gruppe = Gruppe.Jobbsøkerrettet)
+
+        assertEquals(HTTP_OK, response.statusCode())
+        val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
+        assertEquals(listOf("44444444444"), body.jobbsokerInfo.map { it.fodselsnummer })
+    }
+
+    @Test
     fun `nekter jobbsokerrettet når kandidaten er utenfor egen tilgang`() {
         stubModiaDecorator(enheter = listOf("1234"))
         stubOpensearch(
