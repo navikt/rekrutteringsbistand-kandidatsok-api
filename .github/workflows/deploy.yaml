@@ -6,7 +6,7 @@ jobs:
     uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-deploy.yaml@v15
     with:
       java-version: "25"
-      deploy-to-dev-if-branch-name-is: "kontortilgang-uten-veileder"
+      deploy-to-dev-if-branch-name-is: "deling-av-cv-i-inbound"
     permissions:
       contents: read
       id-token: write
