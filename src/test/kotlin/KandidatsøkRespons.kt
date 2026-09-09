@@ -36,7 +36,7 @@ object KandidatsøkRespons {
     val queryMedPAMKandidatnrTerm = """{"term":{"kandidatnr":{"value":"PAM01Z"}}}"""
     val queryMedKMultiMatchTerm = """{"multi_match":{"query":"søkeord","fields":["fritekst^1","fornavn^1","etternavn^1","yrkeJobbonskerObj.styrkBeskrivelse^1.5","yrkeJobbonskerObj.sokeTitler^1"]}}"""
     val mineBrukereTerm = """{"term": {"veileder": {"value":"A123456","case_insensitive":true}}}"""
-    val valgtKontorTerm = """{"bool":{"should":[{"term":{"navkontor":{"value":"NAV Hamar"}}},{"term":{"navkontor":{"value":"NAV Lofoten"}}}]}}"""
+    val valgtKontorTerm = """{"bool":{"should":[{"term":{"orgenhet":{"value":"0403"}}},{"term":{"orgenhet":{"value":"1001"}}}]}}"""
     val mittKontorTerm = """{"term": {"orgenhet": {"value":"1234"}}}"""
     val mittKontorUtenValgtTerm = """{"term": {"orgenhet": {"value":""}}}"""
     val mineKontorerTerm = """{"bool":{"should":[{"term":{"navkontor":{"value":"NAV Hamar"}}},{"term":{"navkontor":{"value":"NAV Kristiansand"}}}]}}"""

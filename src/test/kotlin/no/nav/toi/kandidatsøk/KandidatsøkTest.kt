@@ -190,7 +190,7 @@ class KandidatsøkTest {
         Alle("alle"),
         MineBrukere("minebrukere", arrayOf(KandidatsøkRespons.mineBrukereTerm)),
         ValgteKontorer("valgtekontorer", arrayOf(KandidatsøkRespons.valgtKontorTerm),
-            { (if (it) "," else "") + """"valgtKontor":["NAV Hamar","NAV Lofoten"]""" }),
+            { (if (it) "," else "") + """"valgtKontor":["0403","1001"]""" }),
         MineKontorer("minekontorer", arrayOf(KandidatsøkRespons.mineKontorerTerm), ekstraMocking = ::mockDecorator),
         MittKontor(
             "mittkontor",
@@ -728,7 +728,7 @@ class KandidatsøkTest {
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
         val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/valgtekontorer")
-            .body("""{"valgtKontor":["NAV Hamar","NAV Lofoten"]}""")
+            .body("""{"valgtKontor":["0403","1001"]}""")
             .header("Authorization", "Bearer ${token.serialize()}")
             .responseObject<JsonNode>()
 
