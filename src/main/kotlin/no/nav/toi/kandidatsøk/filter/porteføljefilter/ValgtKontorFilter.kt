@@ -16,11 +16,11 @@ internal class ValgtKontorFilter(filterParametre: FilterParametre) : Portefølje
         must_ {
             bool_ {
                 apply {
-                    valgteKontor.forEach { kontor ->
+                    valgteKontor.forEach { enhetId ->
                         should_ {
                             term_ {
-                                field("navkontor")
-                                value(kontor)
+                                field("orgenhet")
+                                value(enhetId)
                             }
                         }
                     }
