@@ -154,7 +154,7 @@ private val fakedingsAuthenticationConfiguration = AuthenticationConfiguration(
 )
 
 fun main() {
-    noClassLogger.info("Starter app.")
+    noClassLogger.info("Starter app. Dette er ment å logges til vanlig log.")
     secureLog.info("Starter app. Dette er ment å logges til Securelogs. Hvis du ser dette i den ordinære apploggen er noe galt, og sensitive data kan havne i feil logg.")
 
     App(
@@ -188,6 +188,8 @@ fun main() {
         toiLivshendelseUrl = "http://toi-livshendelse",
         rekrutteringstreffApiClientId = hentClientIdForPreAuthorizedApp("${getenv("NAIS_CLUSTER_NAME")}:toi:rekrutteringstreff-api"),
     ).start()
+
+    noClassLogger.info("App startet. Dette er ment å logges til den ordinære apploggen.")
 }
 
 private data class PreAuthorizedApp(
