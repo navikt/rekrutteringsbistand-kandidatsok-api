@@ -1,6 +1,6 @@
 package no.nav.toi.jobbsokerinfo
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.ForbiddenResponse
@@ -111,8 +111,8 @@ fun handleJobbsokerInfoFraOpensearch(
         .hits().hits().mapNotNull { it.source() }
 
     val utilgjengeligJobbsoker = treffFraOpensearch.firstOrNull { source ->
-        val orgEnhet = source.get("orgenhet")?.takeIf { !it.isNull }?.asText()
-        val veileder = source.get("veilederIdent")?.takeIf { !it.isNull }?.asText()
+        val orgEnhet = source.get("orgenhet")?.takeIf { !it.isNull }?.asString()
+        val veileder = source.get("veilederIdent")?.takeIf { !it.isNull }?.asString()
         !authenticatedUser.harTilgangTilBruker(orgEnhet, veileder, modiaKlient)
     }
     if (utilgjengeligJobbsoker != null) {
@@ -120,18 +120,18 @@ fun handleJobbsokerInfoFraOpensearch(
     }
 
     val treff = treffFraOpensearch
-        .associateBy { it.get("fodselsnummer").asText() }
+        .associateBy { it.get("fodselsnummer").asString() }
 
     val jobbsokerInfo = fodselsnumre.mapNotNull { fnr ->
         treff[fnr]?.let { source ->
             JobbsokerInfoDto(
                 fodselsnummer = fnr,
-                navkontor = source.get("navkontor")?.takeIf { !it.isNull }?.asText(),
-                veilederNavn = source.get("veilederVisningsnavn")?.takeIf { !it.isNull }?.asText(),
-                veilederNavIdent = source.get("veilederIdent")?.takeIf { !it.isNull }?.asText(),
-                alder = source.get("fodselsdato")?.takeIf { !it.isNull }?.asText()?.let(::beregnAlder),
-                innsatsgruppe = source.get("innsatsgruppe")?.takeIf { !it.isNull }?.asText(),
-                orgenhet = source.get("orgenhet")?.takeIf { !it.isNull }?.asText(),
+                navkontor = source.get("navkontor")?.takeIf { !it.isNull }?.asString(),
+                veilederNavn = source.get("veilederVisningsnavn")?.takeIf { !it.isNull }?.asString(),
+                veilederNavIdent = source.get("veilederIdent")?.takeIf { !it.isNull }?.asString(),
+                alder = source.get("fodselsdato")?.takeIf { !it.isNull }?.asString()?.let(::beregnAlder),
+                innsatsgruppe = source.get("innsatsgruppe")?.takeIf { !it.isNull }?.asString(),
+                orgenhet = source.get("orgenhet")?.takeIf { !it.isNull }?.asString(),
             )
         }
     }

@@ -1,14 +1,15 @@
 package no.nav.toi.kandidatsammendrag
 
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.Headers
-import com.github.kittinunf.fuel.core.extensions.authentication
-import com.github.kittinunf.fuel.core.extensions.jsonBody
-import com.github.kittinunf.fuel.jackson.responseObject
-import com.github.kittinunf.result.Result
 import io.javalin.http.InternalServerErrorResponse
 import io.javalin.http.NotFoundResponse
 import no.nav.toi.AccessTokenClient
+import no.nav.toi.erVellykket
+import no.nav.toi.httpClient
+import no.nav.toi.httpKlientMapper
+import no.nav.toi.httpRequest
+import tools.jackson.module.kotlin.readValue
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
 
 class PdlKlient(private val pdlUrl: String, private val accessTokenClient: AccessTokenClient) {
     fun hentFornavnOgEtternavn(fødselsnummer: String, innkommendeToken: String): Pair<String, String>? {
@@ -16,29 +17,28 @@ class PdlKlient(private val pdlUrl: String, private val accessTokenClient: Acces
         val accessToken = accessTokenClient.hentAccessToken(innkommendeToken)
         val graphql = lagGraphQLSpørring(fødselsnummer)
 
-        val (_, _, result) = Fuel.post(pdlUrl)
-            .header(Headers.CONTENT_TYPE, "application/json")
+        val request = httpRequest(pdlUrl)
+            .header("Authorization", "Bearer $accessToken")
+            .header("Content-Type", "application/json")
             .header("Tema", "GEN")
             .header("Behandlingsnummer", "B346")
-            .authentication().bearer(accessToken)
-            .jsonBody(graphql)
-            .responseObject<Respons>()
+            .POST(BodyPublishers.ofString(graphql))
+            .build()
 
-        when (result) {
-            is Result.Success -> {
-                val respons = result.get()
-                if(respons.errors?.isNotEmpty() == true) {
-                    if(respons.errors.any { it.extensions.code != "not_found" }) {
-                        throw InternalServerErrorResponse("Feil ved henting av navn fra PDL: ${respons.errors.first().message}")
-                    }
-                    else throw NotFoundResponse("Fant ikke person i PDL")
-                }
-                return respons.data.hentPerson?.navn?.first()?.let {
-                    it.fornavn + (it.mellomnavn?.let { " $it" } ?: "") to it.etternavn
-                }
+        val response = httpClient.send(request, BodyHandlers.ofString())
+        if (!response.erVellykket()) {
+            throw RuntimeException("Noe feil skjedde ved henting av navn fra PDL, status ${response.statusCode()}")
+        }
+
+        val respons = httpKlientMapper.readValue<Respons>(response.body())
+        if (respons.errors?.isNotEmpty() == true) {
+            if (respons.errors.any { it.extensions.code != "not_found" }) {
+                throw InternalServerErrorResponse("Feil ved henting av navn fra PDL: ${respons.errors.first().message}")
             }
-
-            is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av navn fra PDL: ", result.getException())
+            else throw NotFoundResponse("Fant ikke person i PDL")
+        }
+        return respons.data.hentPerson?.navn?.first()?.let {
+            it.fornavn + (it.mellomnavn?.let { " $it" } ?: "") to it.etternavn
         }
     }
 

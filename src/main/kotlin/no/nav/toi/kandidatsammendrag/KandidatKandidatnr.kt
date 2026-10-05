@@ -1,6 +1,6 @@
 package no.nav.toi.kandidatsammendrag
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
@@ -44,7 +44,7 @@ fun JavalinDefaultRoutingApi.handleKandidatKandidatnr(openSearchClient: OpenSear
         val request = ctx.bodyAsClass<KandidatKandidatnrRequestDto>()
         val result = openSearchClient.lookupKandidatNavn(request.fodselsnummer)
         result.hits().hits().firstOrNull()?.source()?.get("arenaKandidatnr")
-            ?.let(JsonNode::asText)
+            ?.let(JsonNode::asString)
             ?.let(::KandidatKandidatnrResponsDto)
             ?.let(ctx::json) ?: ctx.status(404)
     }

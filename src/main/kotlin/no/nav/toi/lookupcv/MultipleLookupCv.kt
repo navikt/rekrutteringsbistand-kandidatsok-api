@@ -1,6 +1,6 @@
 package no.nav.toi.lookupcv
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
@@ -40,8 +40,8 @@ fun JavalinDefaultRoutingApi.handleMultipleLookupCv(openSearchClient: OpenSearch
             log.info("Tid brukt på multipleLookupCv 2: ${java.time.Duration.between(startTime, LocalDateTime.now())}")
         }
         val filtrerteKandidater = result.hits().hits().filter { kandidat ->
-            val orgEnhet = kandidat?.source()?.get("orgenhet")?.asText()
-            val veileder = kandidat?.source()?.get("veilederIdent")?.asText()
+            val orgEnhet = kandidat?.source()?.get("orgenhet")?.asString()
+            val veileder = kandidat?.source()?.get("veilederIdent")?.asString()
             authenticatedUser.harTilgangTilBruker(orgEnhet, veileder, modiaKlient)
         }
 

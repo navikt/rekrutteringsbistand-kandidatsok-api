@@ -1,9 +1,12 @@
 package no.nav.toi.kandidatsammendrag
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.jackson.responseObject
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
+import no.nav.toi.testHttpClient
+import no.nav.toi.testObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
@@ -12,7 +15,6 @@ import com.nimbusds.jwt.SignedJWT
 import no.nav.toi.LokalApp
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
-import org.mockito.kotlin.mock
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WireMockTest(httpPort = 10000)
@@ -35,10 +37,10 @@ class KandidatsammendragLookupTest {
         mockKandidatSammendrag(wireMock)
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response, result) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseKandidatsammendragLookup))
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        Assertions.assertThat(testObjectMapper.readTree(response.body())).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseKandidatsammendragLookup))
     }
 
     @Test
@@ -81,13 +83,16 @@ class KandidatsammendragLookupTest {
         )
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsammendrag")
-            .body("""{"kandidatnr": "PAM000000001"}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsammendrag"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"kandidatnr": "PAM000000001"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseIngenTreff))
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        Assertions.assertThat(testObjectMapper.readTree(response.body())).isEqualTo(ObjectMapper().readTree(CvTestRespons.responseIngenTreff))
     }
 
     @Test
@@ -102,18 +107,18 @@ class KandidatsammendragLookupTest {
         )
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response, result) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(500)
+        Assertions.assertThat(response.statusCode()).isEqualTo(500)
     }
 
     @Test
     fun `modia generell skal ikke ha tilgang til kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
         mockKandidatSammendrag(wmRuntimeInfo.wireMock)
-        val (_, response, _) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
     @Test
@@ -121,9 +126,9 @@ class KandidatsammendragLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockKandidatSammendrag(wireMock)
         val token = app.lagToken(navIdent = "A100000", groups = listOf(LokalApp.jobbsøkerrettet))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -131,9 +136,9 @@ class KandidatsammendragLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockKandidatSammendrag(wireMock)
         val token = app.lagToken(navIdent = "ikke_veileder", groups = listOf(LokalApp.jobbsøkerrettet))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
     @Test
@@ -165,9 +170,9 @@ class KandidatsammendragLookupTest {
                 )
         )
         val token = app.lagToken(navIdent = "A100001", groups = listOf(LokalApp.jobbsøkerrettet))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -199,9 +204,9 @@ class KandidatsammendragLookupTest {
                 )
         )
         val token = app.lagToken(navIdent = "A100001", groups = listOf(LokalApp.jobbsøkerrettet))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -209,9 +214,9 @@ class KandidatsammendragLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockKandidatSammendrag(wireMock)
         val token = app.lagToken(groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -219,24 +224,27 @@ class KandidatsammendragLookupTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockKandidatSammendrag(wireMock)
         val token = app.lagToken(groups = listOf(LokalApp.utvikler))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
     fun `om man ikke har gruppetilhørighet skal man ikke få kandidatsammendrag`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = app.lagToken(groups = emptyList())
         mockKandidatSammendrag(wmRuntimeInfo.wireMock)
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
-    private fun gjørKall(token: SignedJWT) = Fuel.post("http://localhost:8080/api/kandidatsammendrag")
-        .body("""{"kandidatnr": "PAM0xtfrwli5"}""")
-        .header("Authorization", "Bearer ${token.serialize()}")
-        .responseObject<JsonNode>()
+    private fun gjørKall(token: SignedJWT) = testHttpClient.send(
+        HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsammendrag"))
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .POST(BodyPublishers.ofString("""{"kandidatnr": "PAM0xtfrwli5"}"""))
+            .build(),
+        BodyHandlers.ofString()
+    )
 
     private fun mockKandidatSammendrag(wireMock: WireMock, veileder: String? = "A100000") {
         wireMock.register(

@@ -1,16 +1,17 @@
 package no.nav.toi.kompetanseforslag
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.jackson.responseObject
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
+import no.nav.toi.testHttpClient
+import no.nav.toi.testObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import com.nimbusds.jwt.SignedJWT
-import no.nav.toi.App
-import no.nav.toi.RolleUuidSpesifikasjon
 import no.nav.toi.LokalApp
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
@@ -149,20 +150,23 @@ class KompetanseforslagTest {
 
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kompetanseforslag")
-            .body("""
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kompetanseforslag"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""
                 {
                   "yrker": [
                     {"yrke": "Mat og livsstils videograf"},
                     {"yrke": "Kokk"}
                   ]
                 }
-            """.trimIndent())
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+            """.trimIndent()))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        Assertions.assertThat(testObjectMapper.readTree(response.body())).isEqualTo(ObjectMapper().readTree(
             """
               {
                   "aggregations": {
@@ -293,20 +297,23 @@ class KompetanseforslagTest {
 
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kompetanseforslag")
-            .body("""
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kompetanseforslag"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""
                 {
                   "yrker": [
                     {"yrke": "dMat og livsstils videograf"},
                     {"yrke": "dKokk"}
                   ]
                 }
-            """.trimIndent())
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+            """.trimIndent()))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get()).isEqualTo(ObjectMapper().readTree(
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        Assertions.assertThat(testObjectMapper.readTree(response.body())).isEqualTo(ObjectMapper().readTree(
             """
               {
                   "aggregations": {
@@ -362,36 +369,42 @@ class KompetanseforslagTest {
 
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kompetanseforslag")
-            .body("""
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kompetanseforslag"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""
                 {
                   "yrker": [
                     {"yrke": "dMat og livsstils videograf"},
                     {"yrke": "dKokk"}
                   ]
                 }
-            """.trimIndent())
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+            """.trimIndent()))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(500)
+        Assertions.assertThat(response.statusCode()).isEqualTo(500)
     }
 
     @Test
     fun feil_dersom_ikke_autentisert() {
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/kompetanseforslag")
-            .body("""{"yrker": [{"yrke": "yrke"}]}""")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kompetanseforslag"))
+                .POST(BodyPublishers.ofString("""{"yrker": [{"yrke": "yrke"}]}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        Assertions.assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @Test
     fun `modia generell skal ikke ha tilgang`() {
         val token = app.lagToken(groups = listOf(LokalApp.modiaGenerell))
-        val (_, response, _) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
     @Test
@@ -399,9 +412,9 @@ class KompetanseforslagTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockKompetanseforslag(wireMock)
         val token = app.lagToken(groups = listOf(LokalApp.jobbsøkerrettet))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -409,9 +422,9 @@ class KompetanseforslagTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockKompetanseforslag(wireMock)
         val token = app.lagToken(groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -419,30 +432,33 @@ class KompetanseforslagTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockKompetanseforslag(wireMock)
         val token = app.lagToken(groups = listOf(LokalApp.utvikler))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
     fun `om man ikke har gruppetilhørighet skal man ikke ha tilgang`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = app.lagToken(groups = emptyList())
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
-    private fun gjørKall(token: SignedJWT) =  Fuel.post("http://localhost:8080/api/kompetanseforslag")
-        .body("""
+    private fun gjørKall(token: SignedJWT) =  testHttpClient.send(
+        HttpRequest.newBuilder(URI("http://localhost:8080/api/kompetanseforslag"))
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .POST(BodyPublishers.ofString("""
                 {
                   "yrker": [
                     {"yrke": "Mat og livsstils videograf"},
                     {"yrke": "Kokk"}
                   ]
                 }
-            """.trimIndent())
-        .header("Authorization", "Bearer ${token.serialize()}")
-        .responseObject<JsonNode>()
+            """.trimIndent()))
+            .build(),
+        BodyHandlers.ofString()
+    )
 
     private fun mockKompetanseforslag(wireMock: WireMock) {
         val esresponse = """

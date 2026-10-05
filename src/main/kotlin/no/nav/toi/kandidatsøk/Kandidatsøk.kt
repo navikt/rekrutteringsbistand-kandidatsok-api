@@ -1,7 +1,7 @@
 package no.nav.toi.kandidatsøk
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.Context
 import io.javalin.http.Handler
@@ -183,7 +183,7 @@ private fun håndterEndepunkt(
     filter.forEach {
         it.auditLog(
             ctx.authenticatedUser().navIdent,
-            hits.hits.map { it._source["fodselsnummer"].asText() }.firstOrNull()
+            hits.hits.map { it._source["fodselsnummer"].asString() }.firstOrNull()
         )
     }
     val kandidater: List<JsonNode> = hits.hits.map { it._source }

@@ -1,21 +1,18 @@
 package no.nav.toi.kandidatsøk
 
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.fuel.core.Headers
-import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.fuel.core.extensions.authentication
-import com.github.kittinunf.fuel.jackson.responseObject
-import com.github.kittinunf.result.Result
-import io.github.resilience4j.retry.Retry
-import io.github.resilience4j.retry.RetryConfig
 import no.nav.toi.AccessTokenClient
+import no.nav.toi.erVellykket
+import no.nav.toi.httpClient
+import no.nav.toi.httpKlientMapper
+import no.nav.toi.httpRequest
+import no.nav.toi.medRetry
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ExpiryPolicyBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
+import tools.jackson.module.kotlin.readValue
+import java.net.http.HttpResponse.BodyHandlers
 import java.time.Duration
 import java.util.*
 
@@ -23,39 +20,23 @@ class ModiaKlient(private val modiaUrl: String, private val accessTokenClient: A
 
     private val cache = ModiaCacheHjelper().lagCache { token -> fetchModiaEnheter(token) }
 
-    companion object {
-        private fun withRetry(fetch: () -> Triple<Request, Response, Result<ModiaPerson, FuelError>>): Triple<Request, Response, Result<ModiaPerson, FuelError>> {
-            fun isFailure(t: Triple<Request, Response, Result<Any, Exception>>) = t.third is Result.Failure
-            val retryConfig =
-                RetryConfig.custom<Triple<Request, Response, Result<Any, Exception>>>()
-                    .retryOnResult(::isFailure)
-                    .maxAttempts(3)
-                    .build()
-            val retry = Retry.of("fetch access token", retryConfig)
-            val fetchWithRetry = Retry.decorateSupplier(retry, fetch)
-            return fetchWithRetry.get()
-        }
-    }
-
     fun hentModiaEnheter(innkommendeToken: String): List<Enhet> = cache(innkommendeToken)
 
     private fun fetchModiaEnheter(innkommendeToken: String): List<Enhet> {
-        fun fetch(): Triple<Request, Response, Result<ModiaPerson, FuelError>> {
+        val response = medRetry("fetch modia enheter") {
             val accessToken = accessTokenClient.hentAccessToken(innkommendeToken)
-            return Fuel.get("$modiaUrl/api/decorator")
-                .header(Headers.CONTENT_TYPE, "application/json")
-                .authentication().bearer(accessToken)
-                .responseObject<ModiaPerson>()
+            val request = httpRequest("$modiaUrl/api/decorator")
+                .header("Authorization", "Bearer $accessToken")
+                .header("Content-Type", "application/json")
+                .GET()
+                .build()
+            httpClient.send(request, BodyHandlers.ofString())
         }
-        val (_, response, result) = withRetry(::fetch)
 
-        if(response.statusCode == 404) return emptyList()
+        if (response.statusCode() == 404) return emptyList()
+        if (!response.erVellykket()) throw RuntimeException("Noe feil skjedde ved henting av brukere, status ${response.statusCode()}")
 
-        when (result) {
-            is Result.Success -> return result.get().enheter
-
-            is Result.Failure -> throw RuntimeException("Noe feil skjedde ved henting av brukere: ", result.getException())
-        }
+        return httpKlientMapper.readValue<ModiaPerson>(response.body()).enheter
     }
 }
 

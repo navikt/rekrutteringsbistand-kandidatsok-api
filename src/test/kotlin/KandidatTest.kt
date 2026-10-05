@@ -1,7 +1,8 @@
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.jackson.responseObject
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
+import no.nav.toi.testHttpClient
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
@@ -46,11 +47,14 @@ class KandidatTest {
     @Test
     fun `trenger token for å spørre endepunkt om arenanummer`() {
         val fødselsnummer = "12312312312"
-        val (_, response, result) = Fuel.post("$endepunkt/arena-kandidatnr")
-            .body("""{"fodselsnummer":"$fødselsnummer"}""")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("$endepunkt/arena-kandidatnr"))
+                .POST(BodyPublishers.ofString("""{"fodselsnummer":"$fødselsnummer"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        Assertions.assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @Test
@@ -102,23 +106,29 @@ class KandidatTest {
                     )
                 )
         )
-        val (_, response, result) = Fuel.post("$endepunkt/arena-kandidatnr")
-            .body("""{"fodselsnummer":"$fødselsnummer"}""")
-            .leggPåAutensiering()
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("$endepunkt/arena-kandidatnr"))
+                .leggPåAutensiering()
+                .POST(BodyPublishers.ofString("""{"fodselsnummer":"$fødselsnummer"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), """{"arenaKandidatnr": "$kandidatnummer"}""", true)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        JSONAssert.assertEquals(response.body(), """{"arenaKandidatnr": "$kandidatnummer"}""", true)
     }
 
     @Test
     fun `trenger token for å spørre endepunkt om navn`() {
         val fødselsnummer = "12312312312"
-        val (_, response, result) = Fuel.post("$endepunkt/navn")
-            .body("""{"fodselsnummer":"$fødselsnummer"}""")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("$endepunkt/navn"))
+                .POST(BodyPublishers.ofString("""{"fodselsnummer":"$fødselsnummer"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        Assertions.assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @Test
@@ -129,14 +139,17 @@ class KandidatTest {
         val fornavn = "Kjæreste"
         val etternavn = "Parodisk"
         mockNavnSøk(wireMock, fødselsnummer, fornavn, etternavn)
-        val (_, response, result) = Fuel.post("$endepunkt/navn")
-            .body("""{"fodselsnummer":"$fødselsnummer"}""")
-            .leggPåAutensiering()
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("$endepunkt/navn"))
+                .leggPåAutensiering()
+                .POST(BodyPublishers.ofString("""{"fodselsnummer":"$fødselsnummer"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
         JSONAssert.assertEquals(
-            result.get().toPrettyString(),
+            response.body(),
             """{"fornavn": "$fornavn","etternavn": "$etternavn", "kilde":"REKRUTTERINGSBISTAND"}""",
             true
         )
@@ -218,14 +231,17 @@ class KandidatTest {
                     )
                 )
         )
-        val (_, response, result) = Fuel.post("$endepunkt/navn")
-            .body("""{"fodselsnummer":"$fødselsnummer"}""")
-            .leggPåAutensiering()
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("$endepunkt/navn"))
+                .leggPåAutensiering()
+                .POST(BodyPublishers.ofString("""{"fodselsnummer":"$fødselsnummer"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
         JSONAssert.assertEquals(
-            result.get().toPrettyString(),
+            response.body(),
             """{"fornavn": "$fornavn $mellomnavn","etternavn": "$etternavn", "kilde":"PDL"}""",
             true
         )
@@ -307,12 +323,15 @@ class KandidatTest {
                     """.trimIndent()
                 ))
         )
-        val (_, response, result) = Fuel.post("$endepunkt/navn")
-            .body("""{"fodselsnummer":"$fødselsnummer"}""")
-            .leggPåAutensiering()
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("$endepunkt/navn"))
+                .leggPåAutensiering()
+                .POST(BodyPublishers.ofString("""{"fodselsnummer":"$fødselsnummer"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(404)
+        Assertions.assertThat(response.statusCode()).isEqualTo(404)
     }
 
     @Test
@@ -387,10 +406,13 @@ class KandidatTest {
                     """.trimIndent()
                 ))
         )
-        val statusCode = Fuel.post("$endepunkt/navn")
-            .body("""{"fodselsnummer":"$fødselsnummer"}""")
-            .leggPåAutensiering()
-            .responseObject<JsonNode>().second.statusCode
+        val statusCode = testHttpClient.send(
+            HttpRequest.newBuilder(URI("$endepunkt/navn"))
+                .leggPåAutensiering()
+                .POST(BodyPublishers.ofString("""{"fodselsnummer":"$fødselsnummer"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        ).statusCode()
 
         Assertions.assertThat(statusCode).isEqualTo(500)
     }
@@ -398,9 +420,9 @@ class KandidatTest {
     @Test
     fun `modia generell skal ikke ha tilgang til navn`() {
         val token = lagToken(groups = listOf(modiaGenerell))
-        val (_, response) = gjørKallNavn("123", token)
+        val response = gjørKallNavn("123", token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
     @Test
@@ -410,9 +432,9 @@ class KandidatTest {
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(jobbsøkerrettet))
-        val (_, response) = gjørKallNavn(fødselsnummer, token)
+        val response = gjørKallNavn(fødselsnummer, token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -422,9 +444,9 @@ class KandidatTest {
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(arbeidsgiverrettet))
-        val (_, response) = gjørKallNavn(fødselsnummer, token)
+        val response = gjørKallNavn(fødselsnummer, token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -434,25 +456,25 @@ class KandidatTest {
         val fødselsnummer = "12345678910"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(utvikler))
-        val (_, response) = gjørKallNavn(fødselsnummer, token)
+        val response = gjørKallNavn(fødselsnummer, token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
     fun `om man ikke har gruppetilhørighet skal man ikke få navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = lagToken(groups = emptyList())
-        val (_, response) = gjørKallNavn("123", token)
+        val response = gjørKallNavn("123", token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
     @Test
     fun `modia generell skal ikke ha tilgang til kandidatnummer`() {
         val token = lagToken(groups = listOf(modiaGenerell))
-        val (_, response) = gjørKallKandidatnummer("123", token)
+        val response = gjørKallKandidatnummer("123", token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
     @Test
@@ -461,9 +483,9 @@ class KandidatTest {
         val fødselsnummer = "12345678910"
         mockHentKandidatnummer(wireMock, fødselsnummer, "123")
         val token = lagToken(groups = listOf(jobbsøkerrettet))
-        val (_, response) = gjørKallKandidatnummer(fødselsnummer, token)
+        val response = gjørKallKandidatnummer(fødselsnummer, token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -472,9 +494,9 @@ class KandidatTest {
         val fødselsnummer = "12345678910"
         mockHentKandidatnummer(wireMock, fødselsnummer, "123")
         val token = lagToken(groups = listOf(arbeidsgiverrettet))
-        val (_, response) = gjørKallKandidatnummer(fødselsnummer, token)
+        val response = gjørKallKandidatnummer(fødselsnummer, token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -483,17 +505,17 @@ class KandidatTest {
         val fødselsnummer = "12345678910"
         mockHentKandidatnummer(wireMock, fødselsnummer, "123")
         val token = lagToken(groups = listOf(utvikler))
-        val (_, response) = gjørKallKandidatnummer(fødselsnummer, token)
+        val response = gjørKallKandidatnummer(fødselsnummer, token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
     fun `om man ikke har gruppetilhørighet skal man ikke få kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = lagToken(groups = emptyList())
-        val (_, response) = gjørKallKandidatnummer("123", token)
+        val response = gjørKallKandidatnummer("123", token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
     @Test
@@ -502,9 +524,9 @@ class KandidatTest {
         val token = lagToken()
         mockAdressebeskyttelse(wireMock, true)
 
-        val (_, response, result) = gjørKallNavn("123", token)
+        val response = gjørKallNavn("123", token)
 
-        assertStatuscodeEquals(response, result, 403)
+        assertStatuscodeEquals(response, 403)
     }
 
     private fun lagLokalApp() = App(
@@ -551,7 +573,7 @@ class KandidatTest {
         expiry = expiry
     )
 
-    private fun Request.leggPåAutensiering() =
+    private fun HttpRequest.Builder.leggPåAutensiering() =
         header("Authorization", "Bearer ${lagToken(navIdent = "A123456").serialize()}")
 
     private fun mockAdressebeskyttelse(wireMock: WireMock, harAdressebeskyttelse: Boolean = false) {
@@ -622,15 +644,21 @@ class KandidatTest {
         )
     }
 
-    fun gjørKallNavn(fødselsnummer: String, token: SignedJWT) = Fuel.post("$endepunkt/navn")
-        .body("""{"fodselsnummer":"$fødselsnummer"}""")
-        .header("Authorization", "Bearer ${token.serialize()}")
-        .responseObject<com.fasterxml.jackson.databind.JsonNode>()
+    fun gjørKallNavn(fødselsnummer: String, token: SignedJWT) = testHttpClient.send(
+        HttpRequest.newBuilder(URI("$endepunkt/navn"))
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .POST(BodyPublishers.ofString("""{"fodselsnummer":"$fødselsnummer"}"""))
+            .build(),
+        BodyHandlers.ofString()
+    )
 
-    fun gjørKallKandidatnummer(fødselsnummer: String, token: SignedJWT) = Fuel.post("$endepunkt/arena-kandidatnr")
-        .body("""{"fodselsnummer":"$fødselsnummer"}""")
-        .header("Authorization", "Bearer ${token.serialize()}")
-        .responseObject<JsonNode>()
+    fun gjørKallKandidatnummer(fødselsnummer: String, token: SignedJWT) = testHttpClient.send(
+        HttpRequest.newBuilder(URI("$endepunkt/arena-kandidatnr"))
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .POST(BodyPublishers.ofString("""{"fodselsnummer":"$fødselsnummer"}"""))
+            .build(),
+        BodyHandlers.ofString()
+    )
 
     fun mockHentKandidatnummer(
         wireMock: WireMock,

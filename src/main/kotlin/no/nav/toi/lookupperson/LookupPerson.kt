@@ -1,6 +1,6 @@
 package no.nav.toi.lookupperson
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.Context
 import io.javalin.http.bodyAsClass
@@ -55,10 +55,10 @@ fun handleLookupPersonFraOpensearch(openSearchClient: OpenSearchClient): (Contex
         log.info("Personen finnes ikke i opensearch")
         ctx.status(404).result("Fant ikke personen i opensearch")
     } else {
-        val fornavn = kandidat.get("fornavn").asText()
-        val etternavn = kandidat.get("etternavn").asText()
-        val aktorId = kandidat.get("aktorId").asText()
-        val fodselsdato = kandidat.get("fodselsdato").asText()
+        val fornavn = kandidat.get("fornavn").asString()
+        val etternavn = kandidat.get("etternavn").asString()
+        val aktorId = kandidat.get("aktorId").asString()
+        val fodselsdato = kandidat.get("fodselsdato").asString()
 
         val personInfo = PersonInfoDto(
             fornavn = fornavn,

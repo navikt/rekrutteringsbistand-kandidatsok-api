@@ -1,11 +1,11 @@
 package no.nav.toi.kandidatsøk
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.result.Result
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.fuel.jackson.responseObject
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse
+import java.net.http.HttpResponse.BodyHandlers
+import no.nav.toi.testHttpClient
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
@@ -63,13 +63,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{${endepunkt.bodyParameter(false)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{${endepunkt.bodyParameter(false)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
 
     }
 
@@ -81,13 +84,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"ukjentFelt":"skal ignoreres"${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"ukjentFelt":"skal ignoreres"${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -98,13 +104,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}?side=4")
-            .body("""{${endepunkt.bodyParameter(false)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}?side=4"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{${endepunkt.bodyParameter(false)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -115,13 +124,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}?side=401")
-            .body("""{${endepunkt.bodyParameter(false)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}?side=401"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{${endepunkt.bodyParameter(false)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -132,47 +144,59 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}?sortering=score")
-            .body("""{${endepunkt.bodyParameter(false)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}?sortering=score"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{${endepunkt.bodyParameter(false)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
     @MethodSource("endepunktSomParameter")
     fun `Må ha token`(endepunkt: Endepunkt) {
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{}""")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 401)
+        assertStatuscodeEquals(response, 401)
     }
 
     @ParameterizedTest
     @MethodSource("endepunktSomParameter")
     fun `Må ha gyldig token`(endepunkt: Endepunkt) {
         val token = lagToken(issuerId = "falskissuer")
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 401)
+        assertStatuscodeEquals(response, 401)
     }
 
     @ParameterizedTest
     @MethodSource("endepunktSomParameter")
     fun `Må ha navIdent`(endepunkt: Endepunkt) {
         val token = lagToken(claims = mapOf("groups" to listOf(modiaGenerell)))
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 401)
+        assertStatuscodeEquals(response, 401)
     }
 
     enum class Tilgang(val uuid: String) {
@@ -235,12 +259,15 @@ class KandidatsøkTest {
         mockES(wireMock, extraTerms = endepunkt.extraTerms)
         endepunkt.ekstraMocking(wireMock)
         val token = lagToken(navIdent = "A123456", groups = listOf(tilgang.uuid))
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{${endepunkt.bodyParameter(false)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{${endepunkt.bodyParameter(false)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, statusCode)
+        assertStatuscodeEquals(response, statusCode)
     }
 
     @ParameterizedTest
@@ -250,12 +277,15 @@ class KandidatsøkTest {
         wmRuntimeInfo: WireMockRuntimeInfo
     ) {
         val token = lagToken(groups = emptyList())
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 403)
+        assertStatuscodeEquals(response, 403)
     }
 
     @ParameterizedTest
@@ -275,12 +305,15 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{${endepunkt.bodyParameter(false)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{${endepunkt.bodyParameter(false)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 500)
+        assertStatuscodeEquals(response, 500)
     }
 
     @ParameterizedTest
@@ -291,19 +324,22 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body(
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString(
                 """{"ønsketSted":["Bodø.NO18.1804","Kristiansund.NO50.5001","Akershus.NO02","Norge.NO"]${
                     endepunkt.bodyParameter(
                         true
                     )
                 }}"""
-            )
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+            ))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -314,20 +350,23 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body(
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString(
                 """
                 {
                     "ønsketSted":["Oslo.NO03.0301","Bergen.NO46.4601","Norge.NO","Møre og Romsdal.NO15"],
                     "borPåØnsketSted": true
                     ${endepunkt.bodyParameter(true)}
                 }""".trimIndent()
-            )
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+            ))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -338,13 +377,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"ønsketYrke":["Sauegjeter","Saueklipper"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"ønsketYrke":["Sauegjeter","Saueklipper"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -359,13 +401,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -380,13 +425,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"innsatsgruppe":["GRADERT_VARIG_TILPASSET_INNSATS"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"innsatsgruppe":["GRADERT_VARIG_TILPASSET_INNSATS"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -401,13 +449,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"innsatsgruppe":["HAR_IKKE_GJELDENDE_14A_VEDTAK"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"innsatsgruppe":["HAR_IKKE_GJELDENDE_14A_VEDTAK"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -422,13 +473,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS","HAR_IKKE_GJELDENDE_14A_VEDTAK", "GRADERT_VARIG_TILPASSET_INNSATS"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"innsatsgruppe":["SPESIELT_TILPASSET_INNSATS","SITUASJONSBESTEMT_INNSATS","STANDARD_INNSATS","VARIG_TILPASSET_INNSATS","HAR_IKKE_GJELDENDE_14A_VEDTAK", "GRADERT_VARIG_TILPASSET_INNSATS"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -442,13 +496,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"innsatsgruppe":[]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"innsatsgruppe":[]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -459,13 +516,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"språk":["Nynorsk","Norsk"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"språk":["Nynorsk","Norsk"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -476,13 +536,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"arbeidserfaring":["Barnehageassistent","Butikkansvarlig"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"arbeidserfaring":["Barnehageassistent","Butikkansvarlig"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -493,13 +556,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"arbeidserfaring":["Hvalfanger","Kokk"],"ferskhet":2${endepunkt.bodyParameter(true)}}""".trimMargin())
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"arbeidserfaring":["Hvalfanger","Kokk"],"ferskhet":2${endepunkt.bodyParameter(true)}}""".trimMargin()))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -510,13 +576,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"hovedmål":["SKAFFE_ARBEID","OKE_DELTAKELSE"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"hovedmål":["SKAFFE_ARBEID","OKE_DELTAKELSE"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -527,13 +596,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"kompetanse":["Fagbrev FU-operatør","Kotlin"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"kompetanse":["Fagbrev FU-operatør","Kotlin"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -544,13 +616,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"førerkort":["D - Buss","BE - Personbil med tilhenger"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"førerkort":["D - Buss","BE - Personbil med tilhenger"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -561,13 +636,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"utdanningsnivå":["videregaende","bachelor","doktorgrad"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"utdanningsnivå":["videregaende","bachelor","doktorgrad"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -578,13 +656,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"prioritertMålgruppe":["senior","unge","hullICv"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"prioritertMålgruppe":["senior","unge","hullICv"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -595,13 +676,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"fritekst":"12345678910"${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"fritekst":"12345678910"${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -612,13 +696,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"fritekst":"PAM01Z"${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"fritekst":"PAM01Z"${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -629,13 +716,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"fritekst":"ab123"${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"fritekst":"ab123"${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -646,13 +736,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"omfang":["DELTID"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"omfang":["DELTID"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -663,13 +756,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"omfang":["HELTID"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"omfang":["HELTID"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -680,13 +776,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"omfang":["DELTID","HELTID"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"omfang":["DELTID","HELTID"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -697,13 +796,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"omfang":["HELTID_OG_DELTID"]${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"omfang":["HELTID_OG_DELTID"]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @Test
@@ -712,13 +814,16 @@ class KandidatsøkTest {
         mockES(wireMock, KandidatsøkRespons.mineBrukereTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/minebrukere")
-            .body("""{}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/minebrukere"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @Test
@@ -727,13 +832,16 @@ class KandidatsøkTest {
         mockES(wireMock, KandidatsøkRespons.valgtKontorTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/valgtekontorer")
-            .body("""{"valgtKontor":["0403","1001"]}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/valgtekontorer"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"valgtKontor":["0403","1001"]}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @Test
@@ -742,13 +850,16 @@ class KandidatsøkTest {
         mockES(wireMock, KandidatsøkRespons.mittKontorTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/mittkontor")
-            .body("""{"orgenhet":"1234"}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/mittkontor"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"orgenhet":"1234"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @Test
@@ -757,13 +868,16 @@ class KandidatsøkTest {
         mockES(wireMock, KandidatsøkRespons.mittKontorUtenValgtTerm)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/mittkontor")
-            .body("""{}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/mittkontor"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @Test
@@ -775,13 +889,16 @@ class KandidatsøkTest {
 
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/minekontorer")
-            .body("""{}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/minekontorer"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @Test
@@ -809,12 +926,15 @@ class KandidatsøkTest {
 
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/minekontorer")
-            .body("""{}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/minekontorer"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 401)
+        assertStatuscodeEquals(response, 401)
     }
 
     @ParameterizedTest
@@ -825,13 +945,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"fritekst":"søkeord"${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"fritekst":"søkeord"${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -845,13 +968,16 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body("""{"fritekst":""${endepunkt.bodyParameter(true)}}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"fritekst":""${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     @ParameterizedTest
@@ -877,8 +1003,10 @@ class KandidatsøkTest {
         endepunkt.ekstraMocking(wireMock)
         val navIdent = "A123456"
         val token = lagToken(navIdent = navIdent)
-        val (_, response, result) = Fuel.post("http://localhost:8080/api/kandidatsok/${endepunkt.path}")
-            .body(
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString(
                 """
                 {
                     "fritekst":"søkeord",
@@ -895,12 +1023,13 @@ class KandidatsøkTest {
                     "fritekst":"søkeord"
                     ${endepunkt.bodyParameter(true)}
                 }""".trimIndent()
-            )
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+            ))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertStatuscodeEquals(response, result, 200)
-        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, result.get().toPrettyString(), false)
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
     }
 
     private fun lagLokalApp() = App(
@@ -1016,16 +1145,8 @@ private fun mockDecorator(wireMock: WireMock) {
 }
 
 fun assertStatuscodeEquals(
-    actualResponse: Response,
-    actualResult: Result<*, FuelError>,
+    actualResponse: HttpResponse<String>,
     expectedStatuscode: Int,
 ) {
-    when (actualResult) {
-        is Result.Success -> assertThat(actualResponse.statusCode).isEqualTo(expectedStatuscode)
-        is Result.Failure -> if (actualResponse.statusCode == -1) {
-            throw actualResult.error
-        } else {
-            assertThat(actualResponse.statusCode).isEqualTo(expectedStatuscode)
-        }
-    }
+    assertThat(actualResponse.statusCode()).isEqualTo(expectedStatuscode)
 }

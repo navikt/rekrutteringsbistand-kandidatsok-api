@@ -1,7 +1,10 @@
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.jackson.responseObject
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
+import no.nav.toi.testHttpClient
+import no.nav.toi.testObjectMapper
+import tools.jackson.databind.node.ArrayNode
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
@@ -62,18 +65,21 @@ class MineKandidatnummerTest {
             mockDecorator(wireMock)
         }
         val token = lagToken(navIdent = veilederIdent, groups = listOf(tilgang.uuid))
-        val (_, response, result) = Fuel.post(endepunkt)
-            .body("""["PAM000kanse1","PAM000kanse4","PAMkanikkese","PAM000kanse3","PAMikkekontor","PAMikkebruker","PAM000kanse2"]""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI(endepunkt))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""["PAM000kanse1","PAM000kanse4","PAMkanikkese","PAM000kanse3","PAMikkekontor","PAMikkebruker","PAM000kanse2"]"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
         if(harTilgang) {
-            Assertions.assertThat(response.statusCode).isEqualTo(200)
-            Assertions.assertThat(result.get().isArray).isTrue()
-            Assertions.assertThat((result.get() as ArrayNode).map { it.asText() })
+            Assertions.assertThat(response.statusCode()).isEqualTo(200)
+            Assertions.assertThat(testObjectMapper.readTree(response.body()).isArray).isTrue()
+            Assertions.assertThat((testObjectMapper.readTree(response.body()) as ArrayNode).values().map { it.asString() })
                 .isEqualTo(listOf("PAM000kanse1", "PAM000kanse4", "PAM000kanse3", "PAM000kanse2"))
         } else {
-            Assertions.assertThat(response.statusCode).isEqualTo(403)
+            Assertions.assertThat(response.statusCode()).isEqualTo(403)
         }
     }
 

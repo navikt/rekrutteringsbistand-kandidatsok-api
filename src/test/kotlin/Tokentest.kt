@@ -1,6 +1,8 @@
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.jackson.responseObject
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
+import no.nav.toi.testHttpClient
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
@@ -54,59 +56,74 @@ class Tokentest {
     @ParameterizedTest
     @MethodSource("urler")
     fun `krever token for å søke kandidatnumre for navigering`(url: String) {
-        val (_, response, _) = Fuel.post(url)
-            .body("{}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI(url))
+                .POST(BodyPublishers.ofString("{}"))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        Assertions.assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @ParameterizedTest
     @MethodSource("urler")
     fun `Navigering må ha token med rett issuer`(url: String) {
         val token = lagToken(issuerId = "falskissuer")
-        val (_, response, _) = Fuel.post(url)
-            .body("""{}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI(url))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        Assertions.assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @ParameterizedTest
     @MethodSource("urler")
     fun `Navigering må ha navIdent`(url: String) {
         val token = lagToken(claims = mapOf("groups" to listOf(utvikler.toString())))
-        val (_, response, _) = Fuel.post(url)
-            .body("""{}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI(url))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        Assertions.assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @ParameterizedTest
     @MethodSource("urler")
     fun `Navigering må ha rett audience`(url: String) {
         val token = lagToken(aud = "Feil aud")
-        val (_, response, _) = Fuel.post(url)
-            .body("""{}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI(url))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        Assertions.assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @ParameterizedTest
     @MethodSource("urler")
     fun `Navigering må ikke være utgått`(url: String) {
         val token = lagToken(expiry = -1)
-        val (_, response, _) = Fuel.post(url)
-            .body("""{}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI(url))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        Assertions.assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @ParameterizedTest
@@ -114,12 +131,15 @@ class Tokentest {
     fun `Navigering må ha rett algoritme`(url: String) {
         val payload = lagToken().serialize().split(".")[1]
 
-        val (_, response, _) = Fuel.post(url)
-            .body("""{}""")
-            .header("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.$payload.")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI(url))
+                .header("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.$payload.")
+                .POST(BodyPublishers.ofString("""{}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(401)
+        Assertions.assertThat(response.statusCode()).isEqualTo(401)
     }
 
     private fun lagToken(
