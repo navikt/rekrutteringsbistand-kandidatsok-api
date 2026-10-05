@@ -1,5 +1,5 @@
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
 
 object KandidatsøkRespons {
@@ -1728,7 +1728,7 @@ object KandidatsøkRespons {
             val nodeMedMetadata = objectMapper.readTree(kandidatsøkHits)
             val nodeUtenMetadata = objectMapper.createArrayNode()
             nodeMedMetadata
-                .map { it.get("_source") }
+                .values().map { it.get("_source") }
                 .map { objectMapper.createObjectNode().putPOJO("_source", it) }
                 .forEach<ObjectNode>(nodeUtenMetadata::add)
 
@@ -1741,7 +1741,7 @@ object KandidatsøkRespons {
             val nodeMedMetadata = objectMapper.readTree(kandidatsøkHits)
             val nodeUtenMetadata = objectMapper.createArrayNode()
             nodeMedMetadata
-                .map { it.get("_source") }
+                .values().map { it.get("_source") }
                 .forEach(nodeUtenMetadata::add)
             return nodeUtenMetadata.toPrettyString()
         }

@@ -1,6 +1,6 @@
 package no.nav.toi.kandidatsammendrag
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
@@ -32,9 +32,9 @@ fun JavalinDefaultRoutingApi.handleKandidatSammendrag(openSearchClient: OpenSear
         val navIdent = authenticatedUser.navIdent
         val result = openSearchClient.lookupKandidatsammendrag(ctx.bodyAsClass<RequestDto>())
         val kandidat = result.hits().hits().firstOrNull()?.source()
-        val fodselsnummer = kandidat?.get("fodselsnummer")?.asText()
-        val orgEnhet = kandidat?.get("orgenhet")?.asText()
-        val veileder = kandidat?.get("veilederIdent")?.asText()
+        val fodselsnummer = kandidat?.get("fodselsnummer")?.asString()
+        val orgEnhet = kandidat?.get("orgenhet")?.asString()
+        val veileder = kandidat?.get("veilederIdent")?.asString()
 
         authenticatedUser.verifiserTilgangTilBruker(orgEnhet, veileder, modiaKlient) { permit ->
             if (fodselsnummer != null) {

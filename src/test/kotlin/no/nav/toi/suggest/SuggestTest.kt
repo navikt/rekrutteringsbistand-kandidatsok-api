@@ -1,9 +1,10 @@
 package no.nav.toi.suggest
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.jackson.responseObject
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
+import no.nav.toi.testHttpClient
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
@@ -62,13 +63,16 @@ class SuggestTest {
                 )
         )
         val token = lagToken(navIdent = "A123456", groups = listOf(arbeidsgiverrettet))
-        val (_, response, result) = Fuel.post(endepunkt)
-            .body("""{"query":"kok","type":"ØnsketYrke"}""")
-            .leggPåAutensiering(token)
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI(endepunkt))
+                .leggPåAutensiering(token)
+                .POST(BodyPublishers.ofString("""{"query":"kok","type":"ØnsketYrke"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), suggestSvar, true)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        JSONAssert.assertEquals(response.body(), suggestSvar, true)
     }
 
     @Test
@@ -88,13 +92,16 @@ class SuggestTest {
                 )
         )
         val token = lagToken(navIdent = "A123456", groups = listOf(arbeidsgiverrettet))
-        val (_, response, result) = Fuel.post(endepunkt)
-            .body("""{"query":"prog","type":"Kompetanse"}""")
-            .leggPåAutensiering(token)
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI(endepunkt))
+                .leggPåAutensiering(token)
+                .POST(BodyPublishers.ofString("""{"query":"prog","type":"Kompetanse"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), suggestSvar, true)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        JSONAssert.assertEquals(response.body(), suggestSvar, true)
     }
 
     @Test
@@ -114,13 +121,16 @@ class SuggestTest {
                 )
         )
         val token = lagToken(navIdent = "A123456", groups = listOf(arbeidsgiverrettet))
-        val (_, response, result) = Fuel.post(endepunkt)
-            .body("""{"query":"keln","type":"Arbeidserfaring"}""")
-            .leggPåAutensiering(token)
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI(endepunkt))
+                .leggPåAutensiering(token)
+                .POST(BodyPublishers.ofString("""{"query":"keln","type":"Arbeidserfaring"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), suggestSvar, true)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        JSONAssert.assertEquals(response.body(), suggestSvar, true)
     }
 
     @Test
@@ -140,21 +150,24 @@ class SuggestTest {
                 )
         )
         val token = lagToken(navIdent = "A123456", groups = listOf(arbeidsgiverrettet))
-        val (_, response, result) = Fuel.post(endepunkt)
-            .body("""{"query":"nor","type":"Språk"}""")
-            .leggPåAutensiering(token)
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI(endepunkt))
+                .leggPåAutensiering(token)
+                .POST(BodyPublishers.ofString("""{"query":"nor","type":"Språk"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), suggestSvar, true)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        JSONAssert.assertEquals(response.body(), suggestSvar, true)
     }
 
     @Test
     fun `modia generell skal ikke ha tilgang`() {
         val token = lagToken(groups = listOf(modiaGenerell))
-        val (_, response, _) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
     @Test
@@ -162,9 +175,9 @@ class SuggestTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockSuggest(wireMock)
         val token = lagToken(groups = listOf(jobbsøkerrettet))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -172,9 +185,9 @@ class SuggestTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockSuggest(wireMock)
         val token = lagToken(groups = listOf(arbeidsgiverrettet))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -182,17 +195,17 @@ class SuggestTest {
         val wireMock = wmRuntimeInfo.wireMock
         mockSuggest(wireMock)
         val token = lagToken(groups = listOf(utvikler))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
     fun `om man ikke har gruppetilhørighet skal man ikke ha tilgang`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val token = lagToken(groups = emptyList())
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
     private fun lagLokalApp() = App(
         port = 8080,
@@ -236,7 +249,7 @@ class SuggestTest {
         claims = claims
     )
 
-    private fun Request.leggPåAutensiering(token: SignedJWT) =
+    private fun HttpRequest.Builder.leggPåAutensiering(token: SignedJWT) =
         header("Authorization", "Bearer ${token.serialize()}")
 
     private fun esRequest(prefix: String, field: String) = """
@@ -576,10 +589,13 @@ class SuggestTest {
         )
     }
 
-    private fun gjørKall(token: SignedJWT) = Fuel.post(endepunkt)
-        .body("""{"query":"kok","type":"ØnsketYrke"}""")
-        .leggPåAutensiering(token)
-        .responseObject<JsonNode>()
+    private fun gjørKall(token: SignedJWT) = testHttpClient.send(
+        HttpRequest.newBuilder(URI(endepunkt))
+            .leggPåAutensiering(token)
+            .POST(BodyPublishers.ofString("""{"query":"kok","type":"ØnsketYrke"}"""))
+            .build(),
+        BodyHandlers.ofString()
+    )
 
 
 

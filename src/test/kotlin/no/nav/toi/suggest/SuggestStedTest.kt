@@ -1,8 +1,10 @@
 package no.nav.toi.suggest
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.jackson.responseObject
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
+import no.nav.toi.testHttpClient
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
@@ -47,10 +49,10 @@ class SuggestStedTest {
     fun `Svar på sted`(wmRuntimeInfo: WireMockRuntimeInfo) {
         mockSuggest(wmRuntimeInfo)
         val token = lagToken(navIdent = "A123456")
-        val (_, response, result) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        JSONAssert.assertEquals(result.get().toPrettyString(), """
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        JSONAssert.assertEquals(response.body(), """
             [{
                 "geografiKodeTekst":"Bodø",
                 "geografiKode":"123"
@@ -71,44 +73,47 @@ class SuggestStedTest {
         )
     }
 
-    private fun gjørKall(token: SignedJWT) = Fuel.post("$endepunkt")
-        .body("""{"query":"Bod"}""")
-        .header("Authorization", "Bearer ${token.serialize()}")
-        .responseObject<JsonNode>()
+    private fun gjørKall(token: SignedJWT) = testHttpClient.send(
+        HttpRequest.newBuilder(URI("$endepunkt"))
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .POST(BodyPublishers.ofString("""{"query":"Bod"}"""))
+            .build(),
+        BodyHandlers.ofString()
+    )
 
     @Test
     fun `modia generell skal ikke ha tilgang`() {
         val token = lagToken(groups = listOf(modiaGenerell))
-        val (_, response, _) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
     @Test
     fun `jobbsøkerrettet skal ha tilgang`(wmRuntimeInfo: WireMockRuntimeInfo) {
         mockSuggest(wmRuntimeInfo)
         val token = lagToken(groups = listOf(jobbsøkerrettet))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
     fun `arbeidsgiverrettet skal ha tilgang`(wmRuntimeInfo: WireMockRuntimeInfo) {
         mockSuggest(wmRuntimeInfo)
         val token = lagToken(groups = listOf(arbeidsgiverrettet))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
     fun `utvikler skal ha tilgang`(wmRuntimeInfo: WireMockRuntimeInfo) {
         mockSuggest(wmRuntimeInfo)
         val token = lagToken(groups = listOf(utvikler))
-        val (_, response) = gjørKall(token)
+        val response = gjørKall(token)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     private fun lagLokalApp() = App(

@@ -1,6 +1,9 @@
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.jackson.responseObject
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
+import no.nav.toi.testHttpClient
+import no.nav.toi.testObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
@@ -30,19 +33,27 @@ class SikkerhetTest {
 
     @Test
     fun `kan aksessere usikret endepunkt uten å ha tilganger`() {
-        val (_, response) = Fuel.get("http://localhost:8080/internal/alive")
-            .response()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/internal/alive"))
+                .GET()
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.statusCode()).isEqualTo(200)
 
     }
 
     @Test
     fun `autentisering feiler om man ikke har token`() {
-        val (_, response) = Fuel.get("http://localhost:8080/api/me")
-            .response()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/me"))
+                .GET()
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertThat(response.statusCode).isEqualTo(401)
+        assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @Test
@@ -51,11 +62,15 @@ class SikkerhetTest {
             claims = mapOf("groups" to listOf(LokalApp.arbeidsgiverrettet))
         )
         println(token.serialize())
-        val (_, response) = Fuel.get("http://localhost:8080/api/me")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .response()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/me"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .GET()
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertThat(response.statusCode).isEqualTo(401)
+        assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @Test
@@ -63,21 +78,29 @@ class SikkerhetTest {
         val token = app.lagToken(
             issuerId = "fakeissuer",
         )
-        val (_, response) = Fuel.get("http://localhost:8080/api/me")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .response()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/me"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .GET()
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertThat(response.statusCode).isEqualTo(401)
+        assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @Test
     fun `autentisering feiler om man token ikke er utstedt for vår applikasjon`() {
         val token = app.lagToken(aud = "feilaudience")
-        val (_, response) = Fuel.get("http://localhost:8080/api/me")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .response()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/me"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .GET()
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertThat(response.statusCode).isEqualTo(401)
+        assertThat(response.statusCode()).isEqualTo(401)
     }
 
     @Test
@@ -85,12 +108,16 @@ class SikkerhetTest {
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent)
         println(token.serialize())
-        val (_, response, result) = Fuel.get("http://localhost:8080/api/me")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/me"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .GET()
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertThat(response.statusCode).isEqualTo(200)
-        assertThat(result.get()["navIdent"].asText()).isEqualTo(navIdent)
+        assertThat(response.statusCode()).isEqualTo(200)
+        assertThat(testObjectMapper.readTree(response.body())["navIdent"].asString()).isEqualTo(navIdent)
     }
 
     @Test
@@ -98,12 +125,16 @@ class SikkerhetTest {
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent)
         println(token.serialize())
-        val (_, response, result) = Fuel.get("http://localhost:8080/api/me")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/me"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .GET()
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertThat(response.statusCode).isEqualTo(200)
-        assertThat(result.get()["roller"].get(0).asText()).isEqualTo("ARBEIDSGIVER_RETTET")
+        assertThat(response.statusCode()).isEqualTo(200)
+        assertThat(testObjectMapper.readTree(response.body())["roller"].get(0).asString()).isEqualTo("ARBEIDSGIVER_RETTET")
     }
 
     @Test
@@ -117,11 +148,14 @@ class SikkerhetTest {
                 )
         )
         val token = app.lagToken(groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response) = Fuel.post("http://localhost:8080/api/lookup-cv")
-            .body("""{"kandidatnr": "\",!xz"}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .responseObject<JsonNode>()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/lookup-cv"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"kandidatnr": "\",!xz"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.statusCode()).isEqualTo(200)
     }
 }

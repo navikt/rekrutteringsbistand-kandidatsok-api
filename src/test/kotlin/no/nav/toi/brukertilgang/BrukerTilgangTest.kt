@@ -1,6 +1,10 @@
 package no.nav.toi.brukertilgang
 
-import com.github.kittinunf.fuel.Fuel
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
+import no.nav.toi.testHttpClient
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
@@ -109,12 +113,15 @@ class BrukerTilgangTest {
         mockES(wireMock, kandidat.orgEnhet, kandidat.veilederIdent, søkeParameter.mockESFelt)
         mockDecorator(wireMock)
         val token = lagToken(navIdent = veilederIdent, groups = listOf(tilgang.uuid))
-        val (_, response, _) = Fuel.post("http://localhost:8080/api/brukertilgang")
-            .body("""{"${søkeParameter.requestParameter}":"12345678910"}""")
-            .header("Authorization", "Bearer ${token.serialize()}")
-            .response()
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/brukertilgang"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"${søkeParameter.requestParameter}":"12345678910"}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
 
-        Assertions.assertThat(response.statusCode).isEqualTo(statusCode)
+        Assertions.assertThat(response.statusCode()).isEqualTo(statusCode)
     }
     private fun mockDecorator(wireMock: WireMock) {
         wireMock.register(

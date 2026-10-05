@@ -1,17 +1,13 @@
 package no.nav.toi
 
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.fuel.core.FuelManager
-import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.fuel.jackson.responseObject
-import com.github.kittinunf.result.Result
-import io.github.resilience4j.retry.Retry
-import io.github.resilience4j.retry.RetryConfig
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
+import tools.jackson.module.kotlin.readValue
+import java.net.URLEncoder
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
 import java.time.Instant
 import java.util.*
 
@@ -27,44 +23,38 @@ class AccessTokenClient(
     fun hentAccessToken(innkommendeToken: String) = cache.invoke(innkommendeToken).access_token
 
     private fun fetchAccessToken(token: String): AccessTokenResponse {
-        fun fetch(): Triple<Request, Response, Result<AccessTokenResponse, FuelError>> {
-            val formData = listOf(
-                "grant_type" to "urn:ietf:params:oauth:grant-type:jwt-bearer",
-                "client_secret" to secret,
-                "client_id" to clientId,
-                "assertion" to token,
-                "scope" to scope,
-                "requested_token_use" to "on_behalf_of"
-            )
-            return FuelManager().post(azureUrl, formData).responseObject<AccessTokenResponse>()
+        val skjema = mapOf(
+            "grant_type" to "urn:ietf:params:oauth:grant-type:jwt-bearer",
+            "client_secret" to secret,
+            "client_id" to clientId,
+            "assertion" to token,
+            "scope" to scope,
+            "requested_token_use" to "on_behalf_of"
+        )
+
+        val request = httpRequest(azureUrl)
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .POST(BodyPublishers.ofString(skjema.tilSkjemadata()))
+            .build()
+
+        val response = try {
+            medRetry("fetch access token") { httpClient.send(request, BodyHandlers.ofString()) }
+        } catch (e: Exception) {
+            secureLog.error("Noe feil skjedde ved henting av access_token", e)
+            throw RuntimeException("Noe feil skjedde ved henting av access_token: ", e)
         }
 
-        val (_, response, result) = withRetry(::fetch)
-        return when (result) {
-            is Result.Success -> result.get()
-            is Result.Failure -> {
-                secureLog.error(
-                    "Noe feil skjedde ved henting av access_token. msg: ${
-                        response.body().asString("application/json")
-                    }", result.getException()
-                )
-                throw RuntimeException("Noe feil skjedde ved henting av access_token: ", result.getException())
-            }
+        if (!response.erVellykket()) {
+            secureLog.error("Noe feil skjedde ved henting av access_token. status: ${response.statusCode()} msg: ${response.body()}")
+            throw RuntimeException("Noe feil skjedde ved henting av access_token, status ${response.statusCode()}")
         }
+        return httpKlientMapper.readValue(response.body())
     }
 
-    companion object {
-        private fun withRetry(fetch: () -> Triple<Request, Response, Result<AccessTokenResponse, FuelError>>): Triple<Request, Response, Result<AccessTokenResponse, FuelError>> {
-            fun isFailure(t: Triple<Request, Response, Result<Any, Exception>>) = t.third is Result.Failure
-            val retryConfig =
-                RetryConfig.custom<Triple<Request, Response, Result<Any, Exception>>>()
-                    .retryOnResult(::isFailure)
-                    .build()
-            val retry = Retry.of("fetch access token", retryConfig)
-            val fetchAccessTokenWithRetry = Retry.decorateSupplier(retry, fetch)
-            return fetchAccessTokenWithRetry.get()
+    private fun Map<String, String>.tilSkjemadata() =
+        entries.joinToString("&") { (navn, verdi) ->
+            "${URLEncoder.encode(navn, Charsets.UTF_8)}=${URLEncoder.encode(verdi, Charsets.UTF_8)}"
         }
-    }
 }
 
 

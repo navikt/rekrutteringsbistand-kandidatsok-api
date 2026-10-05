@@ -1,6 +1,6 @@
 package no.nav.toi.hullicv
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
@@ -57,8 +57,8 @@ fun JavalinDefaultRoutingApi.handleHullICv(openSearchClient: OpenSearchClient, m
             ctx.status(HttpStatus.NOT_FOUND)
         } else {
             val source = kandidat.source()
-            val orgEnhet = source?.get("orgenhet")?.asText()
-            val veileder = source?.get("veilederIdent")?.asText()
+            val orgEnhet = source?.get("orgenhet")?.asString()
+            val veileder = source?.get("veilederIdent")?.asString()
             authenticatedUser.verifiserTilgangTilBruker(orgEnhet, veileder, modiaKlient) { permit ->
                 AuditLogg.loggOppslagHullICv(request.aktorId, authenticatedUser.navIdent, permit)
             }

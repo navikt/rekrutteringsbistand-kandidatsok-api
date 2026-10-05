@@ -1,6 +1,6 @@
 package no.nav.toi.brukertilgang
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.HttpStatus
 import io.javalin.http.bodyAsClass
@@ -46,8 +46,8 @@ fun JavalinDefaultRoutingApi.handleBrukertilgang(openSearchClient: OpenSearchCli
         }
 
         val kandidat = result.hits().hits().firstOrNull()?.source()
-        val orgEnhet = kandidat?.get("orgenhet")?.asText()
-        val veileder = kandidat?.get("veilederIdent")?.asText()
+        val orgEnhet = kandidat?.get("orgenhet")?.asString()
+        val veileder = kandidat?.get("veilederIdent")?.asString()
 
         authenticatedUser.verifiserTilgangTilBruker(orgEnhet, veileder, modiaKlient, {})
         ctx.json(result.toResponseJson())

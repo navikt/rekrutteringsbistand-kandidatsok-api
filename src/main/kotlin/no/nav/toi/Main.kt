@@ -1,6 +1,6 @@
 package no.nav.toi
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import io.javalin.Javalin
 import io.javalin.config.JavalinConfig
 import io.javalin.http.HttpStatus.BAD_REQUEST
@@ -88,6 +88,7 @@ class App(
 
     fun start() {
         javalin = Javalin.create { config ->
+            config.jsonMapper(javalinJsonMapper())
             configureOpenApi(config)
             config.routes.apply {
                 handleHealth()

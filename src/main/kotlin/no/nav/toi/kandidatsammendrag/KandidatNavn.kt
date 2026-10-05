@@ -1,6 +1,6 @@
 package no.nav.toi.kandidatsammendrag
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import io.javalin.router.JavalinDefaultRoutingApi
 import io.javalin.http.bodyAsClass
 import io.javalin.openapi.*
@@ -54,8 +54,8 @@ fun JavalinDefaultRoutingApi.handleKandidatNavn(
         result.hits().hits().firstOrNull()?.source()?.let {
             ctx.json(
                 KandidatNavnResponsDto(
-                    it["fornavn"]!!.asText(),
-                    it["etternavn"]!!.asText(),
+                    it["fornavn"]!!.asString(),
+                    it["etternavn"]!!.asString(),
                     Kilde.REKRUTTERINGSBISTAND
                 )
             )

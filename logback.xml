@@ -1,4 +1,14 @@
+<!--
+    Brukes kun i Docker-imaget (se Dockerfile), altså bare når appen kjører i Nais.
+    Lokalt og i tester brukes src/test/resources/logback.xml, der audit- og team-logs-meldinger går til konsoll.
+
+    Audit-logg og team-logs kan inneholde fødselsnummer og andre personopplysninger.
+    De skal aldri havne i den vanlige applikasjonsloggen. Derfor er det ingen betingelser i denne filen:
+    audit- og team-logs-oppsettet gjelder alltid. Rutingen verifiseres av LogbackKonfigurasjonTest.
+-->
 <configuration>
+    <include resource="no/nav/common/audit_log/logback-naudit.xml"/>
+
     <appender name="loggIJsonFormatTilKibana" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
@@ -10,33 +20,23 @@
         </filter>
     </appender>
 
-    <if condition='isDefined("NAIS_CLUSTER_NAME")'>
-        <then>
-            <include resource="no/nav/common/audit_log/logback-naudit.xml"/>
-
-            <appender name="team-logs" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-                <destination>team-logs.nais-system:5170</destination>
-                <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                    <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${HOSTNAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
-                    <includeContext>false</includeContext>
-                </encoder>
-                <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-                    <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                        <marker>TEAM_LOGS</marker>
-                    </evaluator>
-                    <OnMatch>ACCEPT</OnMatch>
-                    <OnMismatch>DENY</OnMismatch>
-                </filter>
-            </appender>
-
-            <logger name="team-logs-logger" level="INFO" additivity="false">
-                <appender-ref ref="team-logs" />
-            </logger>
-        </then>
-    </if>
+    <appender name="team-logs" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>team-logs.nais-system:5170</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${HOSTNAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
+            <includeContext>false</includeContext>
+        </encoder>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>TEAM_LOGS</marker>
+            </evaluator>
+            <OnMatch>ACCEPT</OnMatch>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
+    </appender>
 
     <root level="INFO">
         <appender-ref ref="loggIJsonFormatTilKibana"/>
-        <appender-ref ref="team-logs" />
+        <appender-ref ref="team-logs"/>
     </root>
 </configuration>

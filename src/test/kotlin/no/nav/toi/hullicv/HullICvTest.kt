@@ -1,11 +1,11 @@
 package no.nav.toi.hullicv
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.jackson.responseObject
+import java.net.URI
+import java.net.http.HttpRequest
+import java.net.http.HttpRequest.BodyPublishers
+import java.net.http.HttpResponse.BodyHandlers
+import no.nav.toi.testHttpClient
+import no.nav.toi.testObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.ok
@@ -342,9 +342,9 @@ class HullICvTest {
         )
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response) = gjørKall(token, aktorId, nå)
+        val response = gjørKall(token, aktorId, nå)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(404)
+        Assertions.assertThat(response.statusCode()).isEqualTo(404)
     }
 
     @Test
@@ -355,10 +355,10 @@ class HullICvTest {
         wireMock.mockES(aktorId = aktorId, datoForKall = nå, finnerTreff = true)
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response, result) = gjørKall(token, aktorId, nå)
+        val response = gjørKall(token, aktorId, nå)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get().asText()).isEqualTo("true")
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        Assertions.assertThat(testObjectMapper.readTree(response.body()).asString()).isEqualTo("true")
     }
 
     @Test
@@ -369,10 +369,10 @@ class HullICvTest {
         wireMock.mockES(aktorId = aktorId, datoForKall = nå, finnerTreff = false)
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response, result) = gjørKall(token, aktorId, nå)
+        val response = gjørKall(token, aktorId, nå)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
-        Assertions.assertThat(result.get().asText()).isEqualTo("false")
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
+        Assertions.assertThat(testObjectMapper.readTree(response.body()).asString()).isEqualTo("false")
     }
 
     @Test
@@ -387,9 +387,9 @@ class HullICvTest {
         )
         val navIdent = "A123456"
         val token = app.lagToken(navIdent = navIdent, groups = listOf(LokalApp.arbeidsgiverrettet))
-        val (_, response) = gjørKall(token, aktorId = aktorId, dato = LocalDate.now())
+        val response = gjørKall(token, aktorId = aktorId, dato = LocalDate.now())
 
-        Assertions.assertThat(response.statusCode).isEqualTo(500)
+        Assertions.assertThat(response.statusCode()).isEqualTo(500)
     }
 
     @Test
@@ -398,9 +398,9 @@ class HullICvTest {
         val aktorId = "1234567890123"
         val nå = LocalDate.now()
         wmRuntimeInfo.wireMock.mockES(aktorId, nå, finnerTreff = true)
-        val (_, response, _) = gjørKall(token, aktorId, nå)
+        val response = gjørKall(token, aktorId, nå)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
     @Test
@@ -409,9 +409,9 @@ class HullICvTest {
         val aktorId = "1234567890123"
         val nå = LocalDate.now()
         wmRuntimeInfo.wireMock.mockES(aktorId, nå, finnerTreff = true)
-        val (_, response, _) = gjørKall(token, aktorId, nå)
+        val response = gjørKall(token, aktorId, nå)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -450,9 +450,9 @@ class HullICvTest {
         wireMock.mockES(aktorId = aktorId, datoForKall = nå, veilederIdent = veiledersIdent, orgenhet = feilVeiledersOrgenhet, finnerTreff = true)
 
         val token = app.lagToken(groups = listOf(LokalApp.Companion.jobbsøkerrettet))
-        val (_, response, result) = gjørKall(token, aktorId, nå)
+        val response = gjørKall(token, aktorId, nå)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -491,9 +491,9 @@ class HullICvTest {
         wireMock.mockES(aktorId = aktorId, datoForKall = nå, veilederIdent = annenIdent, orgenhet = feilVeiledersOrgenhet, finnerTreff = false)
 
         val token = app.lagToken(groups = listOf(LokalApp.Companion.jobbsøkerrettet))
-        val (_, response, result) = gjørKall(token, aktorId, nå)
+        val response = gjørKall(token, aktorId, nå)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
     @Test
@@ -536,9 +536,9 @@ class HullICvTest {
         wireMock.mockES(aktorId = aktorId, datoForKall = nå, veilederIdent = feilVeilederIdent, orgenhet = veiledersOrgenhet, finnerTreff = true)
 
         val token = app.lagToken(groups = listOf(LokalApp.Companion.jobbsøkerrettet))
-        val (_, response, result) = gjørKall(token, aktorId, nå)
+        val response = gjørKall(token, aktorId, nå)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -576,9 +576,9 @@ class HullICvTest {
         wireMock.mockES(aktorId = aktorId, datoForKall = nå, veilederIdent = feilVeiledersIdent, orgenhet = feilVeiledersOrgenhet, finnerTreff = true)
 
         val token = app.lagToken(groups = listOf(LokalApp.Companion.jobbsøkerrettet, LokalApp.Companion.arbeidsgiverrettet))
-        val (_, response) = gjørKall(token, aktorId, nå)
+        val response = gjørKall(token, aktorId, nå)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
 
@@ -588,9 +588,9 @@ class HullICvTest {
         val aktorId = "1234567890123"
         val nå = LocalDate.now()
         wmRuntimeInfo.wireMock.mockES(aktorId, nå, finnerTreff = true)
-        val (_, response, _) = gjørKall(token, aktorId, nå)
+        val response = gjørKall(token, aktorId, nå)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(200)
+        Assertions.assertThat(response.statusCode()).isEqualTo(200)
     }
 
     @Test
@@ -599,14 +599,17 @@ class HullICvTest {
         val aktorId = "1234567890123"
         val nå = LocalDate.now()
         wmRuntimeInfo.wireMock.mockES(aktorId, nå, finnerTreff = true)
-        val (_, response, _) = gjørKall(token, aktorId, nå)
+        val response = gjørKall(token, aktorId, nå)
 
-        Assertions.assertThat(response.statusCode).isEqualTo(403)
+        Assertions.assertThat(response.statusCode()).isEqualTo(403)
     }
 
-    private fun gjørKall(token: SignedJWT,aktorId: String, dato: LocalDate) = Fuel.post("http://localhost:8080/api/har-hull-i-cv")
-        .body("""{"aktorId": "$aktorId", "dato": "$dato" }""")
-        .header("Authorization", "Bearer ${token.serialize()}")
-        .responseObject<JsonNode>()
+    private fun gjørKall(token: SignedJWT,aktorId: String, dato: LocalDate) = testHttpClient.send(
+        HttpRequest.newBuilder(URI("http://localhost:8080/api/har-hull-i-cv"))
+            .header("Authorization", "Bearer ${token.serialize()}")
+            .POST(BodyPublishers.ofString("""{"aktorId": "$aktorId", "dato": "$dato" }"""))
+            .build(),
+        BodyHandlers.ofString()
+    )
 
 }
