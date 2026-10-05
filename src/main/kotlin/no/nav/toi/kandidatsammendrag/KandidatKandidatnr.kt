@@ -44,7 +44,7 @@ fun JavalinDefaultRoutingApi.handleKandidatKandidatnr(openSearchClient: OpenSear
         val request = ctx.bodyAsClass<KandidatKandidatnrRequestDto>()
         val result = openSearchClient.lookupKandidatNavn(request.fodselsnummer)
         result.hits().hits().firstOrNull()?.source()?.get("arenaKandidatnr")
-            ?.let(JsonNode::asText)
+            ?.let(JsonNode::asString)
             ?.let(::KandidatKandidatnrResponsDto)
             ?.let(ctx::json) ?: ctx.status(404)
     }
