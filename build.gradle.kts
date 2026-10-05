@@ -31,6 +31,8 @@ dependencies {
     implementation("org.opensearch.client:opensearch-rest-client:3.9.0")
     implementation("org.opensearch.client:opensearch-java:3.10.0")
     implementation(platform("tools.jackson:jackson-bom:$jacksonVersion"))
+    // Jackson 2 kommer transitivt via java-jwt, jwks-rsa, opensearch-java og javalin-openapi
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.3"))
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("com.auth0:java-jwt:4.6.1")
     implementation("com.auth0:jwks-rsa:0.24.1")
