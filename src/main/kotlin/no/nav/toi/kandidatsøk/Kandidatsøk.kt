@@ -176,7 +176,8 @@ private fun håndterEndepunkt(
     ).filter(Filter::erAktiv)
     val filterFunksjoner = filter.map(Filter::lagESFilterFunksjon)
     val side = hentProblematiskQueryParamSideMedLogging(ctx)
-    val result = openSearchClient.kandidatSøk(filterFunksjoner, side, sorterting).toResponseJson()
+    val antallPerSide = ctx.queryParam("antallPerSide")?.toInt() ?: 25
+    val result = openSearchClient.kandidatSøk(filterFunksjoner, side, antallPerSide, sorterting).toResponseJson()
     val navigeringResult =
         openSearchClient.kandidatSøkNavigering(filterFunksjoner, side, sorterting).hentUtKandidatnumre()
     val hits = result.hits
@@ -217,6 +218,7 @@ private fun hentProblematiskQueryParamSideMedLogging(ctx: Context): Int {
 private fun OpenSearchClient.kandidatSøk(
     filter: List<FilterFunksjon>,
     side: Int,
+    antallPerSide: Int,
     sorterting: Sortering
 ): SearchResponse<JsonNode> {
     return search<JsonNode> {
@@ -244,8 +246,8 @@ private fun OpenSearchClient.kandidatSøk(
         }
         trackTotalHits(true)
         sorterting.lagSorteringES()()
-        size(25)
-        from(25 * (side - 1))
+        size(antallPerSide)
+        from(antallPerSide * (side - 1))
     }
 }
 
