@@ -75,6 +75,9 @@ spec:
     - name: TOI_LIVSHENDELSE_SCOPE
       value: {{toiLivshendelseScope}}
   observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
     logging:
       destinations:
         - id: loki
