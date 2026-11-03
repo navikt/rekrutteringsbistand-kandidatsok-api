@@ -8,6 +8,7 @@ fun List<Filter>.medFørerkortFilter(filterParametre: FilterParametre) = this + 
 
 private interface Førerkort {
     val kode: String
+    val indeksverdi: String get() = kode
     fun alleSomKanKjøreDetteKortet() = setOf(this)
 }
 private object LettMotorsykkel: Førerkort {
@@ -26,6 +27,10 @@ private object Personbil: Førerkort {
         .flatMap(Førerkort::alleSomKanKjøreDetteKortet)+this).toSet()
     override val kode = "B - Personbil"
     override fun alleSomKanKjøreDetteKortet() = alleSomKanKjøreDetteKortet
+}
+private object PersonbilMedAutomatgir: Førerkort {
+    override val kode = "B 78 - Personbil med automatgir"
+    override val indeksverdi = "B78 - B 78 - Personbil med automatgir"
 }
 private object PersonbilMedTilhenger: Førerkort {
     private val alleSomKanKjøreDetteKortet = (listOf(LettLastebilMedTilhenger,MinibussMedTilhenger)
@@ -78,6 +83,7 @@ private val alleFørerkort = listOf(
     MellomtungMotorsykkel,
     TungMotorsykkel,
     Personbil,
+    PersonbilMedAutomatgir,
     PersonbilMedTilhenger,
     LettLastebil,
     LettLastebilMedTilhenger,
@@ -114,7 +120,7 @@ private class FørerkortFilter(parametre: FilterParametre): Filter {
                                 query_ {
                                     term_ {
                                         field("forerkort.forerkortKodeKlasse")
-                                        value(førerkort.kode)
+                                        value(førerkort.indeksverdi)
                                     }
                                 }
                             }

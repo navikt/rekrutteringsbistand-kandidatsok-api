@@ -1,6 +1,21 @@
 # rekrutteringsbistand-kandidatsok-api
 TODO: Hva skal være ansvaret til denne appen? Håpet var å erstatte rekrutteringsbistand-kandidat-api men det skjedde ikke, så....
 
+## Førerkort B78
+
+Send `B 78 - Personbil med automatgir` i `førerkort` for å søke etter kandidater registrert med B78.
+Filteret inkluderer ikke vanlig B eller andre førerkortklasser. Dagens B-filter er uendret og inkluderer ikke B78.
+Ved valg av begge filtrene finner søket kandidater som oppfyller minst ett av dem.
+
+API-et oversetter B78 til indeksverdien `B78 - B 78 - Personbil med automatgir`.
+Verdien følger kodekjeden fra [CV-API-ets beskrivelse](https://github.com/navikt/pam-cv-api-gcp/blob/main/src/main/kotlin/no/nav/arbeid/cv/rest/dto/cv/Forerkortklasse.kt)
+og [konvertering til CV-hendelse](https://github.com/navikt/pam-cv-api-gcp/blob/2dfceab3dab75fd8917d6939eb17a743d0558ce3/src/main/kotlin/no/nav/arbeid/cv/rest/dto/cv/DriversLicense.kt),
+via [konvertering til Avro](https://github.com/navikt/pam-cv-endret-bridge/blob/master/src/main/kotlin/no/nav/cv/dto/cv/CvEndretInternDriversLicence.kt),
+til [indekseringen](https://github.com/navikt/toi-rapids-and-rivers/blob/1557564132cf61c6f0d89bc6c5f7775a45009336/apps/toi-kandidat-indekser/src/main/kotlin/no/nav/arbeidsgiver/toi/kandidat/indekser/domene/EsForerkort.kt).
+Dette gjelder når CV-ens klasse er `B78`. Kontrakten er utledet fra koden, ikke kontrollert mot produksjonsdata.
+
+Deploy backend-støtten før frontend aktiverer B78-valget, ellers avviser API-et filterverdien.
+
 ## Fakedings-autentisering ved kjøring lokalt 
 Vi bruker [fakedings](https://github.com/navikt/fakedings?tab=readme-ov-file) for autentisering når vi kjører lokalt for å teste underveis i utviklingen. For å hente et fake token, kan du gjøre et kall ala
 ```http request

@@ -14,7 +14,12 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.toi.App
 import no.nav.toi.AuthenticationConfiguration
 import no.nav.toi.RolleUuidSpesifikasjon
+import no.nav.toi.kandidatsøk.filter.Filter
+import no.nav.toi.kandidatsøk.filter.Valideringsfeil
+import no.nav.toi.kandidatsøk.filter.medFørerkortFilter
+import no.nav.toi.testObjectMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -223,6 +228,32 @@ class KandidatsøkTest {
     }
 
     fun endepunktSomParameter() = Endepunkt.entries.stream()
+
+    fun personbilførerkortSomParameter(): Stream<Arguments> {
+        val b78 = "B 78 - Personbil med automatgir"
+        val b78Indeksverdi = "B78 - B 78 - Personbil med automatgir"
+        val b = "B - Personbil"
+        val bIndeksverdier = listOf(
+            b,
+            "BE - Personbil med tilhenger",
+            "C1 - Lett lastebil",
+            "C1E - Lett lastebil med tilhenger",
+            "C - Lastebil",
+            "CE - Lastebil med tilhenger",
+            "D1 - Minibuss",
+            "D1E - Minibuss med tilhenger",
+            "D - Buss",
+            "DE - Buss med tilhenger"
+        )
+        return Endepunkt.entries.flatMap { endepunkt ->
+            listOf(
+                Arguments.of(endepunkt, listOf(b78), listOf(b78Indeksverdi)),
+                Arguments.of(endepunkt, listOf(b), bIndeksverdier),
+                Arguments.of(endepunkt, listOf(b, b78), bIndeksverdier + b78Indeksverdi),
+                Arguments.of(endepunkt, listOf(b78, b78), listOf(b78Indeksverdi))
+            )
+        }.stream()
+    }
 
     fun tilgangParametre() = Stream.of(
         Arguments.of(Tilgang.ModiaGenerell, Endepunkt.Alle, 403),
@@ -626,6 +657,47 @@ class KandidatsøkTest {
 
         assertStatuscodeEquals(response, 200)
         JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
+    }
+
+    @ParameterizedTest
+    @MethodSource("personbilførerkortSomParameter")
+    fun `B78 og B søker med separate indeksverdier`(
+        endepunkt: Endepunkt,
+        førerkort: List<String>,
+        indeksverdier: List<String>,
+        wmRuntimeInfo: WireMockRuntimeInfo
+    ) {
+        val førerkortTermer = indeksverdier.joinToString(",") {
+            """{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"$it"}}},"score_mode":"sum"}}"""
+        }
+        val førerkortFilter = """{"bool":{"should":[$førerkortTermer]}}"""
+        val wireMock = wmRuntimeInfo.wireMock
+        mockES(wireMock, extraTerms = endepunkt.extraTerms + førerkortFilter)
+        endepunkt.ekstraMocking(wireMock)
+        val token = lagToken(navIdent = "A123456")
+        val førerkortJson = førerkort.joinToString(",") { """"$it"""" }
+        val response = testHttpClient.send(
+            HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
+                .header("Authorization", "Bearer ${token.serialize()}")
+                .POST(BodyPublishers.ofString("""{"førerkort":[$førerkortJson]${endepunkt.bodyParameter(true)}}"""))
+                .build(),
+            BodyHandlers.ofString()
+        )
+
+        assertStatuscodeEquals(response, 200)
+        JSONAssert.assertEquals(KandidatsøkRespons.kandidatsøkRespons, response.body(), false)
+    }
+
+    @Test
+    fun `Ukjente førerkort avvises fortsatt`() {
+        val parametre = testObjectMapper.readValue(
+            """{"førerkort":["Ukjent førerkort"]}""",
+            FilterParametre::class.java
+        )
+
+        assertThatThrownBy { emptyList<Filter>().medFørerkortFilter(parametre) }
+            .isInstanceOf(Valideringsfeil::class.java)
+            .hasMessage("Ukjent førerkort: Ukjent førerkort")
     }
 
     @ParameterizedTest
