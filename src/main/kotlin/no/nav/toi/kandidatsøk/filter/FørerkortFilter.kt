@@ -31,6 +31,7 @@ private object Personbil: Førerkort {
 private object PersonbilMedAutomatgir: Førerkort {
     override val kode = "B 78 - Personbil med automatgir"
     override val indeksverdi = "B78 - B 78 - Personbil med automatgir"
+    override fun alleSomKanKjøreDetteKortet() = setOf(this) + Personbil.alleSomKanKjøreDetteKortet()
 }
 private object PersonbilMedTilhenger: Førerkort {
     private val alleSomKanKjøreDetteKortet = (listOf(LettLastebilMedTilhenger,MinibussMedTilhenger)

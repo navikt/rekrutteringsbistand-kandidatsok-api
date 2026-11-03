@@ -245,12 +245,14 @@ class KandidatsøkTest {
             "D - Buss",
             "DE - Buss med tilhenger"
         )
+        val b78Indeksverdier = bIndeksverdier + b78Indeksverdi
         return Endepunkt.entries.flatMap { endepunkt ->
             listOf(
-                Arguments.of(endepunkt, listOf(b78), listOf(b78Indeksverdi)),
+                Arguments.of(endepunkt, listOf(b78), b78Indeksverdier),
                 Arguments.of(endepunkt, listOf(b), bIndeksverdier),
-                Arguments.of(endepunkt, listOf(b, b78), bIndeksverdier + b78Indeksverdi),
-                Arguments.of(endepunkt, listOf(b78, b78), listOf(b78Indeksverdi))
+                Arguments.of(endepunkt, listOf(b, b78), b78Indeksverdier),
+                Arguments.of(endepunkt, listOf(b78, b), b78Indeksverdier),
+                Arguments.of(endepunkt, listOf(b78, b78), b78Indeksverdier)
             )
         }.stream()
     }
@@ -661,7 +663,7 @@ class KandidatsøkTest {
 
     @ParameterizedTest
     @MethodSource("personbilførerkortSomParameter")
-    fun `B78 og B søker med separate indeksverdier`(
+    fun `B78 inkluderer B men B inkluderer ikke B78`(
         endepunkt: Endepunkt,
         førerkort: List<String>,
         indeksverdier: List<String>,

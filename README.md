@@ -3,9 +3,9 @@ TODO: Hva skal være ansvaret til denne appen? Håpet var å erstatte rekrutteri
 
 ## Førerkort B78
 
-Send `B 78 - Personbil med automatgir` i `førerkort` for å søke etter kandidater registrert med B78.
-Filteret inkluderer ikke vanlig B eller andre førerkortklasser. Dagens B-filter er uendret og inkluderer ikke B78.
-Ved valg av begge filtrene finner søket kandidater som oppfyller minst ett av dem.
+Send `B 78 - Personbil med automatgir` i `førerkort` for å søke etter kandidater med B78 eller B.
+B78-filteret inkluderer også de øvrige klassene som dagens B-filter finner.
+B-filteret er uendret og inkluderer ikke B78. Valg av begge filtrene gir samme treff som B78 alene.
 
 API-et oversetter B78 til indeksverdien `B78 - B 78 - Personbil med automatgir`.
 Verdien følger kodekjeden fra [CV-API-ets beskrivelse](https://github.com/navikt/pam-cv-api-gcp/blob/main/src/main/kotlin/no/nav/arbeid/cv/rest/dto/cv/Forerkortklasse.kt)
