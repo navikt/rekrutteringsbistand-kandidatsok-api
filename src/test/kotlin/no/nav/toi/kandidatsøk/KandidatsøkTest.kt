@@ -231,7 +231,6 @@ class KandidatsøkTest {
 
     fun personbilførerkortSomParameter(): Stream<Arguments> {
         val b78 = "B 78 - Personbil med automatgir"
-        val b78Indeksverdi = "B78 - B 78 - Personbil med automatgir"
         val b = "B - Personbil"
         val bIndeksverdier = listOf(
             b,
@@ -245,7 +244,10 @@ class KandidatsøkTest {
             "D - Buss",
             "DE - Buss med tilhenger"
         )
-        val b78Indeksverdier = bIndeksverdier + b78Indeksverdi
+        val b78Indeksverdier = bIndeksverdier + listOf(
+            "B78 - B 78 - Personbil med automatgir",
+            "B 78 - Personbil med automatgir"
+        )
         return Endepunkt.entries.flatMap { endepunkt ->
             listOf(
                 Arguments.of(endepunkt, listOf(b78), b78Indeksverdier),
@@ -663,7 +665,7 @@ class KandidatsøkTest {
 
     @ParameterizedTest
     @MethodSource("personbilførerkortSomParameter")
-    fun `B78 inkluderer B men B inkluderer ikke B78`(
+    fun `B78 matcher begge indeksformater med OR og inkluderer B men B inkluderer ikke B78`(
         endepunkt: Endepunkt,
         førerkort: List<String>,
         indeksverdier: List<String>,
