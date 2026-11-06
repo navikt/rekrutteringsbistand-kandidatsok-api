@@ -1,7 +1,9 @@
 plugins {
+    val kotlinVersion = "2.4.21"
+
     application
-    kotlin("jvm") version "2.4.21"
-    kotlin("kapt") version "2.4.21"
+    kotlin("jvm") version kotlinVersion
+    kotlin("kapt") version kotlinVersion
     id("io.github.ben-manes.versions") version "0.67.0"
 }
 
@@ -9,8 +11,8 @@ group = "no.nav"
 version = "1.0-SNAPSHOT"
 
 val mockOAuth2ServerVersion = "6.0.4"
-val javalinVersion = "7.2.3"
-val javalinOpenApiVersion = "7.2.3"
+val javalinVersion = "7.2.4"
+val javalinOpenApiVersion = "7.2.4"
 val junitVersion = "6.1.3"
 val resilience4jVersion = "2.4.0"
 val jacksonVersion = "3.2.3"
