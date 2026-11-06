@@ -13,6 +13,8 @@ class JsonTest {
         val json = javalinJsonMapper().toJsonString(MedNorskeTegn("Oslo", true, "ja"), MedNorskeTegn::class.java)
 
         assertThat(json).contains("\"ønsketSted\":\"Oslo\"", "\"åpen\":true", "\"ærlig\":\"ja\"")
+        assertThat(javalinJsonMapper().fromJsonString<MedNorskeTegn>(json, MedNorskeTegn::class.java))
+            .isEqualTo(MedNorskeTegn("Oslo", true, "ja"))
     }
 
     @Test
@@ -20,6 +22,8 @@ class JsonTest {
         val json = httpKlientMapper.writeValueAsString(MedNorskeTegn("Oslo", true, "ja"))
 
         assertThat(json).contains("\"ønsketSted\":\"Oslo\"", "\"åpen\":true", "\"ærlig\":\"ja\"")
+        assertThat(httpKlientMapper.readValue<MedNorskeTegn>(json))
+            .isEqualTo(MedNorskeTegn("Oslo", true, "ja"))
     }
 
     private data class MedPrimitiver(val tall: Int, val flagg: Boolean)
@@ -41,5 +45,21 @@ class JsonTest {
     fun `http-klientens mapper godtar null i primitive felt og ignorerer ukjente felt`() {
         assertThat(httpKlientMapper.readValue<MedPrimitiver>("""{"tall":null,"flagg":null,"ukjent":1}"""))
             .isEqualTo(MedPrimitiver(0, false))
+        assertThat(httpKlientMapper.readValue<MedPrimitiver>("""{"tall":1}"""))
+            .isEqualTo(MedPrimitiver(1, false))
+        assertThat(httpKlientMapper.readValue<MedPrimitiver>("""{"tall":1,"flagg":true} x"""))
+            .isEqualTo(MedPrimitiver(1, true))
+    }
+
+    @Test
+    fun `begge mapperne avviser tom og ugyldig JSON`() {
+        listOf("", "not-json", """{"tall":""").forEach { json ->
+            assertThatThrownBy {
+                javalinJsonMapper().fromJsonString<MedPrimitiver>(json, MedPrimitiver::class.java)
+            }.isInstanceOf(tools.jackson.core.JacksonException::class.java)
+            assertThatThrownBy {
+                httpKlientMapper.readValue<MedPrimitiver>(json)
+            }.isInstanceOf(tools.jackson.core.JacksonException::class.java)
+        }
     }
 }

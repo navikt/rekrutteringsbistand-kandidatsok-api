@@ -23,6 +23,40 @@ og så legge på svaret som
 Authorization: Bearer <token>
 ```
 
+## Jackson 2-avhengigheter
+
+Applikasjonen bruker Jackson 3. Jackson 2 finnes fortsatt transitivt via Auth0,
+OpenSearch og Javalin OpenAPI. OpenAPI-prosessoren bruker også Jackson 2 i kapt,
+og WireMock standalone inneholder relokerte Jackson 2-klasser.
+
+`./gradlew check` kjører `verifyJackson2Baseline`. Kontrollen avviser nye Jackson
+2-moduler, endrede Jackson 2-versjoner, nye konsumenter og nye konfigurasjoner
+med Jackson 2. Den krever også at unntak fjernes når en avhengighet forsvinner.
+Eksisterende unntak ligger i `gradle/jackson2.gradle.kts`. De er midlertidige,
+ikke en godkjenning av nye Jackson 2-avhengigheter.
+
+```sh
+./gradlew reportJackson2Dependencies reportBundledJackson2
+./gradlew verifyNoJackson2
+```
+
+Rapportene skrives til `build/reports/jackson2/dependencies.txt` og `bundled.txt`.
+Den første viser moduler og konsumenter per konfigurasjon. Den andre viser
+Jackson 2-klasser pakket inn i andre avhengigheter, inkludert relokering med
+et ekstra pakkeprefiks. Kontrollen dekker prosjektets og buildscriptets
+oppløsbare konfigurasjoner og lokale JAR-avhengigheter. Den garanterer ikke
+deteksjon av vilkårlig omskrevne pakkenavn, nestede JAR-filer eller separate
+verktøyprosesser og konfigurasjoner opprettet internt under andre oppgaver.
+
+`verifyNoJackson2` skal feile så lenge konsumenter eller innpakket Jackson 2
+gjenstår. Oppgrader eller erstatt konsumentene én om gangen. Ikke ekskluder
+Jackson 2-klasser som bibliotekene fortsatt trenger. Når kontrollen passerer,
+fjern Jackson 2-BOM-en, bytt avhengigheten til `check` fra
+`verifyJackson2Baseline` til `verifyNoJackson2`, og fjern de midlertidige
+unntakene. Kontroller også `lib` i den nybygde distribusjonen.
+`com.fasterxml.jackson.core:jackson-annotations` er tillatt fordi Jackson 3
+fortsatt bruker denne artefakten.
+
 # Kode generert av GitHub Copilot
 Dette repoet bruker GitHub Copilot til å generere kode.
 
