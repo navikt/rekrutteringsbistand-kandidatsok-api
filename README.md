@@ -23,39 +23,51 @@ og så legge på svaret som
 Authorization: Bearer <token>
 ```
 
-## Jackson 2-avhengigheter
+## Jackson 3: status og videre arbeid
 
-Applikasjonen bruker Jackson 3. Jackson 2 finnes fortsatt transitivt via Auth0,
-OpenSearch og Javalin OpenAPI. OpenAPI-prosessoren bruker også Jackson 2 i kapt,
-og WireMock standalone inneholder relokerte Jackson 2-klasser.
+Status per 6. november 2026.
 
-`./gradlew check` kjører `verifyJackson2Baseline`. Kontrollen avviser nye Jackson
-2-moduler, endrede Jackson 2-versjoner, nye konsumenter og nye konfigurasjoner
-med Jackson 2. Den krever også at unntak fjernes når en avhengighet forsvinner.
-Eksisterende unntak ligger i `gradle/jackson2.gradle.kts`. De er midlertidige,
-ikke en godkjenning av nye Jackson 2-avhengigheter.
+Applikasjonens JSON-håndtering bruker Jackson 3.2.4. Javalin er eksplisitt
+konfigurert med `JavalinJackson3`, og OpenSearch-klienten bruker Jackson
+3-mapperen. Regresjonstestene dekker blant annet norske feltnavn begge veier,
+nullverdier i primitive felt, ukjente felt og ugyldig JSON.
 
-```sh
-./gradlew reportJackson2Dependencies reportBundledJackson2
-./gradlew verifyNoJackson2
-```
+Migreringen av applikasjonskoden er gjennomført, men Jackson 2 finnes fortsatt
+transitivt. De undersøkte stabile bibliotekversjonene har følgende bindinger:
 
-Rapportene skrives til `build/reports/jackson2/dependencies.txt` og `bundled.txt`.
-Den første viser moduler og konsumenter per konfigurasjon. Den andre viser
-Jackson 2-klasser pakket inn i andre avhengigheter, inkludert relokering med
-et ekstra pakkeprefiks. Kontrollen dekker prosjektets og buildscriptets
-oppløsbare konfigurasjoner og lokale JAR-avhengigheter. Den garanterer ikke
-deteksjon av vilkårlig omskrevne pakkenavn, nestede JAR-filer eller separate
-verktøyprosesser og konfigurasjoner opprettet internt under andre oppgaver.
+| Bibliotek | Gjenværende bruk av Jackson 2 |
+|---|---|
+| Auth0 `java-jwt` 4.6.2 og `jwks-rsa` 0.24.2 | Bruker Jackson 2 internt til parsing av token og nøkler. Se publiserte avhengigheter for [java-jwt](https://repo.maven.apache.org/maven2/com/auth0/java-jwt/4.6.2/java-jwt-4.6.2.pom) og [jwks-rsa](https://repo.maven.apache.org/maven2/com/auth0/jwks-rsa/0.24.2/jwks-rsa-0.24.2.pom). |
+| OpenSearch Java 3.10.0 | Har Jackson 3-adapter, men [deklarerer fortsatt Jackson 2 som runtime-avhengighet](https://repo.maven.apache.org/maven2/org/opensearch/client/opensearch-java/3.10.0/opensearch-java-3.10.0.pom). |
+| Javalin OpenAPI 7.2.4 | [Generatoren](https://repo.maven.apache.org/maven2/io/javalin/community/openapi/openapi-generator/7.2.4/openapi-generator-7.2.4.pom) og [annotasjonsprosessoren](https://repo.maven.apache.org/maven2/io/javalin/community/openapi/openapi-annotation-processor/7.2.4/openapi-annotation-processor-7.2.4.pom) bruker Jackson 2. |
+| WireMock standalone 3.13.2 | [Pakker inn og relokerer Jackson 2.20.1](https://github.com/wiremock/wiremock/blob/3.13.2/build.gradle). Applikasjonens BOM styrer ikke denne kopien. |
 
-`verifyNoJackson2` skal feile så lenge konsumenter eller innpakket Jackson 2
-gjenstår. Oppgrader eller erstatt konsumentene én om gangen. Ikke ekskluder
-Jackson 2-klasser som bibliotekene fortsatt trenger. Når kontrollen passerer,
-fjern Jackson 2-BOM-en, bytt avhengigheten til `check` fra
-`verifyJackson2Baseline` til `verifyNoJackson2`, og fjern de midlertidige
-unntakene. Kontroller også `lib` i den nybygde distribusjonen.
-`com.fasterxml.jackson.core:jackson-annotations` er tillatt fordi Jackson 3
-fortsatt bruker denne artefakten.
+Jackson 2-BOM-en på 2.22.4 beholdes for å samordne de ordinære transitive
+avhengighetene i applikasjonen. OpenAPI-prosessoren har et separat Jackson
+2.21.0-avhengighetssett i `kapt`; applikasjonens BOM samordner ikke dette.
+
+### Anbefalt framgangsmåte
+
+Gjennomgangen fant ingen stabil direkteoppgradering som fjerner de gjenværende
+Jackson 2-implementasjonene. Behold derfor dagens oppsett inntil kompatible
+bibliotekversjoner finnes. Ikke erstatt eller fork bibliotekene, eller
+ekskluder klasser de trenger, bare for å fjerne Jackson 2 fra avhengighetsgrafen.
+Ordinære vedlikeholds- og sikkerhetsoppgraderinger må fortsatt vurderes.
+
+1. Undersøk publiserte avhengigheter når nye bibliotekversjoner kommer.
+   Oppgrader én bibliotekfamilie om gangen.
+2. Kontroller både produksjons-, test- og `kapt`-avhengigheter. Kjør relevante
+   regresjonstester og `./gradlew clean build distTar`, og undersøk bibliotekene
+   i den ferdige distribusjonen. Innpakket Jackson-kode må kontrolleres
+   separat fra avhengighetsgrafen.
+3. Fjern Jackson 2-BOM-en når ingen komponent trenger Jackson 2-implementasjonene.
+   Kontroller deretter alle berørte avhengighetssett på nytt.
+
+Målet er ingen Jackson 2-implementasjon, heller ikke i tester eller
+annotasjonsprosessering. `com.fasterxml.jackson.core:jackson-annotations`
+og importene fra `com.fasterxml.jackson.annotation.*` er et tilsiktet unntak:
+[Jackson 3 bruker fortsatt disse annotasjonene med 2.x-versjon og gammelt
+pakkenavn](https://github.com/FasterXML/jackson/blob/main/jackson3/MIGRATING_TO_JACKSON_3.md).
 
 # Kode generert av GitHub Copilot
 Dette repoet bruker GitHub Copilot til å generere kode.

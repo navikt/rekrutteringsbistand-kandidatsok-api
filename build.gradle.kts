@@ -66,8 +66,6 @@ tasks.test {
     useJUnitPlatform()
 }
 
-apply(from = "gradle/jackson2.gradle.kts")
-
 fun erUstabilVersjon(versjon: String): Boolean {
     val stabilt = listOf("RELEASE", "FINAL", "GA").any { versjon.uppercase().contains(it) }
     val ustabilt = Regex("(?i).*[.-](alpha|beta|rc|cr|m|milestone|preview|snapshot|eap|dev)[.\\d-]*.*").matches(versjon)
