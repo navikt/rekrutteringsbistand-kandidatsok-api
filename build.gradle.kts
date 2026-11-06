@@ -36,8 +36,8 @@ dependencies {
     // Jackson 2 kommer transitivt via java-jwt, jwks-rsa, opensearch-java og javalin-openapi
     implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
     implementation("tools.jackson.module:jackson-module-kotlin")
-    implementation("com.auth0:java-jwt:4.6.1")
-    implementation("com.auth0:jwks-rsa:0.24.1")
+    implementation("com.auth0:java-jwt:4.6.2")
+    implementation("com.auth0:jwks-rsa:0.24.2")
     implementation("io.javalin.community.openapi:javalin-openapi-plugin:$javalinOpenApiVersion")
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:$javalinOpenApiVersion")
     implementation("no.nav.common:audit-log:4.2026.10.01_11.30-68a5418edc3c")
