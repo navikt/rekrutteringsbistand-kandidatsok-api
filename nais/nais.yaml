@@ -43,6 +43,7 @@ spec:
         - application: rekrutteringsbistand-kandidatvarsel-api
         - application: rekrutteringsbistand-kandidat-api
           cluster: {{rekrutteringsbistand-kandidat-api-cluster}}
+        - application: rekrutteringsbistand-kandidat-api
         - application: toi-deling-av-cv-api
         - application: foresporsel-om-deling-av-cv-api
           namespace: toi
