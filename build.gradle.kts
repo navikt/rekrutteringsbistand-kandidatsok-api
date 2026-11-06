@@ -40,7 +40,7 @@ dependencies {
     implementation("com.auth0:jwks-rsa:0.24.2")
     implementation("io.javalin.community.openapi:javalin-openapi-plugin:$javalinOpenApiVersion")
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:$javalinOpenApiVersion")
-    implementation("no.nav.common:audit-log:4.2026.10.01_11.30-68a5418edc3c")
+    implementation("no.nav.common:audit-log:4.2026.11.05_07.24-dd0ce2805c16")
     kapt("io.javalin.community.openapi:openapi-annotation-processor:$javalinOpenApiVersion")
     implementation("org.ehcache:ehcache:3.12.0")
     implementation("io.github.resilience4j:resilience4j-retry:$resilience4jVersion")
