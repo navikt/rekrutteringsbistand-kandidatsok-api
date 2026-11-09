@@ -1,0 +1,80 @@
+name: Dependabot automerge
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions: { }
+
+concurrency:
+  group: dependabot-automerge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  bygg:
+    # Automerge-jobben sjekker at alle commits i PR-en er fra Dependabot
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+          cache: 'gradle'
+
+      - run: ./gradlew build
+
+  automerge:
+    needs: bygg
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    timeout-minutes: 10
+    steps:
+      - name: Hent metadata fra Dependabot
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # fetch-metadata sjekker bare første commit, så vi stopper hvis noen andre har pushet til PR-en
+      - name: Sjekk at alle commits er fra Dependabot
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          andre=$(gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/commits" --jq '.[] | select(.author.login != "dependabot[bot]") | .sha')
+          if [[ -n "$andre" ]]; then
+            echo "::error::PR-en har commits fra andre enn Dependabot, automerge hoppes over: $andre"
+            exit 1
+          fi
+
+      # Major-oppdateringer må merges manuelt
+      - name: Merge patch- og minor-oppdateringer
+        id: merge
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: gh pr merge --squash --match-head-commit "$HEAD_SHA" "$PR_URL"
+
+      # Merge gjort med GITHUB_TOKEN utløser ikke on: push, så deploy må startes eksplisitt
+      - name: Start deploy av main
+        if: steps.merge.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: gh workflow run deploy.yaml --ref main --repo "$REPO"
