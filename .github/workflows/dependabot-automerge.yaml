@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   bygg:
-    # Automerge-jobben sjekker at alle commits i PR-en er fra Dependabot
+    # Automerge-jobben sjekker at PR-en er én signert Dependabot-commit
     if: github.event.pull_request.user.login == 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
@@ -47,17 +47,28 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # fetch-metadata sjekker bare første commit, så vi stopper hvis noen andre har pushet til PR-en
-      - name: Sjekk at alle commits er fra Dependabot
+      # fetch-metadata sjekker og klassifiserer bare første commit, og forfatteren kan forfalskes.
+      # Vi krever derfor nøyaktig én commit: den som ble bygget, skrevet av Dependabot og signert
+      # av GitHub (committer web-flow og verified).
+      - name: Sjekk at PR-en er én signert Dependabot-commit
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          andre=$(gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/commits" --jq '.[] | select(.author.login != "dependabot[bot]") | .sha')
-          if [[ -n "$andre" ]]; then
-            echo "::error::PR-en har commits fra andre enn Dependabot, automerge hoppes over: $andre"
+          commit=$(gh api "repos/$REPO/pulls/$PR_NUMBER/commits?per_page=2" --jq '
+            if length == 1
+              and .[0].author.login == "dependabot[bot]"
+              and .[0].committer.login == "web-flow"
+              and .[0].commit.verification.verified == true
+            then .[0].sha
+            else "ugyldig"
+            end')
+          if [[ "$commit" != "$HEAD_SHA" ]]; then
+            echo "::error::Automerge krever at PR-en bare har den signerte Dependabot-commiten $HEAD_SHA. Merge PR-en manuelt."
             exit 1
           fi
 
