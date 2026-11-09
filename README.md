@@ -72,7 +72,7 @@ pakkenavn](https://github.com/FasterXML/jackson/blob/main/jackson3/MIGRATING_TO_
 ## Avhengigheter og Dependabot
 
 Dependabot ser etter oppdateringer av Gradle-avhengigheter og GitHub Actions hver
-mandag (se [`.github/dependabot.yml`](.github/dependabot.yml)). Oppdateringer
+dag (se [`.github/dependabot.yml`](.github/dependabot.yml)). Oppdateringer
 samles i gruppene `minor-og-patch` og `major`.
 
 [`dependabot-automerge.yaml`](.github/workflows/dependabot-automerge.yaml) bygger og
