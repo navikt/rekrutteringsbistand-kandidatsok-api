@@ -69,6 +69,17 @@ og importene fra `com.fasterxml.jackson.annotation.*` er et tilsiktet unntak:
 [Jackson 3 bruker fortsatt disse annotasjonene med 2.x-versjon og gammelt
 pakkenavn](https://github.com/FasterXML/jackson/blob/main/jackson3/MIGRATING_TO_JACKSON_3.md).
 
+## Avhengigheter og Dependabot
+
+Dependabot ser etter oppdateringer av Gradle-avhengigheter og GitHub Actions hver
+mandag (se [`.github/dependabot.yml`](.github/dependabot.yml)). Oppdateringer
+samles i gruppene `minor-og-patch` og `major`.
+
+[`dependabot-automerge.yaml`](.github/workflows/dependabot-automerge.yaml) bygger og
+tester Dependabot-PR-er. Er bygget grønt og PR-en bare inneholder patch- og
+minor-oppdateringer, merges den automatisk, og deploy til dev og prod startes.
+Major-oppdateringer må gjennomgås og merges manuelt.
+
 # Kode generert av GitHub Copilot
 Dette repoet bruker GitHub Copilot til å generere kode.
 
