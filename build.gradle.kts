@@ -10,7 +10,7 @@ plugins {
 group = "no.nav"
 version = "1.0-SNAPSHOT"
 
-val mockOAuth2ServerVersion = "6.1.4"
+val mockOAuth2ServerVersion = "6.1.5"
 val javalinVersion = "7.2.4"
 val javalinOpenApiVersion = "7.2.4"
 val junitVersion = "6.1.3"
