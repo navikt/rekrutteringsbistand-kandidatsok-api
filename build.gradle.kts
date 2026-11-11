@@ -15,7 +15,7 @@ val javalinVersion = "7.2.4"
 val javalinOpenApiVersion = "7.2.4"
 val junitVersion = "6.1.3"
 val resilience4jVersion = "2.4.0"
-val jacksonVersion = "3.2.4"
+val jacksonVersion = "3.3.0"
 
 application {
     mainClass.set("no.nav.toi.MainKt")
@@ -34,7 +34,7 @@ dependencies {
     implementation("org.opensearch.client:opensearch-java:3.10.0")
     implementation(platform("tools.jackson:jackson-bom:$jacksonVersion"))
     // Jackson 2 kommer transitivt via java-jwt, jwks-rsa, opensearch-java og javalin-openapi
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.23.0"))
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("com.auth0:java-jwt:4.6.2")
     implementation("com.auth0:jwks-rsa:0.24.2")
