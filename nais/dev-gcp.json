@@ -13,7 +13,6 @@
     "pdlHost": "pdl-api.dev-fss-pub.nais.io",
     "modiaContextHolderUrl": "http://modiacontextholder.personoversikt",
     "modiaContextHolderScope": "api://dev-gcp.personoversikt.modiacontextholder/.default",
-    "rekrutteringsbistand-kandidat-api-cluster": "dev-fss",
     "foresporsel-om-deling-av-cv-api-cluster": "dev-fss",
     "toiLivshendelseScope": "api://dev-gcp.toi.toi-livshendelse/.default"
 }
