@@ -78,8 +78,11 @@ samles i gruppene `minor-og-patch` og `major`.
 [`dependabot-automerge.yaml`](.github/workflows/dependabot-automerge.yaml) bygger og
 tester Dependabot-PR-er. Er bygget grønt og PR-en bare inneholder patch- og
 minor-oppdateringer, merges den automatisk, og deploy til dev og prod startes.
-Major-oppdateringer må gjennomgås og merges manuelt. Det samme gjelder PR-er der
-andre enn Dependabot har pushet commits.
+Major-oppdateringer må gjennomgås og merges manuelt.
+
+Feiler bygget for en patch- eller minor-oppdatering, pusher du fiksen til samme
+Dependabot-PR. Vent på grønt bygg og merge PR-en manuelt. Automerge hoppes over
+når PR-en har mer enn én commit.
 
 # Kode generert av GitHub Copilot
 Dette repoet bruker GitHub Copilot til å generere kode.

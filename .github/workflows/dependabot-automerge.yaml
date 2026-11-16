@@ -34,6 +34,8 @@ jobs:
 
   automerge:
     needs: bygg
+    # Har noen pushet en fiks til PR-en, merges den manuelt. Da hoppes automerge over i stedet for å feile.
+    if: github.event.pull_request.commits == 1
     runs-on: ubuntu-latest
     permissions:
       contents: write
