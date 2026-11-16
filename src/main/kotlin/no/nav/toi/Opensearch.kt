@@ -7,7 +7,6 @@ import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
 import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder
 import org.apache.hc.core5.http.HttpHost
 import org.opensearch.client.json.JsonData
-import org.opensearch.client.json.jackson3.JacksonJsonpMapper
 import org.opensearch.client.opensearch.OpenSearchClient
 import org.opensearch.client.opensearch._types.FieldValue
 import org.opensearch.client.opensearch._types.SortOrder
@@ -39,7 +38,7 @@ fun createOpenSearchClient(
     }
 
     val transport = ApacheHttpClient5TransportBuilder.builder(httpHost)
-        .setMapper(JacksonJsonpMapper())
+        .setMapper(OpenSearchJsonMapper.create())  // Hotfix for å fikse issue i opensearch versjon 3.11.0 #2293
         .setHttpClientConfigCallback(object : ApacheHttpClient5TransportBuilder.HttpClientConfigCallback {
             override fun customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder {
                 return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
