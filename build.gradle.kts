@@ -28,7 +28,7 @@ repositories {
 
 dependencies {
     implementation("io.javalin:javalin:$javalinVersion")
-    implementation("ch.qos.logback:logback-classic:1.6.6")
+    implementation("ch.qos.logback:logback-classic:1.6.7")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("org.opensearch.client:opensearch-rest-client:3.9.0")
     implementation("org.opensearch.client:opensearch-java:3.11.0")
