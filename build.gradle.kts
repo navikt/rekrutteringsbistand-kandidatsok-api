@@ -28,9 +28,9 @@ repositories {
 
 dependencies {
     implementation("io.javalin:javalin:$javalinVersion")
-    implementation("ch.qos.logback:logback-classic:1.6.7")
+    implementation("ch.qos.logback:logback-classic:1.6.8")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
-    implementation("org.opensearch.client:opensearch-rest-client:3.9.0")
+    implementation("org.opensearch.client:opensearch-rest-client:3.10.0")
     implementation("org.opensearch.client:opensearch-java:3.11.0")
     implementation(platform("tools.jackson:jackson-bom:$jacksonVersion"))
     // Jackson 2 kommer transitivt via java-jwt, jwks-rsa, opensearch-java og javalin-openapi
