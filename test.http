@@ -5,7 +5,7 @@ Content-Type: application/x-www-form-urlencoded
 client_id=someclientid
 &aud=1
 &acr=Level4
-&pid=12345678910
+&pid=00000000016
 &NAVident=1234
 &groups=%5B%2267a06857-0028-4a90-bf4c-9c9a92c7d733%22%5D
 
@@ -22,5 +22,5 @@ POST http://localhost:8080/api/lookupCv
 Content-Type: application/json
 Authorization: Bearer {{auth_token}}
 
-{"fodselsnummer": "10428826731"}
+{"fodselsnummer": "00000000011"}
 

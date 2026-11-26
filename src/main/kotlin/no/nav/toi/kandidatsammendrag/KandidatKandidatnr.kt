@@ -25,7 +25,7 @@ private data class KandidatKandidatnrResponsDto(
     requestBody = OpenApiRequestBody(
         [OpenApiContent(
             from = KandidatKandidatnrRequestDto::class,
-            example = """{ "fodselsnummer": "12345678901" }"""
+            example = """{ "fodselsnummer": "00000000015" }"""
         )]
     ),
     responses = [OpenApiResponse(

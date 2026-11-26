@@ -116,7 +116,7 @@ class BrukerTilgangTest {
         val response = testHttpClient.send(
             HttpRequest.newBuilder(URI("http://localhost:8080/api/brukertilgang"))
                 .header("Authorization", "Bearer ${token.serialize()}")
-                .POST(BodyPublishers.ofString("""{"${søkeParameter.requestParameter}":"12345678910"}"""))
+                .POST(BodyPublishers.ofString("""{"${søkeParameter.requestParameter}":"00000000016"}"""))
                 .build(),
             BodyHandlers.ofString()
         )
@@ -152,7 +152,7 @@ class BrukerTilgangTest {
             WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
                     WireMock.equalToJson(
-                        """{"_source":{"includes":["veilederIdent","orgenhet"]},"query":{"term":{"$mockESFelt":{"value":"12345678910"}}}}""".trimIndent()
+                        """{"_source":{"includes":["veilederIdent","orgenhet"]},"query":{"term":{"$mockESFelt":{"value":"00000000016"}}}}""".trimIndent()
                     )
                 )
                 .willReturn(

@@ -755,7 +755,7 @@ class KandidatsøkTest {
         val response = testHttpClient.send(
             HttpRequest.newBuilder(URI("http://localhost:8080/api/kandidatsok/${endepunkt.path}"))
                 .header("Authorization", "Bearer ${token.serialize()}")
-                .POST(BodyPublishers.ofString("""{"fritekst":"12345678910"${endepunkt.bodyParameter(true)}}"""))
+                .POST(BodyPublishers.ofString("""{"fritekst":"00000000016"${endepunkt.bodyParameter(true)}}"""))
                 .build(),
             BodyHandlers.ofString()
         )

@@ -31,7 +31,7 @@ object KandidatsøkRespons {
     val førerkortTerm = """{"bool":{"should":[{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"BE - Personbil med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"D - Buss"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"C1E - Lett lastebil med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"CE - Lastebil med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"D1E - Minibuss med tilhenger"}}},"score_mode":"sum"}},{"nested":{"path":"forerkort","query":{"term":{"forerkort.forerkortKodeKlasse":{"value":"DE - Buss med tilhenger"}}},"score_mode":"sum"}}]}}"""
     val utdanningTerm = """{"bool":{"should":[{"bool":{"must":[{"nested":{"path":"utdanning","query":{"regexp":{"utdanning.nusKode":{"value":"[3-4][0-9]*"}}}}}],"must_not":[{"nested":{"path":"utdanning","query":{"regexp":{"utdanning.nusKode":{"value":"[5-8][0-9]*"}}}}}]}},{"bool":{"must":[{"nested":{"path":"utdanning","query":{"regexp":{"utdanning.nusKode":{"value":"6[0-9]*"}}}}}],"must_not":[{"nested":{"path":"utdanning","query":{"regexp":{"utdanning.nusKode":{"value":"[7-8][0-9]*"}}}}}]}},{"bool":{"must":[{"nested":{"path":"utdanning","query":{"regexp":{"utdanning.nusKode":{"value":"8[0-9]*"}}}}}]}}]}}"""
     val prioriterteMålgrupperTerm = """{"bool":{"should":[{"range":{"fodselsdato":{"gte":"now/d-30y","lt":"now"}}},{"range":{"fodselsdato":{"gte":"now-200y/d","lt":"now/d-50y"}}},{"bool":{"must":[{"bool":{"should":[{"nested":{"path":"yrkeserfaring","query":{"bool":{"must":[{"exists":{"field":"yrkeserfaring"}}]}}}},{"nested":{"path":"utdanning","query":{"bool":{"must":[{"exists":{"field":"utdanning"}}]}}}},{"nested":{"path":"forerkort","query":{"bool":{"must":[{"exists":{"field":"forerkort"}}]}}}},{"exists":{"field":"kursObj"}},{"exists":{"field":"fagdokumentasjon"}},{"exists":{"field":"annenerfaringObj"}},{"exists":{"field":"godkjenninger"}}]}},{"bool":{"should":[{"bool":{"must_not":[{"exists":{"field":"perioderMedInaktivitet.startdatoForInnevarendeInaktivePeriode"}},{"exists":{"field":"perioderMedInaktivitet.sluttdatoerForInaktivePerioderPaToArEllerMer"}}]}},{"bool":{"must":[{"exists":{"field":"perioderMedInaktivitet.startdatoForInnevarendeInaktivePeriode"}},{"bool":{"should":[{"range":{"perioderMedInaktivitet.startdatoForInnevarendeInaktivePeriode":{"lte":"${LocalDate.now().minusYears(2)}"}}},{"range":{"perioderMedInaktivitet.sluttdatoerForInaktivePerioderPaToArEllerMer":{"gte":"${LocalDate.now().minusYears(3)}"}}}]}}]}}]}}]}}]}}"""
-    val queryMedIdentTerm = """{"bool":{"should":[{"term":{"aktorId":{"value":"12345678910"}}},{"term":{"fodselsnummer":{"value":"12345678910"}}}]}}"""
+    val queryMedIdentTerm = """{"bool":{"should":[{"term":{"aktorId":{"value":"00000000016"}}},{"term":{"fodselsnummer":{"value":"00000000016"}}}]}}"""
     val queryMedArenaKandidatnrTerm = """{"term":{"kandidatnr":{"value":"ab123"}}}"""
     val queryMedPAMKandidatnrTerm = """{"term":{"kandidatnr":{"value":"PAM01Z"}}}"""
     val queryMedKMultiMatchTerm = """{"multi_match":{"query":"søkeord","fields":["fritekst^1","fornavn^1","etternavn^1","yrkeJobbonskerObj.styrkBeskrivelse^1.5","yrkeJobbonskerObj.sokeTitler^1"]}}"""
@@ -82,7 +82,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Nybakt",
-                            "fodselsnummer": "31419334556",
+                            "fodselsnummer": "00000000029",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -102,7 +102,7 @@ object KandidatsøkRespons {
                             "kommuneNavn": "Råde",
                             "geografiJobbonsker": [],
                             "fornavn": "Vennlig",
-                            "fodselsnummer": "02497030229",
+                            "fodselsnummer": "00000000002",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -145,7 +145,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Redd",
-                            "fodselsnummer": "04928797045",
+                            "fodselsnummer": "00000000004",
                             "innsatsgruppe": "STANDARD_INNSATS"
                         },
                         "sort": [
@@ -185,7 +185,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Oppfyllende Korrekt Boble",
-                            "fodselsnummer": "19810297487",
+                            "fodselsnummer": "00000000023",
                             "innsatsgruppe": "STANDARD_INNSATS"
                         },
                         "sort": [
@@ -301,7 +301,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Uklar",
-                            "fodselsnummer": "07858597719",
+                            "fodselsnummer": "00000000007",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -351,7 +351,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "From",
-                            "fodselsnummer": "12447120117",
+                            "fodselsnummer": "00000000017",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -392,7 +392,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Fast",
-                            "fodselsnummer": "23427744876",
+                            "fodselsnummer": "00000000026",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -438,7 +438,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Possessiv",
-                            "fodselsnummer": "07499738492",
+                            "fodselsnummer": "00000000006",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -513,7 +513,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Rettferdig",
-                            "fodselsnummer": "25898097334",
+                            "fodselsnummer": "00000000027",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -624,7 +624,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Umotivert",
-                            "fodselsnummer": "10428826731",
+                            "fodselsnummer": "00000000011",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -662,7 +662,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Opplyst",
-                            "fodselsnummer": "04829398279",
+                            "fodselsnummer": "00000000003",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -698,7 +698,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Ufruktbar",
-                            "fodselsnummer": "66870375701",
+                            "fodselsnummer": "40000000001",
                             "innsatsgruppe": "VARIG_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -814,7 +814,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Uklar",
-                            "fodselsnummer": "07858597719",
+                            "fodselsnummer": "00000000007",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -889,7 +889,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "From",
-                            "fodselsnummer": "07897498280",
+                            "fodselsnummer": "00000000008",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -964,7 +964,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Passiv",
-                            "fodselsnummer": "28869099653",
+                            "fodselsnummer": "00000000028",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -1039,7 +1039,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Hevngjerrig",
-                            "fodselsnummer": "17838298621",
+                            "fodselsnummer": "00000000021",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -1114,7 +1114,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Skamfull",
-                            "fodselsnummer": "13898799837",
+                            "fodselsnummer": "00000000019",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -1189,7 +1189,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Motvillig",
-                            "fodselsnummer": "11857998776",
+                            "fodselsnummer": "00000000013",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -1264,7 +1264,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Pompøs",
-                            "fodselsnummer": "06888699277",
+                            "fodselsnummer": "00000000005",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -1339,7 +1339,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Handlekraftig",
-                            "fodselsnummer": "09850499419",
+                            "fodselsnummer": "00000000010",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -1414,7 +1414,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Melankolsk",
-                            "fodselsnummer": "13898297912",
+                            "fodselsnummer": "00000000018",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -1489,7 +1489,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Oriental",
-                            "fodselsnummer": "08837598290",
+                            "fodselsnummer": "00000000009",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -1564,7 +1564,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Velkommen",
-                            "fodselsnummer": "15927296591",
+                            "fodselsnummer": "00000000020",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -1639,7 +1639,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Oppjaget",
-                            "fodselsnummer": "20877599184",
+                            "fodselsnummer": "00000000024",
                             "innsatsgruppe": "SPESIELT_TILPASSET_INNSATS"
                         },
                         "sort": [
@@ -1714,7 +1714,7 @@ object KandidatsøkRespons {
                                 }
                             ],
                             "fornavn": "Patent",
-                            "fodselsnummer": "17907096467",
+                            "fodselsnummer": "00000000022",
                             "innsatsgruppe": "SITUASJONSBESTEMT_INNSATS"
                         },
                         "sort": [

@@ -11,12 +11,12 @@ Content-Type: application/x-www-form-urlencoded
 client_id=someclientid&
 aud=dev-gcp:toi:rekrutteringsbistand-kandidatsok-api&
 acr=1&
-pid=12345678910&
+pid=00000000016&
 NAVident=1234
 ```
 for eksempel med kommandoen curl:
 ```sh
-curl --data 'client_id=someclientid&aud=dev-gcp:toi:rekrutteringsbistand-kandidatsok-api&acr=1&pid=12345678910&NAVident=1234' https://fakedings.intern.dev.nav.no/fake/aad
+curl --data 'client_id=someclientid&aud=dev-gcp:toi:rekrutteringsbistand-kandidatsok-api&acr=1&pid=00000000016&NAVident=1234' https://fakedings.intern.dev.nav.no/fake/aad
 ```
 og så legge på svaret som
 ``` 

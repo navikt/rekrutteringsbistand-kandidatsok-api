@@ -268,7 +268,7 @@ class SuggestKontorTest {
     private val source = """
     {
       "aktorId": "2740905813038",
-      "fodselsnummer": "01825999058",
+      "fodselsnummer": "00000000001",
       "fornavn": "Flink",
       "etternavn": "Kostnad",
       "fodselsdato": "1959-02-01",

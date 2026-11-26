@@ -89,7 +89,7 @@ class JobbsokerInfoTest {
                   "_id": "1",
                   "_score": 1.0,
                   "_source": {
-                    "fodselsnummer": "11111111111",
+                    "fodselsnummer": "00000000012",
                     "navkontor": "Nav Oslo",
                     "veilederVisningsnavn": "Kari Veileder",
                     "veilederIdent": "Z111111",
@@ -103,13 +103,13 @@ class JobbsokerInfoTest {
             """.trimIndent()
         )
 
-        val response = post("""{"fodselsnumre":["11111111111"]}""", gruppe = Gruppe.Arbeidsgiverrettet)
+        val response = post("""{"fodselsnumre":["00000000012"]}""", gruppe = Gruppe.Arbeidsgiverrettet)
         assertEquals(HTTP_OK, response.statusCode())
 
         val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
         assertEquals(1, body.jobbsokerInfo.size)
         val info = body.jobbsokerInfo.single()
-        assertEquals("11111111111", info.fodselsnummer)
+        assertEquals("00000000012", info.fodselsnummer)
         assertEquals("Nav Oslo", info.navkontor)
         assertEquals("Kari Veileder", info.veilederNavn)
         assertEquals("Z111111", info.veilederNavIdent)
@@ -122,7 +122,7 @@ class JobbsokerInfoTest {
     fun `manglende fnr gir ingen rad`() {
         stubOpensearch(tomtOpensearchSvar())
 
-        val response = post("""{"fodselsnumre":["22222222222"]}""")
+        val response = post("""{"fodselsnumre":["00000000025"]}""")
         assertEquals(HTTP_OK, response.statusCode())
 
         val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
@@ -145,7 +145,7 @@ class JobbsokerInfoTest {
                   "_id": "1",
                   "_score": 1.0,
                   "_source": {
-                    "fodselsnummer": "33333333333",
+                    "fodselsnummer": "00000000030",
                     "navkontor": "Nav Bergen",
                     "veilederVisningsnavn": null,
                     "veilederIdent": null,
@@ -158,7 +158,7 @@ class JobbsokerInfoTest {
             """.trimIndent()
         )
 
-        val response = post("""{"fodselsnumre":["33333333333"]}""", gruppe = Gruppe.Arbeidsgiverrettet)
+        val response = post("""{"fodselsnumre":["00000000030"]}""", gruppe = Gruppe.Arbeidsgiverrettet)
         assertEquals(HTTP_OK, response.statusCode())
 
         val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
@@ -190,7 +190,7 @@ class JobbsokerInfoTest {
     @Test
     fun `nekter kall som ikke kommer fra rekrutteringstreff-api`() {
         val response = post(
-            body = """{"fodselsnumre":["11111111111"]}""",
+            body = """{"fodselsnumre":["00000000012"]}""",
             clientId = frontendClientId,
         )
 
@@ -203,7 +203,7 @@ class JobbsokerInfoTest {
             opensearchSvar(
                 """
                 {
-                  "fodselsnummer": "44444444444",
+                  "fodselsnummer": "00000000031",
                   "navkontor": "Nav Trondheim",
                   "veilederVisningsnavn": "Test Veileder",
                   "veilederIdent": "A000001",
@@ -215,11 +215,11 @@ class JobbsokerInfoTest {
             )
         )
 
-        val response = post("""{"fodselsnumre":["44444444444"]}""", gruppe = Gruppe.Jobbsøkerrettet, navIdent = "A000001")
+        val response = post("""{"fodselsnumre":["00000000031"]}""", gruppe = Gruppe.Jobbsøkerrettet, navIdent = "A000001")
 
         assertEquals(HTTP_OK, response.statusCode())
         val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
-        assertEquals(listOf("44444444444"), body.jobbsokerInfo.map { it.fodselsnummer })
+        assertEquals(listOf("00000000031"), body.jobbsokerInfo.map { it.fodselsnummer })
     }
 
     @Test
@@ -229,7 +229,7 @@ class JobbsokerInfoTest {
             opensearchSvar(
                 """
                 {
-                  "fodselsnummer": "55555555555",
+                  "fodselsnummer": "00000000032",
                   "navkontor": "Nav Tromsø",
                   "veilederVisningsnavn": "Annen Veileder",
                   "veilederIdent": "Z999999",
@@ -241,11 +241,11 @@ class JobbsokerInfoTest {
             )
         )
 
-        val response = post("""{"fodselsnumre":["55555555555"]}""", gruppe = Gruppe.Jobbsøkerrettet)
+        val response = post("""{"fodselsnumre":["00000000032"]}""", gruppe = Gruppe.Jobbsøkerrettet)
 
         assertEquals(HTTP_OK, response.statusCode())
         val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
-        assertEquals(listOf("55555555555"), body.jobbsokerInfo.map { it.fodselsnummer })
+        assertEquals(listOf("00000000032"), body.jobbsokerInfo.map { it.fodselsnummer })
     }
 
     @Test
@@ -255,7 +255,7 @@ class JobbsokerInfoTest {
             opensearchSvar(
                 """
                 {
-                  "fodselsnummer": "44444444444",
+                  "fodselsnummer": "00000000031",
                   "navkontor": "Nav Tromsø",
                   "veilederVisningsnavn": null,
                   "veilederIdent": null,
@@ -267,11 +267,11 @@ class JobbsokerInfoTest {
             )
         )
 
-        val response = post("""{"fodselsnumre":["44444444444"]}""", gruppe = Gruppe.Jobbsøkerrettet)
+        val response = post("""{"fodselsnumre":["00000000031"]}""", gruppe = Gruppe.Jobbsøkerrettet)
 
         assertEquals(HTTP_OK, response.statusCode())
         val body = objectMapper.readValue(response.body(), JobbsokerInfoResponsSvar::class.java)
-        assertEquals(listOf("44444444444"), body.jobbsokerInfo.map { it.fodselsnummer })
+        assertEquals(listOf("00000000031"), body.jobbsokerInfo.map { it.fodselsnummer })
     }
 
     @Test
@@ -281,7 +281,7 @@ class JobbsokerInfoTest {
             opensearchSvar(
                 """
                 {
-                  "fodselsnummer": "66666666666",
+                  "fodselsnummer": "00000000033",
                   "navkontor": "Nav Stavanger",
                   "veilederVisningsnavn": "Annen Veileder",
                   "veilederIdent": "Z999999",
@@ -293,7 +293,7 @@ class JobbsokerInfoTest {
             )
         )
 
-        val response = post("""{"fodselsnumre":["66666666666"]}""", gruppe = Gruppe.Jobbsøkerrettet)
+        val response = post("""{"fodselsnumre":["00000000033"]}""", gruppe = Gruppe.Jobbsøkerrettet)
 
         assertEquals(HTTP_FORBIDDEN, response.statusCode())
     }
@@ -305,7 +305,7 @@ class JobbsokerInfoTest {
             opensearchSvar(
                 """
                 {
-                  "fodselsnummer": "77777777777",
+                  "fodselsnummer": "00000000035",
                   "navkontor": "Nav Trondheim",
                   "veilederVisningsnavn": "Test Veileder",
                   "veilederIdent": "A000001",
@@ -316,7 +316,7 @@ class JobbsokerInfoTest {
                 """.trimIndent(),
                 """
                 {
-                  "fodselsnummer": "88888888888",
+                  "fodselsnummer": "00000000036",
                   "navkontor": "Nav Stavanger",
                   "veilederVisningsnavn": "Annen Veileder",
                   "veilederIdent": "Z999999",
@@ -328,7 +328,7 @@ class JobbsokerInfoTest {
             )
         )
 
-        val response = post("""{"fodselsnumre":["77777777777","88888888888"]}""", gruppe = Gruppe.Jobbsøkerrettet)
+        val response = post("""{"fodselsnumre":["00000000035","00000000036"]}""", gruppe = Gruppe.Jobbsøkerrettet)
 
         assertEquals(HTTP_FORBIDDEN, response.statusCode())
     }
@@ -349,7 +349,7 @@ class JobbsokerInfoTest {
             .uri(URI(endepunkt))
             .header("Authorization", "Bearer ${app.lagToken(groups = gruppe.somStringListe, claims = tokenClaims(gruppe.somStringListe), clientId = rekrutteringstreffApiClientId).serialize()}")
             .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString("""{"fodselsnumre":["99999999999"]}"""))
+            .POST(HttpRequest.BodyPublishers.ofString("""{"fodselsnumre":["00000000037"]}"""))
             .build()
 
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
