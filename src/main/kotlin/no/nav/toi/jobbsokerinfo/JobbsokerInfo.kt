@@ -51,7 +51,7 @@ fun JavalinDefaultRoutingApi.handleJobbsokerInfo(
     requestBody = OpenApiRequestBody(
         [OpenApiContent(
             from = JobbsokerInfoRequestDto::class,
-            example = """{ "fodselsnumre": ["11111111111", "22222222222"] }"""
+            example = """{ "fodselsnumre": ["00000000012", "00000000025"] }"""
         )]
     ),
     responses = [
@@ -63,7 +63,7 @@ fun JavalinDefaultRoutingApi.handleJobbsokerInfo(
                 {
                     "jobbsokerInfo": [
                         {
-                            "fodselsnummer": "11111111111",
+                            "fodselsnummer": "00000000012",
                             "navkontor": "Nav Testkontor",
                             "veilederNavn": "Testveileder",
                             "veilederNavIdent": "TEST_IDENT",

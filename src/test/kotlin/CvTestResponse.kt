@@ -6,7 +6,7 @@ object CvTestRespons {
     private fun cv(kandidatnr: String = "PAM0xtfrwli5") = """
         {
           "aktorId": "2177336243360",
-          "fodselsnummer": "07858597719",
+          "fodselsnummer": "00000000007",
           "fornavn": "Uklar",
           "etternavn": "Klippfisk",
           "fodselsdato": "1985-05-07",
@@ -596,7 +596,7 @@ object CvTestRespons {
                         }
                     ],
                     "veilederIdent": ${if (veileder == null) null else """"$veileder""""},
-                    "fodselsnummer": "04928797045",
+                    "fodselsnummer": "00000000004",
                     "veilederEpost": "a@a.no",
                     "orgenhet": "1234"
                 }

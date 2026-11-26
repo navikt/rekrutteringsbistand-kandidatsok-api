@@ -46,7 +46,7 @@ class KandidatTest {
 
     @Test
     fun `trenger token for å spørre endepunkt om arenanummer`() {
-        val fødselsnummer = "12312312312"
+        val fødselsnummer = "00000000014"
         val response = testHttpClient.send(
             HttpRequest.newBuilder(URI("$endepunkt/arena-kandidatnr"))
                 .POST(BodyPublishers.ofString("""{"fodselsnummer":"$fødselsnummer"}"""))
@@ -60,7 +60,7 @@ class KandidatTest {
     @Test
     fun `map fødselsnummer til arenakandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        val fødselsnummer = "12312312312"
+        val fødselsnummer = "00000000014"
         val kandidatnummer = "PAM123456789"
         wireMock.register(
             WireMock.post("/kandidater/_search?typed_keys=true")
@@ -120,7 +120,7 @@ class KandidatTest {
 
     @Test
     fun `trenger token for å spørre endepunkt om navn`() {
-        val fødselsnummer = "12312312312"
+        val fødselsnummer = "00000000014"
         val response = testHttpClient.send(
             HttpRequest.newBuilder(URI("$endepunkt/navn"))
                 .POST(BodyPublishers.ofString("""{"fodselsnummer":"$fødselsnummer"}"""))
@@ -135,7 +135,7 @@ class KandidatTest {
     fun `map fødselsnummer til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockAdressebeskyttelse(wireMock)
-        val fødselsnummer = "12312312312"
+        val fødselsnummer = "00000000014"
         val fornavn = "Kjæreste"
         val etternavn = "Parodisk"
         mockNavnSøk(wireMock, fødselsnummer, fornavn, etternavn)
@@ -159,7 +159,7 @@ class KandidatTest {
     fun `map fødselsnummer til navn fra PDL om det ikke finnes i ES`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockAdressebeskyttelse(wireMock)
-        val fødselsnummer = "12312312312"
+        val fødselsnummer = "00000000014"
         val fornavn = "Kjæreste"
         val mellomnavn: String? = "Mellom"
         val etternavn = "Parodisk"
@@ -251,7 +251,7 @@ class KandidatTest {
     fun `fødselsnummer som ikke eksisterer i hverken pdl eller ES returnerer 404`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockAdressebeskyttelse(wireMock)
-        val fødselsnummer = "12312312312"
+        val fødselsnummer = "00000000014"
         val fornavn = "Kjæreste"
         val mellomnavn: String? = "Mellom"
         val etternavn = "Parodisk"
@@ -337,7 +337,7 @@ class KandidatTest {
     @Test
     fun `skal feile om pdl returerer error-code som ikke er not_found`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        val fødselsnummer = "12312312312"
+        val fødselsnummer = "00000000014"
         wireMock.register(
             WireMock.post("/kandidater/_search?typed_keys=true")
                 .withRequestBody(
@@ -429,7 +429,7 @@ class KandidatTest {
     fun `jobbsøkerrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockAdressebeskyttelse(wireMock)
-        val fødselsnummer = "12345678910"
+        val fødselsnummer = "00000000016"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(jobbsøkerrettet))
         val response = gjørKallNavn(fødselsnummer, token)
@@ -441,7 +441,7 @@ class KandidatTest {
     fun `arbeidsgiverrettet skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockAdressebeskyttelse(wireMock)
-        val fødselsnummer = "12345678910"
+        val fødselsnummer = "00000000016"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(arbeidsgiverrettet))
         val response = gjørKallNavn(fødselsnummer, token)
@@ -453,7 +453,7 @@ class KandidatTest {
     fun `utvikler skal ha tilgang til navn`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
         mockAdressebeskyttelse(wireMock)
-        val fødselsnummer = "12345678910"
+        val fødselsnummer = "00000000016"
         mockNavnSøk(wireMock, fødselsnummer, "N", "A")
         val token = lagToken(groups = listOf(utvikler))
         val response = gjørKallNavn(fødselsnummer, token)
@@ -480,7 +480,7 @@ class KandidatTest {
     @Test
     fun `jobbsøkerrettet skal ha tilgang til kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        val fødselsnummer = "12345678910"
+        val fødselsnummer = "00000000016"
         mockHentKandidatnummer(wireMock, fødselsnummer, "123")
         val token = lagToken(groups = listOf(jobbsøkerrettet))
         val response = gjørKallKandidatnummer(fødselsnummer, token)
@@ -491,7 +491,7 @@ class KandidatTest {
     @Test
     fun `arbeidsgiverrettet skal ha tilgang til kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        val fødselsnummer = "12345678910"
+        val fødselsnummer = "00000000016"
         mockHentKandidatnummer(wireMock, fødselsnummer, "123")
         val token = lagToken(groups = listOf(arbeidsgiverrettet))
         val response = gjørKallKandidatnummer(fødselsnummer, token)
@@ -502,7 +502,7 @@ class KandidatTest {
     @Test
     fun `utvikler skal ha tilgang til kandidatnummer`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val wireMock = wmRuntimeInfo.wireMock
-        val fødselsnummer = "12345678910"
+        val fødselsnummer = "00000000016"
         mockHentKandidatnummer(wireMock, fødselsnummer, "123")
         val token = lagToken(groups = listOf(utvikler))
         val response = gjørKallKandidatnummer(fødselsnummer, token)
