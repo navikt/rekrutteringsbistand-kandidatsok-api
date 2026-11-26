@@ -40,7 +40,6 @@ spec:
       rules:
         - application: rekrutteringsbistand-frontend
         - application: rekrutteringsbistand-frontend2
-        - application: rekrutteringsbistand-kandidatvarsel-api
         - application: rekrutteringsbistand-kandidat-api
         - application: toi-deling-av-cv-api
         - application: foresporsel-om-deling-av-cv-api
